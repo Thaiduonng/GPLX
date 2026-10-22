@@ -1,0 +1,56 @@
+# ========================================
+# Java / Maven Artifacts
+# ========================================
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+# Maven Wrapper binaries (properties & scripts are tracked)
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# ========================================
+# Node / Frontend Artifacts
+# ========================================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ========================================
+# IDE & Tooling
+# ========================================
+.idea/
+*.iml
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ========================================
+# Operating System
+# ========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================================
+# Environment & Secrets (NEVER COMMIT!)
+# ========================================
+.env
+.env.local
+.env.*.local
+
+# ========================================
+# Docker Local Overrides
+# ========================================
+docker-compose.override.yml
+
+# Temporary scripts
+generate_*.py

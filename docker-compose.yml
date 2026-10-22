@@ -1,0 +1,71 @@
+services:
+  # ============================================================================
+  # 1. Cơ sở dữ liệu MySQL 8.4 LTS
+  # ============================================================================
+  mysql:
+    image: mysql:8.4
+    container_name: gplx-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-gplx_db}
+      MYSQL_USER: ${DB_USERNAME:-gplx_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-dev_password_only}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-dev_root_password_only}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-dev_root_password_only}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-time-zone=+00:00
+
+  # ============================================================================
+  # 2. Máy chủ Ứng dụng Backend (Spring Boot 4.1.1 - Java 21)
+  # ============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../infra/docker/backend.Dockerfile
+    container_name: gplx-backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-gplx_db}
+      DB_USERNAME: ${DB_USERNAME:-gplx_user}
+      DB_PASSWORD: ${DB_PASSWORD:-dev_password_only}
+      SERVER_PORT: 8080
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ============================================================================
+  # 3. Giao diện Người dùng Frontend (React 19 + TypeScript + Vite)
+  # ============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../infra/docker/frontend.Dockerfile
+    container_name: gplx-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: http://backend:8080
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+    driver: local
