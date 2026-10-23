@@ -233,3 +233,52 @@
 | `finalResult` | VARCHAR(30) | NOT NULL, DEFAULT 'PENDING' | `PENDING`, `PASSED`, `FAILED` |
 | `examiner_id` | BIGINT | FK → `users(id)`, NULL | Sát hạch viên ký biên bản chấm điểm |
 | `examiner_note` | TEXT | NULL | Nhận xét của hội đồng sát hạch |
+
+
+---
+
+## Phase 5 — Support Modules Tables (Finance, Fleet, Notification, CRM - V6)
+
+### Bảng `fee_invoices` (Hóa đơn học phí)
+| Tên cột | Kiểu dữ liệu | Khóa/Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Khóa chính hóa đơn |
+| `invoice_code` | VARCHAR(50) | UNIQUE, NOT NULL | Mã hóa đơn (`INV-B1-202610-0001`) |
+| `user_id` | BIGINT | FK → `users(id)`, NOT NULL | Học viên đóng học phí |
+| `category_id` | BIGINT | FK → `license_categories(id)`, NOT NULL | Khóa đào tạo theo hạng bằng |
+| `total_amount` | DECIMAL(15,2)| NOT NULL | Tổng số học phí trọn gói |
+| `paid_amount` | DECIMAL(15,2)| NOT NULL, DEFAULT 0.00 | Số tiền đã thanh toán tích lũy |
+| `status` | VARCHAR(30) | NOT NULL, DEFAULT 'PENDING' | `PENDING`, `PARTIALLY_PAID`, `PAID`, `CANCELLED` |
+| `due_date` | DATE | NULL | Hạn chót thanh toán nghĩa vụ học phí |
+
+### Bảng `payment_receipts` (Biên lai nộp tiền học phí - FIN-001, FIN-002)
+| Tên cột | Kiểu dữ liệu | Khóa/Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Khóa chính biên lai |
+| `receipt_code` | VARCHAR(50) | UNIQUE, NOT NULL | Mã chứng từ (`REC-20261023-0001`) |
+| `invoice_id` | BIGINT | FK → `fee_invoices(id)`, NOT NULL | Hóa đơn tương ứng |
+| `amount` | DECIMAL(15,2)| NOT NULL | Số tiền nộp trong đợt |
+| `payment_method`| VARCHAR(30) | NOT NULL | `BANK_TRANSFER`, `CASH`, `INTERNAL_WALLET` |
+| `idempotency_key`| VARCHAR(100)| UNIQUE, NOT NULL | Khóa chống thanh toán trùng lặp (`FIN-001`) |
+| `paid_at` | DATETIME | NOT NULL | Thời điểm thanh toán thành công |
+| `cashier_id` | BIGINT | FK → `users(id)`, NULL | Cán bộ tài vụ / Cổng tự động |
+
+### Bảng `vehicles` (Đội xe tập lái - FLT-001)
+| Tên cột | Kiểu dữ liệu | Khóa/Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Khóa chính phương tiện |
+| `plate_number` | VARCHAR(20) | UNIQUE, NOT NULL | Biển số xe (`29A-888.12`) |
+| `model` | VARCHAR(100) | NOT NULL | Dòng xe / Model |
+| `category_id` | BIGINT | FK → `license_categories(id)`, NOT NULL | Hạng bằng đào tạo |
+| `transmission` | VARCHAR(20) | NOT NULL, DEFAULT 'MANUAL' | Hộp số (`MANUAL`, `AUTOMATIC`) |
+| `status` | VARCHAR(30) | NOT NULL, DEFAULT 'AVAILABLE' | `AVAILABLE`, `IN_USE`, `MAINTENANCE`, `RETIRED` |
+| `inspection_expiry_date`| DATE | NOT NULL | Hạn đăng kiểm xe (`FLT-001`) |
+
+### Bảng `vehicle_maintenances` (Lịch sử bảo dưỡng & Sửa chữa xe)
+- Lưu `vehicle_id`, `maintenance_date`, `description`, `cost`, `performed_by`.
+
+### Bảng `notifications` (Thông báo & Nhắc lịch - NTF-001)
+- Lưu `user_id`, `title`, `content`, `type`, `is_read`, `deduplication_key` (chống gửi trùng `NTF-001`).
+
+### Bảng `crm_leads` (Khách hàng tiềm năng)
+- Lưu `full_name`, `phone`, `email`, `interested_category_id`, `counselor_id`, `status` (`NEW`, `CONSULTING`, `CONVERTED`, `LOST`), `notes`.

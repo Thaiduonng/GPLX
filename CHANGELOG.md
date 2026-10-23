@@ -2,6 +2,42 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.6.0] — 2026-10-23
+
+### Các Module Hỗ trợ: Tài chính & Quản lý Đội xe (Phase 5 — Finance & Fleet)
+- **Cơ sở dữ liệu & Migration:**
+  - Bổ sung Flyway migration `V6__create_support_modules_tables.sql` tạo 6 bảng nghiệp vụ:
+    - Module Finance: `fee_invoices` (hóa đơn học phí, tổng tiền, tiền đã nộp, trạng thái PENDING, PARTIALLY_PAID, PAID), `payment_receipts` (biên lai nộp tiền, idempotency_key, hình thức thanh toán).
+    - Module Fleet: `vehicles` (quản lý xe tập lái, biển số, hộp số sàn/tự động, hạng bằng tương ứng, hạn đăng kiểm, trạng thái), `vehicle_maintenances` (lịch sử bảo dưỡng định kỳ và sửa chữa).
+    - Module Notification & CRM: `notifications` (thông báo nội bộ, chống gửi trùng `deduplication_key`), `crm_leads` (khách hàng tiềm năng, trạng thái tư vấn).
+  - Seed dữ liệu 4 xe tập lái mẫu các hạng B1, B, C, A1.
+- **Nghiệp vụ & Tuân thủ Quy tắc:**
+  - `FIN-001`: Triển khai cơ chế Idempotency Key duy nhất cho mỗi giao dịch nộp tiền học phí, bảo đảm chống thanh toán trùng lặp khi người dùng click liên tiếp hoặc lỗi mạng.
+  - `FIN-002`: Không cho phép xóa bản ghi biên lai tài chính đã được xác nhận trong hệ thống; bảo toàn truy vết kiểm toán dòng tiền.
+  - Chặn thanh toán vượt quá số tiền còn nợ của hóa đơn; tự động chuyển trạng thái hóa đơn sang `PAID` khi hoàn tất 100% học phí.
+  - `FLT-001`: Tự động loại trừ phương tiện hết hạn kiểm định an toàn kỹ thuật (đăng kiểm) hoặc đang trong lịch bảo dưỡng (`MAINTENANCE`) khỏi danh sách xe sẵn sàng phục vụ thực hành DAT/sa hình.
+- **REST API (`/api/v1`):**
+  - Finance API (`/api/v1/finance`):
+    - `POST /api/v1/finance/invoices`: Tạo hóa đơn học phí cho học viên (Role `ADMIN`, `STAFF`, `MANAGER`).
+    - `GET /api/v1/finance/invoices`: Danh sách toàn bộ hóa đơn học phí (Phân quyền quản lý).
+    - `GET /api/v1/finance/invoices/my`: Học viên tra cứu hóa đơn học phí của chính mình.
+    - `POST /api/v1/finance/invoices/{id}/pay`: Ghi nhận biên lai nộp tiền học phí kèm Idempotency Key (`FIN-001`).
+    - `GET /api/v1/finance/invoices/{id}/receipts`: Xem lịch sử các đợt nộp học phí.
+  - Fleet API (`/api/v1/fleet`):
+    - `GET /api/v1/fleet/available`: Công khai danh sách xe tập lái sẵn sàng hoạt động (còn hạn đăng kiểm - `FLT-001`).
+    - `GET /api/v1/fleet`: Quản lý danh sách toàn bộ phương tiện trong đội xe.
+    - `POST /api/v1/fleet`: Thêm xe mới vào đội xe (Role `ADMIN`, `MANAGER`).
+    - `PATCH /api/v1/fleet/{id}/status`: Cập nhật trạng thái xe (`AVAILABLE`, `MAINTENANCE`, `IN_USE`).
+    - `POST /api/v1/fleet/{id}/maintenances`: Ghi nhận lịch bảo dưỡng/sửa chữa xe.
+    - `GET /api/v1/fleet/{id}/maintenances`: Xem lịch sử bảo dưỡng phương tiện.
+- **Frontend (React 19 + TypeScript):**
+  - Xây dựng types `types/finance.ts`, `types/fleet.ts` và services `financeService.ts`, `fleetService.ts`.
+  - Trang Quản lý Học phí & Biên lai (`TuitionPaymentPage.tsx`): Tra cứu hóa đơn học phí, theo dõi dư nợ, modal nộp tiền học phí an toàn với Idempotency Key tự sinh.
+  - Trang Quản lý Đội xe tập lái (`FleetManagementPage.tsx`): Theo dõi danh sách xe, cảnh báo trực quan xe quá hạn đăng kiểm (`FLT-001`), modal ghi nhận bảo dưỡng định kỳ.
+- **Kiểm thử:**
+  - 9 test cases mới (`FinanceServiceTest`, `FleetServiceTest`, `FinanceAndFleetIntegrationTest`).
+  - Toàn bộ 59/59 test cases của hệ thống đạt tỷ lệ 100% Passed.
+
 ## [0.5.0] — 2026-10-23
 
 ### Tổ chức thi & Xét duyệt điều kiện dự thi (Phase 4 — Examination Module)

@@ -69,10 +69,30 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 
 ---
 
-## Danh mục Tasks — Phase 5: Support Modules (Finance, CRM, Fleet, Notification)
+## Danh mục Tasks — Phase 5: Support Modules (Finance, Fleet, CRM, Notification)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P5-01`** | Module Finance: Quản lý biểu phí, biên lai học phí & chống ghi trùng | TSK-P4-05 | `TODO` | Biểu phí theo hạng bằng, ghi nhận thanh toán với Idempotency Key (FIN-001), không xóa biên lai đã xác nhận (FIN-002) |
-| **`TSK-P5-02`** | Module Fleet: Quản lý xe tập lái & bảo dưỡng định kỳ | TSK-P5-01 | `TODO` | Quản lý thông tin xe, hạn đăng kiểm, bảo dưỡng (FLT-001), liên kết lịch học DAT |
-| **`TSK-P5-03`** | Module CRM & Notification: Tiếp nhận tư vấn & Nhắc lịch tự động | TSK-P5-02 | `TODO` | Quản lý học viên tiềm năng, gửi email thông báo trúng tuyển/lịch thi (NTF-001) |
+| **`TSK-P5-01`** | CSDL & Migrations V6: Hóa đơn, Biên lai, Đội xe & Bảo dưỡng | TSK-P4-05 | `DONE` | Flyway V6 tạo 6 bảng: `fee_invoices`, `payment_receipts`, `vehicles`, `vehicle_maintenances`, `notifications`, `crm_leads` |
+| **`TSK-P5-02`** | Module Finance: Quản lý biểu phí & Biên lai nộp tiền chống trùng | TSK-P5-01 | `DONE` | Ghi nhận hóa đơn học phí, nộp tiền với Idempotency Key (FIN-001), bảo toàn vĩnh viễn không xóa chứng từ tài chính (FIN-002) |
+| **`TSK-P5-03`** | Module Fleet: Quản lý đội xe tập lái & Giám sát hạn đăng kiểm | TSK-P5-01 | `DONE` | Thêm xe, theo dõi số sàn/tự động, tự động loại trừ xe quá hạn đăng kiểm hoặc đang bảo dưỡng khỏi danh sách khả dụng (FLT-001) |
+| **`TSK-P5-04`** | Giao diện Frontend Quản lý Học phí & Đội xe tập lái | TSK-P5-02..03| `DONE` | `TuitionPaymentPage` (theo dõi nợ, nộp học phí an toàn), `FleetManagementPage` (danh sách xe, cảnh báo đăng kiểm, lịch sử bảo dưỡng) |
+| **`TSK-P5-05`** | Kiểm thử Tự động Toàn diện Phase 5 | TSK-P5-02..03| `DONE` | 9 tests mới (`FinanceServiceTest`, `FleetServiceTest`, `FinanceAndFleetIntegrationTest`); Tổng: 59/59 tests PASS |
+
+---
+
+## Danh mục Tasks — Phase 6: Reporting & Audit Logging (Báo cáo & Giám sát hệ thống)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P6-01`** | Dashboard Thống kê đào tạo & Doanh thu học phí | TSK-P5-05 | `TODO` | Biểu đồ tỷ lệ đỗ sát hạch, tổng km DAT tích lũy theo tháng, tỷ lệ hồ sơ tuyển sinh mới |
+| **`TSK-P6-02`** | Audit Log: Giám sát vết thao tác nghiệp vụ nhạy cảm | TSK-P5-05 | `TODO` | Ghi vết sửa điểm sát hạch, duyệt hồ sơ, thanh toán học phí phục vụ thanh tra |
+
+---
+
+## Danh mục Tasks — Phase 7: Final Polish & Release (Đóng gói & Nghiệm thu)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P7-01`** | Hoàn thiện Docker Compose Production & Multi-stage Build | TSK-P6-02 | `TODO` | Dockerfile backend & frontend tối ưu, kiểm thử khởi chạy 1-click từ máy trắng |
+| **`TSK-P7-02`** | Merge nhánh main & Release v1.0.0 | TSK-P7-01 | `TODO` | Merge `--no-ff` từ develop vào main, gắn Git tag `v1.0.0` |
