@@ -2,6 +2,32 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.0] — 2026-10-23
+
+### Xác thực & Phân quyền (Phase 1 — Identity & Authentication)
+- **Cơ sở dữ liệu & Entity:**
+  - Bổ sung Flyway migration `V2__seed_initial_roles_permissions.sql` nạp 7 vai trò hệ thống (`ROLE_ADMIN`, `ROLE_MANAGER`, `ROLE_STAFF`, `ROLE_INSTRUCTOR`, `ROLE_EXAMINER`, `ROLE_STUDENT`, `ROLE_COUNSELOR`) và danh mục quyền chuẩn.
+  - Xây dựng JPA Entity: `User`, `Role`, `Permission`, enum `RoleType`.
+  - Xây dựng JPA Repository: `UserRepository`, `RoleRepository`, `PermissionRepository`.
+- **Bảo mật & JWT (Spring Security 7):**
+  - Tích hợp thư viện JJWT 0.12.6 (`jjwt-api`, `jjwt-impl`, `jjwt-jackson`).
+  - Triển khai `JwtService` tạo, ký HMAC-SHA256 và xác thực token JWT stateless.
+  - Triển khai `CustomUserDetailsService` và `UserPrincipal` hỗ trợ đăng nhập bằng username hoặc email.
+  - Triển khai `JwtAuthenticationFilter` tự động trích xuất token từ Authorization header.
+  - Cấu hình `JwtAuthenticationEntryPoint` trả về JSON lỗi 401 Unauthorized chuẩn hóa.
+  - Cập nhật `SecurityConfig` Lambda DSL, bảo vệ các endpoint nghiệp vụ và phân quyền Method Security.
+- **REST API:**
+  - `POST /api/v1/auth/register`: Đăng ký tài khoản người dùng kèm validation, kiểm tra trùng lặp và mã hóa BCrypt.
+  - `POST /api/v1/auth/login`: Xác thực tài khoản và phát hành JWT token.
+  - `GET /api/v1/auth/me`: Trả về thông tin chi tiết tài khoản hiện tại từ token.
+- **Frontend (React 19 + TypeScript):**
+  - Xây dựng `AuthContext` và hook `useAuth` quản lý trạng thái đăng nhập toàn cục.
+  - Cập nhật `apiClient` Axios tự động gắn token `Bearer` và điều hướng khi token hết hạn.
+  - Xây dựng trang Đăng nhập (`LoginPage.tsx`) và Đăng ký (`RegisterPage.tsx`) có validation và giao diện tiếng Việt.
+  - Cập nhật `MainLayout.tsx` hiển thị thông tin người dùng đang đăng nhập và nút Đăng xuất.
+- **Kiểm thử:**
+  - 15 test cases (Unit tests `AuthServiceTest`, Integration tests `AuthControllerTest`, `HealthControllerTest`, `GplxApplicationTests`) đạt kết quả 100% Passed.
+
 ## [0.1.0] — 2026-10-22
 
 ### Khởi tạo Khung Dự án (Phase 0 — Foundation)
