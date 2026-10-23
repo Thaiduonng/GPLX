@@ -15,6 +15,11 @@ export default function MainLayout() {
       (r) => r === 'ROLE_ADMIN' || r === 'ROLE_EXAMINER' || r === 'ROLE_MANAGER'
     ) ?? false;
 
+  const isAdminOrManager =
+    user?.roles?.some(
+      (r) => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER'
+    ) ?? false;
+
   return (
     <div className={styles.layout}>
       <header className={styles.header}>
@@ -60,6 +65,24 @@ export default function MainLayout() {
                   >
                     🛡️ Tuyển sinh
                   </Link>
+                )}
+                {isAdminOrManager && (
+                  <>
+                    <Link
+                      to="/dashboard"
+                      className={styles.navLink}
+                      style={{ color: '#fed7aa', fontWeight: 600 }}
+                    >
+                      📊 Dashboard
+                    </Link>
+                    <Link
+                      to="/audit-logs"
+                      className={styles.navLink}
+                      style={{ color: '#fed7aa', fontWeight: 600 }}
+                    >
+                      🛡️ Kiểm toán
+                    </Link>
+                  </>
                 )}
               </>
             )}

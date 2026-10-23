@@ -282,3 +282,21 @@
 
 ### Bảng `crm_leads` (Khách hàng tiềm năng)
 - Lưu `full_name`, `phone`, `email`, `interested_category_id`, `counselor_id`, `status` (`NEW`, `CONSULTING`, `CONVERTED`, `LOST`), `notes`.
+
+
+---
+
+## Phase 6 — Reporting & Audit Logging Tables (Nhật ký kiểm toán hệ thống - V7)
+
+### Bảng `audit_logs` (Nhật ký kiểm toán truy vết thao tác nhạy cảm)
+| Tên cột | Kiểu dữ liệu | Khóa/Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Khóa chính bản ghi audit |
+| `user_id` | BIGINT | NULL | ID người thực hiện (nếu có tài khoản) |
+| `username` | VARCHAR(50) | NOT NULL | Tên đăng nhập người thao tác hoặc `SYSTEM` |
+| `action` | VARCHAR(100) | NOT NULL | Tên hành động nghiệp vụ (`APPROVE_APPLICATION`, `RECORD_SCORE`, `PAY_TUITION`, v.v.) |
+| `resource_type` | VARCHAR(50) | NOT NULL | Phân hệ tài nguyên (`ADMISSION`, `EXAMINATION`, `FINANCE`, `FLEET`, `TRAINING`) |
+| `resource_id` | VARCHAR(100) | NULL | Mã đối tượng bị tác động (`HS-B1-202610-0001`, `SBD-B1-001`, v.v.) |
+| `details` | TEXT | NULL | Chi tiết nội dung thay đổi hoặc kết quả |
+| `ip_address` | VARCHAR(45) | NULL | Địa chỉ IP client gọi request |
+| `created_at` | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Thời điểm thực hiện hành động |

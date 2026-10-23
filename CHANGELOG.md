@@ -2,6 +2,32 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.7.0] — 2026-10-23
+
+### Báo cáo Quản trị & Nhật ký Kiểm toán (Phase 6 — Reporting & Audit Logging)
+- **Cơ sở dữ liệu & Migration:**
+  - Bổ sung Flyway migration `V7__create_reporting_and_audit_tables.sql` tạo bảng `audit_logs` (lưu vết thao tác: `user_id`, `username`, `action`, `resource_type`, `resource_id`, `details`, `ip_address`, `created_at`).
+  - Seed các bản ghi audit log mẫu cho các hành động quan trọng (duyệt hồ sơ, xếp lịch thi, ghi nhận điểm sát hạch, thu học phí, phân công xe tập lái).
+- **Nghiệp vụ & Tuân thủ Quy tắc:**
+  - `ReportingService` tổng hợp KPI quản trị đa chiều liên module theo thời gian thực:
+    - Tổng số học viên và phân bố hồ sơ tuyển sinh (Tổng số / Đã phê duyệt).
+    - Thí sinh dự thi và tỷ lệ đỗ sát hạch toàn hệ thống cũng như chi tiết theo từng hạng bằng (A1, B1, B2, C...).
+    - Doanh thu học phí thực tế đã thu qua các biên lai xác nhận.
+    - Quãng đường thực hành lái xe DAT (km) tích lũy toàn khóa.
+    - Trạng thái đội xe tập lái: số xe đang sẵn sàng hoạt động so với tổng số xe.
+  - Kiểm toán và truy vết: Cung cấp API và giao diện lọc nhật ký kiểm toán theo phân hệ (`ADMISSION`, `EXAMINATION`, `FINANCE`, `FLEET`, `TRAINING`) và hành động cụ thể.
+- **REST API (`/api/v1/reporting`):**
+  - `GET /api/v1/reporting/dashboard`: Lấy dữ liệu tổng hợp KPI cho dashboard quản trị (phân quyền `ADMIN`, `MANAGER`).
+  - `GET /api/v1/reporting/audit-logs`: Tra cứu nhật ký kiểm toán với phân trang và bộ lọc linh hoạt (phân quyền `ADMIN`, `MANAGER`).
+- **Frontend (React 19 + TypeScript):**
+  - Xây dựng types `types/reporting.ts` và service `reportingService.ts`.
+  - Trang Dashboard Quản Trị (`DashboardPage.tsx`): 6 thẻ KPI trực quan, bảng thống kê tỷ lệ đỗ theo từng hạng GPLX kèm thanh tiến trình màu sắc, bảng 8 hoạt động kiểm toán gần nhất.
+  - Trang Nhật Ký Kiểm Toán (`AuditLogPage.tsx`): Tra cứu toàn diện, lọc theo module, hành động, phân trang linh hoạt.
+  - Cập nhật `MainLayout.tsx` và `App.tsx` với quyền truy cập chuyên biệt cho cán bộ quản lý (`ADMIN`, `MANAGER`).
+- **Kiểm thử Tự động:**
+  - 7 bài kiểm thử mới (`ReportingServiceTest`, `ReportingControllerTest`).
+  - Toàn bộ 66/66 test cases của hệ thống đạt tỷ lệ 100% Passed.
+
 ## [0.6.0] — 2026-10-23
 
 ### Các Module Hỗ trợ: Tài chính & Quản lý Đội xe (Phase 5 — Finance & Fleet)

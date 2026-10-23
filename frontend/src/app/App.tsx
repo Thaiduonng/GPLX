@@ -17,6 +17,8 @@ import { ExamGradingPage } from '../pages/ExamGradingPage';
 import { MyExamResultsPage } from '../pages/MyExamResultsPage';
 import { TuitionPaymentPage } from '../pages/TuitionPaymentPage';
 import { FleetManagementPage } from '../pages/FleetManagementPage';
+import { DashboardPage } from '../pages/DashboardPage';
+import { AuditLogPage } from '../pages/AuditLogPage';
 
 export default function App() {
   return (
@@ -38,6 +40,8 @@ export default function App() {
           <Route path="/examination/my-results" element={<MyExamResultsPage />} />
           <Route path="/finance/tuition" element={<TuitionPaymentPage />} />
           <Route path="/fleet" element={<FleetManagementPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/audit-logs" element={<AuditLogPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
