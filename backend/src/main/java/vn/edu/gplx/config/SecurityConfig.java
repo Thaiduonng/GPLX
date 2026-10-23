@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/license-categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/courses/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/theory/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/examination/sessions/**").permitAll()
                 // OpenAPI / Swagger endpoints
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 // All other requests require authentication

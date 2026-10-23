@@ -11,6 +11,10 @@ import ApplicationManagementPage from '../pages/ApplicationManagementPage';
 import CoursesPage from '../pages/CoursesPage';
 import TheoryExamPage from '../pages/TheoryExamPage';
 import TrainingSchedulePage from '../pages/TrainingSchedulePage';
+import { EligibilityCheckPage } from '../pages/EligibilityCheckPage';
+import { ExamSessionsPage } from '../pages/ExamSessionsPage';
+import { ExamGradingPage } from '../pages/ExamGradingPage';
+import { MyExamResultsPage } from '../pages/MyExamResultsPage';
 
 export default function App() {
   return (
@@ -26,6 +30,10 @@ export default function App() {
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/theory-exam" element={<TheoryExamPage />} />
           <Route path="/training/schedules" element={<TrainingSchedulePage />} />
+          <Route path="/examination/eligibility" element={<EligibilityCheckPage />} />
+          <Route path="/examination/sessions" element={<ExamSessionsPage />} />
+          <Route path="/examination/grading" element={<ExamGradingPage />} />
+          <Route path="/examination/my-results" element={<MyExamResultsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

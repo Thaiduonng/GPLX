@@ -189,3 +189,47 @@
 | `duration_minutes`| INT | NOT NULL, DEFAULT 0 | Số phút thực hành lái |
 | `status` | VARCHAR(30) | NOT NULL, DEFAULT 'VERIFIED' | Trạng thái xác thực dữ liệu từ thiết bị DAT |
 | `device_id` | VARCHAR(50) | NULL | Mã thiết bị giám sát hành trình DAT trên xe |
+
+
+---
+
+## Phase 4 — Examination Tables (Kỳ thi & Kết quả sát hạch - V5)
+
+### Bảng `exam_sessions` (Kỳ thi sát hạch / Tốt nghiệp)
+| Tên cột | Kiểu dữ liệu | Khóa/Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Khóa chính kỳ thi |
+| `exam_code` | VARCHAR(50) | UNIQUE, NOT NULL | Mã kỳ thi (`EXAM-B1-20261101-001`) |
+| `name` | VARCHAR(150) | NOT NULL | Tên kỳ thi sát hạch |
+| `category_id` | BIGINT | FK → `license_categories(id)`, NOT NULL | Hạng GPLX tổ chức thi |
+| `exam_date` | DATE | NOT NULL | Ngày tổ chức sát hạch |
+| `location` | VARCHAR(200) | NOT NULL | Địa điểm / Trung tâm sát hạch |
+| `exam_type` | VARCHAR(30) | NOT NULL, DEFAULT 'CERTIFICATION' | `CERTIFICATION` (Sở GTVT) hoặc `GRADUATION` (Trường) |
+| `status` | VARCHAR(30) | NOT NULL, DEFAULT 'PLANNED' | `PLANNED`, `REGISTRATION_OPEN`, `COMPLETED` |
+
+### Bảng `exam_candidates` (Danh sách thí sinh & Số báo danh)
+| Tên cột | Kiểu dữ liệu | Khóa/Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Khóa chính thí sinh |
+| `exam_session_id`| BIGINT | FK → `exam_sessions(id)`, NOT NULL | Kỳ thi tham dự |
+| `user_id` | BIGINT | FK → `users(id)`, NOT NULL | Tài khoản học viên |
+| `candidate_number`| VARCHAR(20) | NOT NULL | Số báo danh (SBD-B1-001) |
+| `eligibility_status`| VARCHAR(30)| NOT NULL, DEFAULT 'QUALIFIED' | `QUALIFIED`, `DISQUALIFIED` (Thẩm định tự động EXM-001) |
+| `disqualification_reason`| TEXT | NULL | Lý do không đủ điều kiện (nếu có) |
+
+### Bảng `exam_results` (Bảng điểm 4 môn sát hạch & Bảo toàn vĩnh viễn EXM-002)
+| Tên cột | Kiểu dữ liệu | Khóa/Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Khóa chính kết quả |
+| `candidate_id` | BIGINT | FK → `exam_candidates(id)`, UNIQUE, NOT NULL | Thí sinh tương ứng |
+| `theory_score` | INT | NULL | Điểm thi lý thuyết |
+| `theory_passed` | BOOLEAN | NULL | Kết quả đạt lý thuyết (>= 27 hoặc theo hạng) |
+| `simulation_score`| INT | NULL | Điểm mô phỏng tình huống (thang 50) |
+| `simulation_passed`| BOOLEAN | NULL | Kết quả đạt mô phỏng (>= 35) |
+| `yard_score` | INT | NULL | Điểm thực hành sa hình (thang 100) |
+| `yard_passed` | BOOLEAN | NULL | Kết quả đạt sa hình (>= 80) |
+| `road_score` | INT | NULL | Điểm thực hành đường trường (thang 100) |
+| `road_passed` | BOOLEAN | NULL | Kết quả đạt đường trường (>= 80) |
+| `finalResult` | VARCHAR(30) | NOT NULL, DEFAULT 'PENDING' | `PENDING`, `PASSED`, `FAILED` |
+| `examiner_id` | BIGINT | FK → `users(id)`, NULL | Sát hạch viên ký biên bản chấm điểm |
+| `examiner_note` | TEXT | NULL | Nhận xét của hội đồng sát hạch |
