@@ -24,12 +24,24 @@
 
 ---
 
-## Danh mục Tasks — Phase 1: Identity (Kế hoạch tiếp theo)
+## Danh mục Tasks — Phase 1: Identity & Authentication
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P1-01`** | Thiết kế Entity và Repository cho Identity | TSK-P0-05 | `TODO` | User, Role, Permission entities khớp với Flyway V1 schema |
-| **`TSK-P1-02`** | Triển khai API Đăng ký tài khoản (`/auth/register`) | TSK-P1-01 | `TODO` | Mã hóa BCrypt, kiểm tra trùng email/username, validation DTO |
-| **`TSK-P1-03`** | Triển khai API Đăng nhập và Xác thực (`/auth/login`) | TSK-P1-02 | `TODO` | Xác thực Spring Security, trả token, xử lý lỗi đăng nhập sai |
-| **`TSK-P1-04`** | Triển khai Phân quyền RBAC và Method Security | TSK-P1-03 | `TODO` | `@PreAuthorize` hoạt động chính xác theo từng role |
-| **`TSK-P1-05`** | Xây dựng Giao diện Đăng nhập và Đăng ký Frontend | TSK-P1-03 | `TODO` | Form validation React, kết nối API backend, lưu token an toàn |
+| **`TSK-P1-01`** | Thiết kế Entity và Repository cho Identity | TSK-P0-05 | `DONE` | User, Role, Permission entities khớp với Flyway V1 schema |
+| **`TSK-P1-02`** | Triển khai API Đăng ký tài khoản (`/auth/register`) | TSK-P1-01 | `DONE` | Mã hóa BCrypt, kiểm tra trùng email/username, validation DTO |
+| **`TSK-P1-03`** | Triển khai API Đăng nhập và Xác thực (`/auth/login`) | TSK-P1-02 | `DONE` | Xác thực Spring Security 7 JWT, trả token, xử lý lỗi đăng nhập sai |
+| **`TSK-P1-04`** | Triển khai Phân quyền RBAC và Method Security | TSK-P1-03 | `DONE` | `@PreAuthorize` hoạt động chính xác theo từng role, CustomUserDetailsService |
+| **`TSK-P1-05`** | Xây dựng Giao diện Đăng nhập và Đăng ký Frontend | TSK-P1-03 | `DONE` | Form validation React, kết nối API backend, lưu token an toàn, AuthContext |
+
+---
+
+## Danh mục Tasks — Phase 2: Admission (Kế hoạch tiếp theo)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P2-01`** | CSDL & Entity Danh mục Hạng GPLX (`license_categories`) | TSK-P1-01 | `TODO` | Flyway V3, Category entity (A1, A, B1, B, C1, C,... cấu hình động) |
+| **`TSK-P2-02`** | CSDL & Entity Hồ sơ Tuyển sinh (`applications`, `documents`) | TSK-P2-01 | `TODO` | Flyway V3, Application entity, trạng thái hồ sơ (ADM-001) |
+| **`TSK-P2-03`** | API Nộp hồ sơ tuyển sinh điện tử (`/applications/submit`) | TSK-P2-02 | `TODO` | DTO validation, kiểm tra điều kiện hồ sơ, upload tài liệu CCCD/sức khỏe |
+| **`TSK-P2-04`** | API Thẩm định & Phê duyệt hồ sơ (`/applications/{id}/review`) | TSK-P2-03 | `TODO` | Duyệt/từ chối/yêu cầu bổ sung kèm lý do (ADM-002, ADM-003), RBAC STAFF/ADMIN |
+| **`TSK-P2-05`** | Giao diện Đăng ký khóa học & Nộp hồ sơ Frontend | TSK-P2-03 | `TODO` | Form nộp hồ sơ, chọn hạng bằng lái, upload tài liệu, tra cứu trạng thái |

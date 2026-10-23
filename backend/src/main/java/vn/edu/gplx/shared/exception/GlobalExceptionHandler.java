@@ -41,6 +41,26 @@ public class GlobalExceptionHandler {
                         ex.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(
+            org.springframework.security.authentication.BadCredentialsException ex, HttpServletRequest request) {
+        log.warn("Bad credentials at [{}]: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse.of(
+                        401, "Unauthorized", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Access denied at [{}]: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.of(
+                        403, "Forbidden", "Bạn không có quyền thực hiện thao tác này", request.getRequestURI()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
