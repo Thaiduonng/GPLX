@@ -91,9 +91,9 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 
 ---
 
-## Danh mục Tasks — Phase 7: Final Polish & Release (Đóng gói & Nghiệm thu)
+## Danh mục Tasks — Phase 7: Final Polish & Release (Đóng gói & Nghiệm thu v1.0.0)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P7-01`** | Hoàn thiện Docker Compose Production & Multi-stage Build | TSK-P6-03 | `TODO` | Dockerfile backend & frontend tối ưu, kiểm thử khởi chạy 1-click từ máy trắng |
-| **`TSK-P7-02`** | Merge nhánh main & Release v1.0.0 | TSK-P7-01 | `TODO` | Merge `--no-ff` từ develop vào main, gắn Git tag `v1.0.0` |
+| **`TSK-P7-01`** | Hoàn thiện Docker Compose Production & Multi-stage Build | TSK-P6-03 | `DONE` | Multi-stage Dockerfile cho backend (Temurin JDK/JRE 21 non-root) và frontend (Node 20 + Nginx Alpine), cấu hình Nginx reverse proxy & SPA fallback, healthcheck đồng bộ |
+| **`TSK-P7-02`** | Merge nhánh main & Release v1.0.0 | TSK-P7-01 | `DONE` | Merge `--no-ff` từ develop vào main, gắn Git tag `v1.0.0`, tài liệu hoàn chỉnh sẵn sàng nghiệm thu bảo vệ đồ án tốt nghiệp |

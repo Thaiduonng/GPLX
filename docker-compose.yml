@@ -25,6 +25,8 @@ services:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
       --default-time-zone=+00:00
+    networks:
+      - gplx-network
 
   # ============================================================================
   # 2. Máy chủ Ứng dụng Backend (Spring Boot 4.1.1 - Java 21)
@@ -46,12 +48,20 @@ services:
       SPRING_PROFILES_ACTIVE: dev
     ports:
       - "${SERVER_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     depends_on:
       mysql:
         condition: service_healthy
+    networks:
+      - gplx-network
 
   # ============================================================================
-  # 3. Giao diện Người dùng Frontend (React 19 + TypeScript + Vite)
+  # 3. Giao diện Người dùng Frontend (React 19 + TypeScript + Vite + Nginx)
   # ============================================================================
   frontend:
     build:
@@ -60,11 +70,22 @@ services:
     container_name: gplx-frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
-    environment:
-      VITE_API_BASE_URL: http://backend:8080
+      - "3000:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    networks:
+      - gplx-network
+
+networks:
+  gplx-network:
+    driver: bridge
 
 volumes:
   mysql_data:
