@@ -2,6 +2,7 @@ package vn.edu.gplx.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -47,8 +48,10 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/**").permitAll()
                 // Public Authentication endpoints (login, register)
                 .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
-                // Public License Categories catalog
+                // Public Catalogs: License Categories, Courses, Theory questions
                 .requestMatchers("/api/v1/license-categories/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/courses/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/theory/**").permitAll()
                 // OpenAPI / Swagger endpoints
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 // All other requests require authentication

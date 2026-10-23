@@ -25,6 +25,9 @@ export default function MainLayout() {
           </div>
           <nav className={styles.nav}>
             <Link to="/" className={styles.navLink}>Trang chủ</Link>
+            <Link to="/courses" className={styles.navLink}>Khóa học</Link>
+            <Link to="/theory-exam" className={styles.navLink}>Thi thử 600 câu</Link>
+            <Link to="/training/schedules" className={styles.navLink}>Lịch học & DAT</Link>
 
             {isAuthenticated && (
               <>
@@ -43,7 +46,7 @@ export default function MainLayout() {
             )}
 
             <a href="http://localhost:8080/swagger-ui/index.html" target="_blank" rel="noreferrer" className={styles.navLink}>
-              Tài liệu OpenAPI
+              OpenAPI
             </a>
 
             {isAuthenticated && user ? (

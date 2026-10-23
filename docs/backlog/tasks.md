@@ -50,9 +50,24 @@
 
 ---
 
-## Danh mục Tasks — Phase 3: Learning & Training (Kế hoạch tiếp theo)
+## Danh mục Tasks — Phase 3: Learning & Training (Học trực tuyến & Đào tạo thực hành)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P3-01`** | Module Learning: Ngân hàng câu hỏi lý thuyết & Bài học online | TSK-P2-04 | `TODO` | Ngân hàng 600 câu hỏi, bộ đề thi thử, theo dõi tiến độ bài giảng lý thuyết (LRN-001, LRN-002) |
-| **`TSK-P3-02`** | Module Training: Lập lịch học, Lớp học, Điểm danh & Thực hành cabin/DAT | TSK-P2-04 | `TODO` | Quản lý lớp, chống xung đột lịch học (TRN-001), điểm danh (TRN-002), ghi nhận số km/giờ thực hành DAT |
+| **`TSK-P3-01`** | CSDL & Entities Khóa học, Bài giảng, Ngân hàng câu hỏi & Lớp/Lịch học | TSK-P2-02 | `DONE` | Flyway V4 tạo 9 bảng: `courses`, `course_lessons`, `learning_progress`, `theory_questions`, `theory_answers`, `training_classes`, `class_enrollments`, `training_schedules`, `attendance_records`, `dat_practice_sessions` |
+| **`TSK-P3-02`** | Module Learning: E-Learning & Theo dõi tiến độ bài học | TSK-P3-01 | `DONE` | Lưu tiến độ học tập người dùng (LRN-001), chặn đánh dấu hoàn thành nếu chưa xem đủ thời gian (LRN-002) |
+| **`TSK-P3-03`** | Module Learning: Ngân hàng 600 câu hỏi & Thi thử lý thuyết trực tuyến | TSK-P3-01 | `DONE` | Sinh đề thi ngẫu nhiên, chấm điểm tự động, trượt ngay lập tức nếu sai câu hỏi điểm liệt |
+| **`TSK-P3-04`** | Module Training: Quản lý Lớp học & Xếp lịch học không xung đột | TSK-P3-01 | `DONE` | Kiểm tra chống trùng lặp lịch đào tạo của giảng viên (TRN-001), phân bổ học viên vào lớp |
+| **`TSK-P3-05`** | Module Training: Điểm danh buổi học & Giám sát thực hành DAT | TSK-P3-01 | `DONE` | Điểm danh trong khung ngày cho phép (TRN-002), tính tổng km/giờ thực hành DAT và cabin mô phỏng |
+| **`TSK-P3-06`** | Giao diện Frontend Khóa học, Thi thử lý thuyết & Lịch học/DAT | TSK-P3-02..05| `DONE` | `CoursesPage`, `TheoryExamPage`, `TrainingSchedulePage`, tích hợp điều hướng và theo dõi thanh tiến trình DAT |
+| **`TSK-P3-07`** | Kiểm thử Tự động Toàn diện Phase 3 | TSK-P3-02..05| `DONE` | 12 tests mới cho Phase 3 (CourseServiceTest, TheoryExamServiceTest, TrainingScheduleServiceTest, AttendanceServiceTest, CourseAndTrainingIntegrationTest); Tổng: 38/38 tests PASS |
+
+---
+
+## Danh mục Tasks — Phase 4: Examination (Tổ chức thi & Xét điều kiện dự thi - Kế hoạch tiếp theo)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P4-01`** | Module Examination: Đánh giá tự động điều kiện dự thi tốt nghiệp/sát hạch | TSK-P3-05 | `TODO` | Kiểm tra hồ sơ duyệt (ADM), hoàn thành lý thuyết (LRN), đủ giờ/km thực hành DAT (TRN) (EXM-001) |
+| **`TSK-P4-02`** | Module Examination: Quản lý Hội đồng thi, Kỳ thi, Danh sách thí sinh & Kết quả | TSK-P4-01 | `TODO` | Quản lý kỳ thi, số báo danh, nhập kết quả thi lý thuyết, sa hình, đường trường, bảo toàn kết quả vĩnh viễn (EXM-002) |
+| **`TSK-P4-03`** | Giao diện Tra cứu điều kiện dự thi & Bảng điểm sát hạch GPLX | TSK-P4-02 | `TODO` | Tra cứu điều kiện dự thi tự động, xem kết quả thi sát hạch và biên bản tổng hợp |

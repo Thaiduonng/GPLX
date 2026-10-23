@@ -2,6 +2,45 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.0] — 2026-10-23
+
+### Học trực tuyến, Đào tạo thực hành & Giám sát DAT (Phase 3 — Learning & Training)
+- **Cơ sở dữ liệu & Migration:**
+  - Bổ sung Flyway migration `V4__create_learning_and_training_tables.sql` tạo 9 bảng:
+    - Module Learning: `courses`, `course_lessons`, `learning_progress`, `theory_questions`, `theory_answers`.
+    - Module Training: `training_classes`, `class_enrollments`, `training_schedules`, `attendance_records`, `dat_practice_sessions`.
+  - Hạt giống dữ liệu khóa học mẫu, bài học mẫu và câu hỏi lý thuyết kèm câu hỏi điểm liệt.
+- **Nghiệp vụ & Tuân thủ Quy tắc:**
+  - `LRN-001`: Ghi nhận tiến độ học tập gắn với người học (`user_id`) và bài giảng (`lesson_id`).
+  - `LRN-002`: Chặn đánh dấu hoàn thành bài giảng nếu người học chưa tích lũy thời gian học tối thiểu theo quy định.
+  - Sát hạch lý thuyết: Tự động đánh trượt ngay lập tức nếu làm sai câu hỏi điểm liệt (`isParalysis = true`).
+  - `TRN-001`: Kiểm tra chống xung đột lịch đào tạo của giảng viên trong cùng khung giờ.
+  - `TRN-002`: Kiểm tra điều kiện điểm danh chỉ được phép ghi nhận trong ngày diễn ra buổi học.
+  - Giám sát DAT: Tích lũy quãng đường và thời gian thực hành đường trường/cabin (đối chiếu chuẩn 810km / 20 giờ).
+- **REST API (`/api/v1`):**
+  - Khóa học & E-Learning:
+    - `GET /api/v1/courses`: Danh mục khóa học đào tạo (Public).
+    - `GET /api/v1/courses/{id}`: Chi tiết khóa học.
+    - `GET /api/v1/courses/{id}/lessons`: Danh sách bài giảng kèm tiến độ học viên.
+    - `POST /api/v1/courses/lessons/{id}/progress`: Cập nhật tiến độ và hoàn thành bài giảng.
+  - Ngân hàng câu hỏi & Thi thử:
+    - `GET /api/v1/theory/questions`: Ngân hàng câu hỏi ôn tập theo hạng GPLX (Public).
+    - `GET /api/v1/theory/mock-exam`: Sinh đề thi ngẫu nhiên theo hạng bằng (Public).
+    - `POST /api/v1/theory/mock-exam/submit`: Nộp bài thi thử trực tuyến và chấm điểm tự động.
+  - Quản lý Đào tạo & Thực hành DAT:
+    - `GET /api/v1/training/classes`, `POST /api/v1/training/classes`, `POST /api/v1/training/classes/{id}/enroll`.
+    - `GET /api/v1/training/schedules/class/{classId}`, `POST /api/v1/training/schedules`.
+    - `POST /api/v1/training/attendance`, `GET /api/v1/training/attendance/schedule/{scheduleId}`, `GET /api/v1/training/attendance/my-records`.
+    - `POST /api/v1/training/dat/sessions`, `GET /api/v1/training/dat/my-summary`.
+- **Frontend (React 19 + TypeScript):**
+  - Xây dựng types `types/learning.ts`, `types/training.ts` và services `learningService.ts`, `trainingService.ts`.
+  - Trang Khóa học & Bài giảng (`CoursesPage.tsx`): Danh mục khóa học, bài học có video mô phỏng, tính giờ học tích lũy và nút hoàn thành bài học.
+  - Trang Thi thử lý thuyết (`TheoryExamPage.tsx`): Chế độ ôn tập theo hạng, chế độ thi thử ngẫu nhiên 20-25 câu, cảnh báo câu điểm liệt.
+  - Trang Kế hoạch đào tạo & Lịch học (`TrainingSchedulePage.tsx`): Lịch học theo lớp, thanh tiến trình quãng đường thực hành DAT (tổng số km và giờ lái thực tế).
+- **Kiểm thử:**
+  - 12 test cases mới cho Phase 3 (`CourseServiceTest`, `TheoryExamServiceTest`, `TrainingScheduleServiceTest`, `AttendanceServiceTest`, `CourseAndTrainingIntegrationTest`).
+  - Toàn bộ 38/38 test cases của toàn hệ thống đạt kết quả 100% Passed.
+
 ## [0.3.0] — 2026-10-23
 
 ### Tuyển sinh & Tiếp nhận Hồ sơ điện tử (Phase 2 — Admission Module)
