@@ -33,11 +33,13 @@ export default function MainLayout() {
             <Link to="/courses" className={styles.navLink}>Khóa học</Link>
             <Link to="/theory-exam" className={styles.navLink}>Thi thử 600 câu</Link>
             <Link to="/training/schedules" className={styles.navLink}>Lịch học & DAT</Link>
+            <Link to="/fleet" className={styles.navLink}>Xe tập lái</Link>
             <Link to="/examination/sessions" className={styles.navLink}>Kỳ sát hạch</Link>
 
             {isAuthenticated && (
               <>
-                <Link to="/examination/eligibility" className={styles.navLink}>Điều kiện dự thi</Link>
+                <Link to="/finance/tuition" className={styles.navLink} style={{ color: '#86efac', fontWeight: 600 }}>💰 Học phí</Link>
+                <Link to="/examination/eligibility" className={styles.navLink}>Điều kiện thi</Link>
                 <Link to="/examination/my-results" className={styles.navLink}>Kết quả thi</Link>
                 <Link to="/admissions/new" className={styles.navLink}>Nộp hồ sơ</Link>
                 <Link to="/my-applications" className={styles.navLink}>Hồ sơ của tôi</Link>
@@ -47,7 +49,7 @@ export default function MainLayout() {
                     className={styles.navLink}
                     style={{ color: '#93c5fd', fontWeight: 600 }}
                   >
-                    📝 Chấm điểm thi
+                    📝 Chấm điểm
                   </Link>
                 )}
                 {isStaffOrAdmin && (
@@ -56,7 +58,7 @@ export default function MainLayout() {
                     className={styles.navLink}
                     style={{ color: '#fef08a', fontWeight: 600 }}
                   >
-                    🛡️ Quản lý tuyển sinh
+                    🛡️ Tuyển sinh
                   </Link>
                 )}
               </>

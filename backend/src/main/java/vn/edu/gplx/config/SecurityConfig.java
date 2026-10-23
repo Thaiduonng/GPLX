@@ -48,11 +48,12 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/**").permitAll()
                 // Public Authentication endpoints (login, register)
                 .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
-                // Public Catalogs: License Categories, Courses, Theory questions
+                // Public Catalogs: License Categories, Courses, Theory questions, Examination sessions, Fleet
                 .requestMatchers("/api/v1/license-categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/courses/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/theory/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/examination/sessions/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/fleet/**").permitAll()
                 // OpenAPI / Swagger endpoints
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 // All other requests require authentication
@@ -64,12 +65,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 }

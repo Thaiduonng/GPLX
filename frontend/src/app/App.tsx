@@ -15,6 +15,8 @@ import { EligibilityCheckPage } from '../pages/EligibilityCheckPage';
 import { ExamSessionsPage } from '../pages/ExamSessionsPage';
 import { ExamGradingPage } from '../pages/ExamGradingPage';
 import { MyExamResultsPage } from '../pages/MyExamResultsPage';
+import { TuitionPaymentPage } from '../pages/TuitionPaymentPage';
+import { FleetManagementPage } from '../pages/FleetManagementPage';
 
 export default function App() {
   return (
@@ -34,6 +36,8 @@ export default function App() {
           <Route path="/examination/sessions" element={<ExamSessionsPage />} />
           <Route path="/examination/grading" element={<ExamGradingPage />} />
           <Route path="/examination/my-results" element={<MyExamResultsPage />} />
+          <Route path="/finance/tuition" element={<TuitionPaymentPage />} />
+          <Route path="/fleet" element={<FleetManagementPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
