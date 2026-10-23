@@ -2,6 +2,20 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.0] — 2026-10-23
+
+### Phát hành Chính thức Nghiệm thu Đồ án (Phase 7 — Final Polish & Release v1.0.0)
+- **Đóng gói & Triển khai Production:**
+  - Hoàn thiện Dockerfile Multi-stage build cho Backend (`infra/docker/backend.Dockerfile`): Tận dụng Eclipse Temurin 21 JDK để build Maven và Eclipse Temurin 21 JRE runtime tối ưu kích thước, bảo mật chạy dưới quyền non-root `appuser`.
+  - Hoàn thiện Dockerfile Multi-stage build cho Frontend (`infra/docker/frontend.Dockerfile`): Node 20 Alpine build bundle tĩnh và Nginx Alpine siêu nhẹ phục vụ production.
+  - Cấu hình Nginx (`frontend/nginx.conf` & `infra/docker/nginx.conf`): Hỗ trợ React Router SPA Fallback (`try_files $uri $uri/ /index.html;`), cấu hình nén Gzip và Reverse Proxy bảo mật đến Backend `/api/` và Swagger UI.
+  - Cập nhật `docker-compose.yml`: Khởi chạy 1-click toàn diện 3 dịch vụ liên thông (`mysql:8.4`, `gplx-backend`, `gplx-frontend`) kèm cơ chế Health Check tự động.
+- **Tài liệu & Nghiệm thu:**
+  - Cập nhật `README.md` hướng dẫn chi tiết khởi chạy 1-click, tài khoản kiểm thử mặc định cho 7 vai trò, danh mục API và quy trình test tự động.
+  - Hoàn tất toàn bộ backlog trong `docs/backlog/tasks.md` (từ `TSK-P0-01` đến `TSK-P7-02` đều đạt trạng thái `DONE`).
+- **Chất lượng Mã nguồn:**
+  - Đạt 100% tỷ lệ pass kiểm thử tự động: **66/66 test cases** trên nền Java 21, Spring Boot 4.1.1 và MySQL 8.4 LTS.
+
 ## [0.7.0] — 2026-10-23
 
 ### Báo cáo Quản trị & Nhật ký Kiểm toán (Phase 6 — Reporting & Audit Logging)

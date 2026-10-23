@@ -1,114 +1,84 @@
-# Hệ thống Học, Đào tạo và Tiếp nhận Hồ sơ thi cấp Giấy phép Lái xe các Hạng (GPLX)
+# Hệ thống Học, Đào tạo và Tiếp nhận Hồ sơ thi cấp Giấy phép Lái xe các Hạng (GPLX Training System)
 
-> **Đồ án tốt nghiệp đại học** — Kiến trúc **Modular Monolith** kết hợp **Java 21**, **Spring Boot 4.1.1**, **React 19 + TypeScript**, **MySQL 8.4 LTS** và **Docker Compose v2**.
-
----
-
-## 1. Công nghệ Sử dụng
-
-- **Backend:** Java 21, Spring Boot 4.1.1, Spring Security 7.x, Spring Data JPA, Hibernate, Bean Validation, Flyway Core & MySQL, OpenAPI Swagger UI (`springdoc-openapi` 3.1.1), JUnit 5, Mockito.
-- **Frontend:** React 19, TypeScript, Vite, React Router DOM v7, Axios, CSS Modules (Responsive, hỗ trợ Tiếng Việt).
-- **Database:** MySQL 8.4 LTS (Lưu trữ UTF-8 `utf8mb4_unicode_ci`, Múi giờ chuẩn UTC).
-- **DevOps:** Docker, Docker Compose v2, Maven Wrapper (`mvnw`), Git.
+> **Đồ án tốt nghiệp đại học** ngành Công nghệ Thông tin / Kỹ thuật Phần mềm.
+> Kiến trúc **Modular Monolith** kết hợp **Java 21**, **Spring Boot 4.1.1**, **React 19 + TypeScript**, **MySQL 8.4 LTS** và **Docker Compose v2**.
+> Phiên bản chính thức: **v1.0.0**.
 
 ---
 
-## 2. Cấu trúc Dự án
+## 1. Công nghệ Sử dụng (Tech Stack)
+
+- **Backend:** Java 21 LTS, Spring Boot 4.1.1, Spring Framework 7, Spring Security 7.x, Spring Data JPA, Hibernate 7, Bean Validation, Flyway Core & MySQL (10.x), OpenAPI Swagger UI (`springdoc-openapi` 3.1.1), JUnit 5, Mockito.
+- **Frontend:** React 19, TypeScript (Strict Mode), Vite, React Router DOM v7, Axios, Nginx Alpine (Multi-stage Production Image), CSS Modules (Responsive, hỗ trợ Tiếng Việt).
+- **Database:** MySQL 8.4 LTS (Lưu trữ UTF-8 `utf8mb4_unicode_ci`, Múi giờ chuẩn UTC, 7 Flyway migrations V1 ➔ V7).
+- **DevOps:** Docker, Docker Compose v2, Maven Wrapper (`mvnw`), Git Flow.
+
+---
+
+## 2. Các Phân Hệ Nghiệp Vụ Cốt Lõi (Phases 0 — 6)
+
+1. **Identity & Authentication (Phase 1):** RBAC 7 vai trò (`ADMIN`, `MANAGER`, `STAFF`, `INSTRUCTOR`, `EXAMINER`, `STUDENT`, `COUNSELOR`), xác thực Stateless JWT HMAC-SHA256, mã hóa BCrypt.
+2. **Admission & Electronic Dossiers (Phase 2):** Tiếp nhận hồ sơ điện tử, tải tài liệu số hóa, máy trạng thái xét duyệt (`ADM-001`), bắt buộc lý do từ chối (`ADM-002`), chống sửa hồ sơ đã duyệt (`ADM-003`), chống nộp trùng CCCD (`ADM-005`).
+3. **Learning & Training (Phase 3):** E-Learning theo dõi tiến độ (`LRN-001/002`), thi thử ngân hàng 600 câu hỏi (trượt ngay nếu sai câu điểm liệt), xếp lịch học không xung đột (`TRN-001`), điểm danh buổi học (`TRN-002`), giám sát km và giờ thực hành lái xe DAT.
+4. **Examination (Phase 4):** Thẩm định tự động 3 điều kiện dự thi (`EXM-001`), quản lý kỳ thi và số báo danh, chấm điểm 4 môn (Lý thuyết, Mô phỏng, Sa hình, Đường trường), bảo toàn vĩnh viễn kết quả sát hạch (`EXM-002`).
+5. **Support Modules — Finance & Fleet (Phase 5):** Hóa đơn học phí, nộp tiền an toàn với Idempotency Key chống trùng (`FIN-001`), cấm xóa chứng từ (`FIN-002`), quản lý đội xe và tự động loại xe quá hạn đăng kiểm (`FLT-001`).
+6. **Reporting & Audit Logging (Phase 6):** Dashboard KPI quản trị thời gian thực, bảng phân tích tỷ lệ đỗ theo hạng bằng, truy vết toàn bộ thao tác hệ thống qua Audit Logs.
+
+---
+
+## 3. Cấu Trúc Dự Án
 
 ```text
 GPLX/
-├── AGENTS.md                  # Hướng dẫn & Quy định hoạt động của AI Coding Agent
+├── AGENTS.md                  # Quy định hoạt động của AI Coding Agent
 ├── README.md                  # Hướng dẫn tổng quan & khởi chạy hệ thống
-├── CHANGELOG.md               # Nhật ký các phiên bản & lịch sử thay đổi
-├── .gitignore                 # Cấu hình bỏ qua tệp tin Git chuẩn hóa
-├── .editorconfig              # Định dạng chuẩn hóa font chữ, tab, spacing
-├── .gitattributes             # Chuẩn hóa ngắt dòng LF / CRLF
-├── .env.example               # Biến môi trường mẫu bảo mật
-├── docker-compose.yml         # Khởi chạy đồng bộ MySQL 8.4, Backend & Frontend
-│
-├── .rules/                    # Bộ 14 file Rule điều khiển quá trình phát triển
-│   ├── 00-project-overview.md
-│   ├── 01-technology-stack.md
-│   ├── 02-architecture.md
-│   ├── 03-coding-conventions.md
-│   ├── 04-database-and-migrations.md
-│   ├── 05-api-conventions.md
-│   ├── 06-security-and-privacy.md
-│   ├── 07-business-rules.md
-│   ├── 08-legal-compliance.md
-│   ├── 09-frontend-conventions.md
-│   ├── 10-testing-and-quality.md
-│   ├── 11-git-and-workflow.md
-│   ├── 12-documentation.md
-│   └── 13-definition-of-done.md
-│
-├── docs/                      # Bộ tài liệu kiến trúc, nghiệp vụ & pháp lý
-│   ├── architecture/          # Kiến trúc hệ thống, ranh giới module, database, an ninh
-│   ├── requirements/          # Tác nhân, Use Cases, Yêu cầu chức năng/phi chức năng
-│   ├── legal/                 # Sổ đăng ký căn cứ pháp lý & quy trình rà soát
-│   ├── testing/               # Chiến lược kiểm thử & tiêu chuẩn chất lượng
-│   ├── deployment/            # Hướng dẫn chi tiết triển khai môi trường
-│   └── backlog/               # Lộ trình tổng thể (Roadmap) & Task backlog chi tiết
-│
-├── backend/                   # Ứng dụng Spring Boot 4.1.1 (Modular Monolith)
-│   ├── pom.xml
-│   ├── mvnw / mvnw.cmd
-│   └── src/
-│       ├── main/java/vn/edu/gplx/
-│       │   ├── GplxApplication.java
-│       │   ├── config/        # SecurityConfig, WebConfig, OpenApiConfig
-│       │   ├── shared/        # BaseEntity, ApiResponse, GlobalExceptionHandler
-│       │   └── modules/       # 10 ranh giới module nghiệp vụ độc lập
-│       │       ├── identity/  # HealthController & Quản lý tài khoản, vai trò
-│       │       ├── admission/ # Tuyển sinh & tiếp nhận hồ sơ
-│       │       ├── learning/  # Bài học trực tuyến & câu hỏi ôn tập
-│       │       ├── training/  # Lớp học & giờ thực hành
-│       │       ├── examination/ # Sát hạch & điều kiện thi
-│       │       ├── crm/       # Quản trị khách hàng tư vấn
-│       │       ├── finance/   # Học phí & công nợ
-│       │       ├── fleet/     # Quản lý xe tập lái & bảo dưỡng
-│       │       ├── notification/ # Email & nhắc lịch
-│       │       └── reporting/ # Dashboard & báo cáo thống kê
-│       └── main/resources/
-│           ├── application.yml
-│           └── db/migration/  # Flyway V1: Bảng users, roles, permissions
-│
-├── frontend/                  # Ứng dụng React 19 + TypeScript (Vite)
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── src/
-│       ├── app/               # Khởi tạo App & Routes
-│       ├── layouts/           # MainLayout chuẩn Responsive
-│       ├── pages/             # HomePage (kết nối Health Check) & NotFoundPage
-│       ├── services/          # apiClient Axios & healthService
-│       └── types/             # Định nghĩa Type ApiResponse, HealthStatus
-│
-└── infra/docker/              # Dockerfiles cho Backend và Frontend
+├── CHANGELOG.md               # Nhật ký phiên bản chi tiết (v0.1.0 -> v1.0.0)
+├── docker-compose.yml         # Khởi chạy 1-click: MySQL 8.4, Backend & Frontend
+├── .rules/                    # Bộ 14 file Rule quy chuẩn kiến trúc & nghiệp vụ
+├── docs/                      # Tài liệu kiến trúc, database, pháp lý và backlog
+│   ├── architecture/          # system-overview, module-boundaries, database-design
+│   ├── requirements/          # actors-and-use-cases, functional-requirements
+│   ├── legal/                 # legal-register (sổ đăng ký pháp lý GPLX)
+│   └── backlog/               # roadmap, tasks.md (DoD)
+├── backend/                   # Spring Boot 4.1.1 (Modular Monolith)
+│   ├── src/main/java/vn/edu/gplx/modules/
+│   │   ├── identity/          # Tài khoản, xác thực, phân quyền
+│   │   ├── admission/         # Tuyển sinh, hồ sơ điện tử
+│   │   ├── learning/          # E-learning, 600 câu hỏi thi thử
+│   │   ├── training/          # Lớp học, lịch học, điểm danh, DAT
+│   │   ├── examination/       # Sát hạch, điều kiện dự thi, chấm điểm
+│   │   ├── finance/           # Hóa đơn học phí, biên lai thanh toán
+│   │   ├── fleet/             # Phương tiện, đăng kiểm, bảo dưỡng
+│   │   └── reporting/         # Dashboard báo cáo KPI, Audit Logs
+│   └── src/main/resources/db/migration/ # 7 migrations Flyway (V1 -> V7)
+├── frontend/                  # React 19 + TypeScript + Vite + Nginx
+│   └── src/pages/             # 16 trang màn hình chức năng hoàn chỉnh
+└── infra/docker/              # Dockerfiles Multi-stage Production & Nginx Conf
     ├── backend.Dockerfile
-    └── frontend.Dockerfile
+    ├── frontend.Dockerfile
+    └── nginx.conf
 ```
 
 ---
 
-## 3. Hướng dẫn Khởi chạy Nhanh
+## 4. Hướng Dẫn Khởi Chạy Nhanh
 
-### Cách 1: Khởi chạy bằng Docker Compose (Khuyến nghị)
+### Cách 1: Khởi chạy 1-Click với Docker Compose (Khuyến nghị)
 
-1. Sao chép file cấu hình môi trường:
+1. **Chuẩn bị file môi trường:**
    ```bash
    cp .env.example .env
    ```
-2. Khởi chạy toàn bộ dịch vụ:
+2. **Khởi chạy toàn bộ hệ thống:**
    ```bash
    docker compose up -d --build
    ```
-3. Truy cập các địa chỉ:
+3. **Truy cập ứng dụng:**
    - **Giao diện Người dùng (Frontend):** [http://localhost:3000](http://localhost:3000)
    - **Tài liệu API Swagger UI:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
    - **Kiểm tra Tình trạng Hệ thống (Health API):** [http://localhost:8080/api/v1/health](http://localhost:8080/api/v1/health)
 
-### Cách 2: Khởi chạy Cục bộ từng Thành phần
+### Cách 2: Khởi chạy Cục bộ cho Lập trình viên (Development)
 
 1. **Khởi động Cơ sở dữ liệu MySQL:**
    ```bash
@@ -117,11 +87,10 @@ GPLX/
 2. **Khởi động Backend (Spring Boot 4.1.1):**
    ```bash
    cd backend
-   ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-   # Hoặc trên Windows:
    .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
+   # Trên Linux/macOS: ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
    ```
-3. **Khởi động Frontend (React + Vite):**
+3. **Khởi động Frontend (React 19 + Vite):**
    ```bash
    cd frontend
    npm install
@@ -130,10 +99,32 @@ GPLX/
 
 ---
 
-## 4. Reset Dữ liệu Cơ sở dữ liệu
+## 5. Tài Khoản Mẫu Kiểm Thử Mặc Định (Seed Data)
 
-> ⚠️ **CẢNH BÁO:** Thao tác này sẽ xóa sạch toàn bộ cơ sở dữ liệu và tạo mới từ đầu thông qua Flyway:
+| Tài khoản (Username) | Mật khẩu | Vai trò (Role) | Chức năng chính |
+| :--- | :--- | :--- | :--- |
+| `admin` | `admin123` | `ROLE_ADMIN` | Quản trị toàn hệ thống, xem Dashboard KPI, Audit Logs |
+| `manager` | `manager123` | `ROLE_MANAGER` | Quản lý cơ sở đào tạo, tạo kỳ thi, quản lý đội xe |
+| `staff` | `staff123` | `ROLE_STAFF` | Thẩm định & duyệt hồ sơ tuyển sinh điện tử |
+| `examiner` | `examiner123` | `ROLE_EXAMINER` | Giám khảo chấm điểm 4 môn sát hạch GPLX |
+| `instructor` | `instructor123`| `ROLE_INSTRUCTOR` | Giảng viên dạy lái, điểm danh, hướng dẫn DAT |
+| `student` | `student123` | `ROLE_STUDENT` | Học viên nộp hồ sơ, thi thử 600 câu, nộp học phí, xem điểm |
+
+---
+
+## 6. Chạy Kiểm Thử Tự Động Toàn Diện (Testing)
+
+Hệ thống sở hữu bộ kiểm thử tự động toàn diện đạt tỷ lệ **100% Passed (66/66 test cases)**:
+
 ```bash
-docker compose down -v
-docker compose up -d
+cd backend
+.\mvnw.cmd test
+# Trên Linux/macOS: ./mvnw test
 ```
+
+---
+
+## 7. Giấy Phép & Bản Quyền
+
+- Dự án phục vụ mục đích nghiên cứu và bảo vệ đồ án tốt nghiệp đại học.
+- Toàn bộ quy tắc về đào tạo và sát hạch lái xe tuân thủ pháp luật giao thông đường bộ Việt Nam.
