@@ -8,6 +8,9 @@ import NotFoundPage from '../pages/NotFoundPage';
 import SubmitApplicationPage from '../pages/SubmitApplicationPage';
 import MyApplicationsPage from '../pages/MyApplicationsPage';
 import ApplicationManagementPage from '../pages/ApplicationManagementPage';
+import CoursesPage from '../pages/CoursesPage';
+import TheoryExamPage from '../pages/TheoryExamPage';
+import TrainingSchedulePage from '../pages/TrainingSchedulePage';
 
 export default function App() {
   return (
@@ -20,6 +23,9 @@ export default function App() {
           <Route path="/admissions/new" element={<SubmitApplicationPage />} />
           <Route path="/my-applications" element={<MyApplicationsPage />} />
           <Route path="/admin/admissions" element={<ApplicationManagementPage />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/theory-exam" element={<TheoryExamPage />} />
+          <Route path="/training/schedules" element={<TrainingSchedulePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
