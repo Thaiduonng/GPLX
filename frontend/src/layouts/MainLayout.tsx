@@ -5,6 +5,11 @@ import styles from './MainLayout.module.css';
 export default function MainLayout() {
   const { user, isAuthenticated, logout } = useAuth();
 
+  const isStaffOrAdmin =
+    user?.roles?.some(
+      (r) => r === 'ROLE_ADMIN' || r === 'ROLE_STAFF' || r === 'ROLE_MANAGER'
+    ) ?? false;
+
   return (
     <div className={styles.layout}>
       <header className={styles.header}>
@@ -20,6 +25,23 @@ export default function MainLayout() {
           </div>
           <nav className={styles.nav}>
             <Link to="/" className={styles.navLink}>Trang chủ</Link>
+
+            {isAuthenticated && (
+              <>
+                <Link to="/admissions/new" className={styles.navLink}>Nộp hồ sơ</Link>
+                <Link to="/my-applications" className={styles.navLink}>Hồ sơ của tôi</Link>
+                {isStaffOrAdmin && (
+                  <Link
+                    to="/admin/admissions"
+                    className={styles.navLink}
+                    style={{ color: '#fef08a', fontWeight: 600 }}
+                  >
+                    🛡️ Quản lý tuyển sinh
+                  </Link>
+                )}
+              </>
+            )}
+
             <a href="http://localhost:8080/swagger-ui/index.html" target="_blank" rel="noreferrer" className={styles.navLink}>
               Tài liệu OpenAPI
             </a>
@@ -60,6 +82,7 @@ export default function MainLayout() {
                     borderRadius: '6px',
                     fontSize: '0.85rem',
                     fontWeight: 500,
+                    textDecoration: 'none',
                   }}
                 >
                   Đăng nhập
@@ -73,6 +96,7 @@ export default function MainLayout() {
                     borderRadius: '6px',
                     fontSize: '0.85rem',
                     fontWeight: 600,
+                    textDecoration: 'none',
                   }}
                 >
                   Đăng ký
@@ -88,10 +112,7 @@ export default function MainLayout() {
       </main>
 
       <footer className={styles.footer}>
-        <div className={styles.footerContainer}>
-          <p>© 2026 Hệ thống Quản lý Đào tạo và Tiếp nhận Hồ sơ thi GPLX các hạng.</p>
-          <p className={styles.note}>Kiến trúc: Java 21 | Spring Boot 4.1.1 | React 19 + TypeScript | MySQL 8.4 LTS</p>
-        </div>
+        <p>© 2026 Hệ thống Quản lý Đào tạo & Tiếp nhận hồ sơ thi GPLX — Modular Monolith</p>
       </footer>
     </div>
   );

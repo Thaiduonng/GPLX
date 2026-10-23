@@ -8,7 +8,7 @@ public class BusinessRuleViolationException extends RuntimeException {
     private final String ruleId;
 
     public BusinessRuleViolationException(String ruleId, String message) {
-        super(message);
+        super(String.format("[%s] %s", ruleId, message));
         this.ruleId = ruleId;
     }
 

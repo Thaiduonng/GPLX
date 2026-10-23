@@ -47,6 +47,8 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/**").permitAll()
                 // Public Authentication endpoints (login, register)
                 .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
+                // Public License Categories catalog
+                .requestMatchers("/api/v1/license-categories/**").permitAll()
                 // OpenAPI / Swagger endpoints
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 // All other requests require authentication
@@ -58,12 +60,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
