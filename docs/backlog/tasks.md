@@ -1,56 +1,49 @@
-# Bảng Quản trị Công việc (Task Backlog)
+# Sổ Quản Lý Công Việc (Tasks Backlog)
 
-## Quy ước Trạng thái:
-- `TODO`: Chưa bắt đầu
-- `IN_PROGRESS`: Đang tiến hành
-- `DONE`: Đã hoàn thành (đạt chuẩn DoD)
-- `BLOCKED`: Đang bị nghẽn
+Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) theo từng giai đoạn phát triển dự án GPLX Training System theo quy định tại `.rules/11-git-and-workflow.md` và `.rules/13-definition-of-done.md`.
 
 ---
 
-## Danh mục Tasks — Phase 0: Foundation
+## Danh mục Tasks — Phase 0: Foundation (Khởi tạo nền tảng)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P0-01`** | Khảo sát workspace và tương thích công nghệ | Không | `DONE` | Xác nhận tính tương thích Java 21, Spring Boot 4.1.1, MySQL 8.4, React 19 |
-| **`TSK-P0-02`** | Xây dựng AGENTS.md và Bộ Rule `.rules/` | TSK-P0-01 | `DONE` | Đầy đủ AGENTS.md và 14 file rule từ 00 đến 13 |
-| **`TSK-P0-03`** | Xây dựng Bộ Tài liệu Kiến trúc, Yêu cầu, Pháp lý | TSK-P0-02 | `DONE` | Đầy đủ 13 file tài liệu trong thư mục `docs/` |
-| **`TSK-P0-04`** | Khởi tạo Khung Backend Modular Monolith | TSK-P0-01 | `DONE` | `pom.xml`, GplxApplication, cấu hình Security, Web, OpenApi, Shared, Module packages |
-| **`TSK-P0-05`** | Thiết lập Cơ sở dữ liệu và Flyway Migration V1 | TSK-P0-04 | `DONE` | File `V1__create_identity_tables.sql` tạo bảng users, roles, permissions |
-| **`TSK-P0-06`** | Khởi tạo Khung Frontend React + TypeScript + Vite | TSK-P0-01 | `DONE` | `package.json`, `tsconfig.json`, `vite.config.ts`, MainLayout, HomePage, API Client |
-| **`TSK-P0-07`** | Cấu hình DevOps Docker Compose & Môi trường | TSK-P0-04, 06 | `DONE` | `docker-compose.yml`, Dockerfiles, `.env.example`, `.gitignore`, `.editorconfig` |
-| **`TSK-P0-08`** | Xây dựng Healthcheck Endpoint & Test cơ bản | TSK-P0-04 | `DONE` | Controller `/api/v1/health` và các test case JUnit 5 tương ứng |
-| **`TSK-P0-09`** | Hoàn thiện README & Báo cáo Khởi tạo | TSK-P0-08 | `DONE` | File `README.md`, `CHANGELOG.md` và tài liệu hướng dẫn khởi chạy |
+| **`TSK-P0-01`** | Khởi tạo cấu trúc dự án & Bộ Rule chuẩn | — | `DONE` | 14 files `.rules/`, `AGENTS.md`, cấu trúc thư mục backend & frontend |
+| **`TSK-P0-02`** | Thiết lập cấu hình Maven & Docker Compose | TSK-P0-01 | `DONE` | `pom.xml` chuẩn Spring Boot 4.1.1, `docker-compose.yml` MySQL 8.4 LTS, `.env.example` |
+| **`TSK-P0-03`** | Migration CSDL V1 & Entity Base | TSK-P0-02 | `DONE` | Flyway V1 tạo bảng: `users`, `roles`, `permissions`, `user_roles`, `role_permissions` |
+| **`TSK-P0-04`** | Actuator & Healthcheck API | TSK-P0-03 | `DONE` | API `/api/v1/health` trả về trạng thái UP, HTTP 200 |
+| **`TSK-P0-05`** | Khung Frontend Vite + React + TypeScript | TSK-P0-01 | `DONE` | Layout cơ bản, gọi API healthcheck, giao diện tiếng Việt |
 
 ---
 
-## Danh mục Tasks — Phase 1: Identity & Authentication
+## Danh mục Tasks — Phase 1: Identity & Authentication (Xác thực & Phân quyền)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P1-01`** | Thiết kế Entity và Repository cho Identity | TSK-P0-05 | `DONE` | User, Role, Permission entities khớp với Flyway V1 schema |
-| **`TSK-P1-02`** | Triển khai API Đăng ký tài khoản (`/auth/register`) | TSK-P1-01 | `DONE` | Mã hóa BCrypt, kiểm tra trùng email/username, validation DTO |
-| **`TSK-P1-03`** | Triển khai API Đăng nhập và Xác thực (`/auth/login`) | TSK-P1-02 | `DONE` | Xác thực Spring Security 7 JWT, trả token, xử lý lỗi đăng nhập sai |
-| **`TSK-P1-04`** | Triển khai Phân quyền RBAC và Method Security | TSK-P1-03 | `DONE` | `@PreAuthorize` hoạt động chính xác theo từng role, CustomUserDetailsService |
-| **`TSK-P1-05`** | Xây dựng Giao diện Đăng nhập và Đăng ký Frontend | TSK-P1-03 | `DONE` | Form validation React, kết nối API backend, lưu token an toàn, AuthContext |
+| **`TSK-P1-01`** | Migration V2 & Cấu hình Seed dữ liệu chuẩn | TSK-P0-03 | `DONE` | Seed 7 Roles hệ thống (`ADMIN`, `MANAGER`, `INSTRUCTOR`, `EXAMINER`, `STUDENT`, `STAFF`, `COUNSELOR`), permissions cốt lõi & tài khoản ban đầu |
+| **`TSK-P1-02`** | Spring Security 7 & JJWT 0.12.6 Integration | TSK-P1-01 | `DONE` | Cấu hình SecurityFilterChain không dùng `.and()`, BCryptPasswordEncoder, JwtAuthenticationFilter stateless |
+| **`TSK-P1-03`** | User Domain & Repository Layer | TSK-P1-01 | `DONE` | `User`, `Role`, `Permission` JPA Entities, quan hệ Many-to-Many chuẩn Hibernate 7 |
+| **`TSK-P1-04`** | Authentication Service & DTOs | TSK-P1-03 | `DONE` | Login, Register, Refresh Token, UserProfile, mapping DTOs immutable records |
+| **`TSK-P1-05`** | Authentication REST Controller | TSK-P1-04 | `DONE` | Endpoints: `POST /api/v1/auth/login`, `POST /api/v1/auth/register`, `GET /api/v1/auth/me` |
+| **`TSK-P1-06`** | Frontend Auth Context & Form Đăng nhập/Đăng ký | TSK-P1-05 | `DONE` | React Context quản lý JWT token, lưu an toàn localStorage, tự động đính kèm Bearer token vào Axios, UI đẹp mắt tiếng Việt |
+| **`TSK-P1-07`** | Kiểm thử Tự động (Unit & Integration Tests) | TSK-P1-05 | `DONE` | Kiểm tra Happy Path đăng nhập, mã hóa BCrypt, chặn đăng ký trùng email/username, bảo vệ endpoint phân quyền |
 
 ---
 
-## Danh mục Tasks — Phase 2: Admission (Tuyển sinh & Tiếp nhận hồ sơ điện tử)
+## Danh mục Tasks — Phase 2: Admission & Electronic Dossiers (Tuyển sinh & Hồ sơ điện tử)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P2-01`** | CSDL & Entity Danh mục Hạng GPLX (`license_categories`) | TSK-P1-01 | `DONE` | Flyway V3, bảng `license_categories`, seed 6 hạng chuẩn A1, A, B1, B, C1, C cấu hình động |
-| **`TSK-P2-02`** | CSDL & Entity Hồ sơ Tuyển sinh (`applications`, `documents`, `status_history`) | TSK-P2-01 | `DONE` | Flyway V3, entities `AdmissionApplication`, `AdmissionDocument`, `ApplicationStatusHistory`, optimistic locking (`@Version`) |
-| **`TSK-P2-03`** | API Nộp hồ sơ điện tử (`POST /api/v1/admissions`) | TSK-P2-02 | `DONE` | Sinh mã `APP-CODE`, kiểm tra tuổi tối thiểu (ADM-004), chống nộp trùng lặp (ADM-005), lưu tài liệu |
-| **`TSK-P2-04`** | API Thẩm định & Xét duyệt hồ sơ (`POST /api/v1/admissions/{id}/review`) | TSK-P2-03 | `DONE` | Máy trạng thái (ADM-001), bắt buộc lý do khi từ chối/bổ sung (ADM-002), cấm hoàn tác hồ sơ đã duyệt (ADM-003) |
-| **`TSK-P2-05`** | API Tra cứu & Phân trang hồ sơ | TSK-P2-03 | `DONE` | `GET /api/v1/admissions/my-applications`, `GET /api/v1/admissions/{id}`, `GET /api/v1/admissions?status=...` có phân trang |
-| **`TSK-P2-06`** | Giao diện Frontend Nộp hồ sơ, Danh sách hồ sơ & Quản lý thẩm định | TSK-P2-03, 04 | `DONE` | `SubmitApplicationPage`, `MyApplicationsPage`, `ApplicationManagementPage`, tích hợp role-based navigation |
-| **`TSK-P2-07`** | Kiểm thử Tự động Toàn diện Phase 2 | TSK-P2-03, 04 | `DONE` | 11 tests cho Admission (6 unit tests, 5 integration tests) + 15 tests Phase 1; Tổng: 26/26 tests PASS |
+| **`TSK-P2-01`** | CSDL & Migrations V3 Tuyển sinh & Hạng GPLX | TSK-P1-01 | `DONE` | Flyway V3 tạo bảng: `license_categories`, `admission_applications`, `admission_documents`, `application_status_histories`. Seed 6 hạng GPLX (A1, A2, B1, B2, C, D) |
+| **`TSK-P2-02`** | Domain Models & JPA Entities Admission | TSK-P2-01 | `DONE` | Entities: `LicenseCategory`, `AdmissionApplication`, `AdmissionDocument`, `ApplicationStatusHistory`. Hỗ trợ Optimistic Locking (`@Version`), Audit Fields |
+| **`TSK-P2-03`** | Service Layer & Quy tắc nghiệp vụ Tuyển sinh | TSK-P2-02 | `DONE` | Thực thi quy trình trạng thái hợp lệ (`ADM-001`), bắt buộc lý do khi bổ sung/từ chối (`ADM-002`), chống ghi đè hồ sơ duyệt (`ADM-003`), tự động sinh mã hồ sơ `HS-CATEGORY-YYYYMM-XXXX`, ghi nhật ký chuyển trạng thái (`ADM-005`) |
+| **`TSK-P2-04`** | REST API Endpoints Tuyển sinh & Hồ sơ | TSK-P2-03 | `DONE` | Endpoints: `GET /api/v1/license-categories`, `POST /api/v1/admissions/applications`, `GET /api/v1/admissions/applications/my`, `GET /api/v1/admissions/applications`, `POST /api/v1/admissions/applications/{id}/review` |
+| **`TSK-P2-05`** | Giao diện Nộp & Quản lý Hồ sơ Điện tử | TSK-P2-04 | `DONE` | `SubmitApplicationPage`, `MyApplicationsPage`, `ApplicationManagementPage`, phân quyền theo Role, hiển thị trạng thái tiếng Việt |
+| **`TSK-P2-06`** | Kiểm thử Tự động Phase 2 | TSK-P2-03..04 | `DONE` | 11 unit & integration tests mới (Validation CCCD, chuyển đổi trạng thái ADM-001/002/003/005, RBAC). Tổng: 26/26 tests PASS |
 
 ---
 
-## Danh mục Tasks — Phase 3: Learning & Training (Học trực tuyến & Đào tạo thực hành)
+## Danh mục Tasks — Phase 3: Learning & Training (Đào tạo lý thuyết & thực hành)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -64,10 +57,22 @@
 
 ---
 
-## Danh mục Tasks — Phase 4: Examination (Tổ chức thi & Xét điều kiện dự thi - Kế hoạch tiếp theo)
+## Danh mục Tasks — Phase 4: Examination (Tổ chức thi & Xét duyệt điều kiện dự thi)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P4-01`** | Module Examination: Đánh giá tự động điều kiện dự thi tốt nghiệp/sát hạch | TSK-P3-05 | `TODO` | Kiểm tra hồ sơ duyệt (ADM), hoàn thành lý thuyết (LRN), đủ giờ/km thực hành DAT (TRN) (EXM-001) |
-| **`TSK-P4-02`** | Module Examination: Quản lý Hội đồng thi, Kỳ thi, Danh sách thí sinh & Kết quả | TSK-P4-01 | `TODO` | Quản lý kỳ thi, số báo danh, nhập kết quả thi lý thuyết, sa hình, đường trường, bảo toàn kết quả vĩnh viễn (EXM-002) |
-| **`TSK-P4-03`** | Giao diện Tra cứu điều kiện dự thi & Bảng điểm sát hạch GPLX | TSK-P4-02 | `TODO` | Tra cứu điều kiện dự thi tự động, xem kết quả thi sát hạch và biên bản tổng hợp |
+| **`TSK-P4-01`** | CSDL & Migrations V5: Kỳ thi, Thí sinh & Kết quả sát hạch | TSK-P3-05 | `DONE` | Flyway V5 tạo bảng: `exam_sessions`, `exam_candidates`, `exam_results`. Ràng buộc khóa ngoại, số báo danh, bảo toàn kết quả (EXM-002) |
+| **`TSK-P4-02`** | Đánh giá tự động điều kiện dự thi tốt nghiệp/sát hạch (EXM-001) | TSK-P4-01 | `DONE` | `EligibilityService` tự động đối soát 3 tiêu chí: Hồ sơ tuyển sinh `APPROVED`, hoàn thành 100% bài học lý thuyết trực tuyến, đủ chỉ tiêu km và giờ thực hành DAT |
+| **`TSK-P4-03`** | Quản lý Hội đồng thi, Đăng ký thí sinh & Bảng điểm sát hạch | TSK-P4-02 | `DONE` | Tạo kỳ thi, cấp số báo danh `SBD-CATEGORY-XXX`, nhập điểm 4 môn (Lý thuyết, Mô phỏng, Sa hình, Đường trường), tính kết quả `PASSED`/`FAILED`, phân quyền `EXAMINER`, `ADMIN` |
+| **`TSK-P4-04`** | Giao diện Tra cứu điều kiện dự thi, Kỳ thi & Bảng điểm sát hạch GPLX | TSK-P4-03 | `DONE` | `EligibilityCheckPage`, `ExamSessionsPage`, `ExamGradingPage`, `MyExamResultsPage`, tích hợp menu điều hướng theo quyền |
+| **`TSK-P4-05`** | Kiểm thử Tự động Toàn diện Phase 4 | TSK-P4-02..03| `DONE` | 12 tests mới cho Phase 4 (`EligibilityServiceTest`, `ExaminationServiceTest`, `ExaminationControllerTest`); Tổng: 50/50 tests PASS |
+
+---
+
+## Danh mục Tasks — Phase 5: Support Modules (Finance, CRM, Fleet, Notification)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P5-01`** | Module Finance: Quản lý biểu phí, biên lai học phí & chống ghi trùng | TSK-P4-05 | `TODO` | Biểu phí theo hạng bằng, ghi nhận thanh toán với Idempotency Key (FIN-001), không xóa biên lai đã xác nhận (FIN-002) |
+| **`TSK-P5-02`** | Module Fleet: Quản lý xe tập lái & bảo dưỡng định kỳ | TSK-P5-01 | `TODO` | Quản lý thông tin xe, hạn đăng kiểm, bảo dưỡng (FLT-001), liên kết lịch học DAT |
+| **`TSK-P5-03`** | Module CRM & Notification: Tiếp nhận tư vấn & Nhắc lịch tự động | TSK-P5-02 | `TODO` | Quản lý học viên tiềm năng, gửi email thông báo trúng tuyển/lịch thi (NTF-001) |

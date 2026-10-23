@@ -2,6 +2,42 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.0] — 2026-10-23
+
+### Tổ chức thi & Xét duyệt điều kiện dự thi (Phase 4 — Examination Module)
+- **Cơ sở dữ liệu & Migration:**
+  - Bổ sung Flyway migration `V5__create_examination_tables.sql` tạo 3 bảng nghiệp vụ:
+    - `exam_sessions`: Quản lý hội đồng thi, tên kỳ thi, ngày tổ chức, địa điểm, hạng GPLX, loại kỳ thi (Sát hạch Sở GTVT / Tốt nghiệp trường lái).
+    - `exam_candidates`: Danh sách thí sinh dự thi, số báo danh (`candidate_number`), trạng thái đủ điều kiện (`QUALIFIED` / `DISQUALIFIED`), lý do bị loại.
+    - `exam_results`: Kết quả thi 4 nội dung (Lý thuyết, Mô phỏng tình huống, Sa hình, Đường trường), kết quả chung (`PASSED`, `FAILED`, `PENDING`), ghi chú và chữ ký giám thị.
+- **Nghiệp vụ & Tuân thủ Quy tắc:**
+  - `EXM-001`: Đánh giá tự động điều kiện dự thi dựa trên 3 tiêu chuẩn liên module bắt buộc:
+    1. Hồ sơ tuyển sinh tại module `admission` ở trạng thái đã được phê duyệt hợp lệ (`APPROVED`).
+    2. Đã hoàn thành 100% thời lượng các bài giảng lý thuyết trực tuyến tại module `learning`.
+    3. Tích lũy đủ số km (810 km) và số giờ (20 giờ) thực hành lái xe trên đường DAT tại module `training` (đối với xe ô tô).
+  - `EXM-002`: Kết quả thi được bảo toàn vĩnh viễn trong CSDL, không cho phép xóa bản ghi nhằm phục vụ thanh tra, kiểm tra và cấp giấy phép lái xe.
+  - Tự động hóa sinh mã kỳ thi `EXAM-CATEGORY-YYYYMMDD-XXX` và số báo danh `SBD-CATEGORY-XXX`.
+  - Tự động tổng kết kết quả thi chung: Đạt khi và chỉ khi vượt qua tất cả các phần thi bắt buộc tương ứng theo từng hạng xe.
+- **REST API (`/api/v1/examination`):**
+  - `GET /api/v1/examination/sessions`: Danh sách kỳ thi sát hạch (Public).
+  - `GET /api/v1/examination/sessions/{id}`: Chi tiết kỳ thi.
+  - `POST /api/v1/examination/sessions`: Tạo kỳ thi mới (Role `ADMIN`, `MANAGER`).
+  - `GET /api/v1/examination/eligibility/check`: Tự động thẩm định điều kiện dự thi của học viên (EXM-001).
+  - `POST /api/v1/examination/sessions/{id}/register`: Đăng ký thí sinh vào kỳ thi (Tự động cấp SBD & gán trạng thái QUALIFIED/DISQUALIFIED).
+  - `GET /api/v1/examination/sessions/{id}/candidates`: Danh sách thí sinh & SBD trong kỳ thi.
+  - `POST /api/v1/examination/candidates/{candidateId}/score`: Ghi nhận điểm 4 môn sát hạch (Role `EXAMINER`, `ADMIN`).
+  - `GET /api/v1/examination/candidates/{candidateId}/result`: Tra cứu kết quả thi của thí sinh.
+  - `GET /api/v1/examination/my-results`: Học viên tra cứu lịch sử và kết quả thi sát hạch cá nhân.
+- **Frontend (React 19 + TypeScript):**
+  - Xây dựng types `types/examination.ts` và services `examinationService.ts`.
+  - Trang Xét duyệt điều kiện dự thi (`EligibilityCheckPage.tsx`): Bảng điều khiển trực quan thẩm định 3 tiêu chuẩn, chỉ dẫn khắc phục tiêu chí còn thiếu.
+  - Trang Danh sách kỳ thi sát hạch (`ExamSessionsPage.tsx`): Danh mục kỳ thi, modal tạo kỳ thi mới cho Quản lý/Admin, nút Đăng ký dự thi.
+  - Trang Bảng điểm sát hạch (`ExamGradingPage.tsx`): Dành cho Sát hạch viên chấm điểm 4 môn, tự động tính Pass/Fail, nhập nhận xét hội đồng thi.
+  - Trang Kết quả thi cá nhân (`MyExamResultsPage.tsx`): Tra cứu SBD và điểm thi chi tiết của học viên.
+- **Kiểm thử:**
+  - 12 unit và integration tests mới (`EligibilityServiceTest`, `ExaminationServiceTest`, `ExaminationControllerTest`).
+  - Toàn bộ 50/50 tests hệ thống đạt tỷ lệ 100% Passed.
+
 ## [0.4.0] — 2026-10-23
 
 ### Học trực tuyến, Đào tạo thực hành & Giám sát DAT (Phase 3 — Learning & Training)
