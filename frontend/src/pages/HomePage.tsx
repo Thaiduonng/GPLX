@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../features/auth/AuthContext';
 import { healthService } from '../services/healthService';
 import type { HealthStatus } from '../types/health';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
+  const { user, isAuthenticated } = useAuth();
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +36,45 @@ export default function HomePage() {
           Giải pháp công nghệ hiện đại phục vụ quản lý toàn diện quy trình tuyển sinh,
           hồ sơ điện tử, lịch đào tạo thực hành và tổ chức sát hạch cấp giấy phép lái xe các hạng.
         </p>
+
+        {isAuthenticated && user ? (
+          <div style={{ marginTop: '1.25rem', padding: '1rem', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+            <h4 style={{ color: '#1e40af', marginBottom: '0.25rem' }}>👋 Xin chào, {user.fullName || user.username}!</h4>
+            <p style={{ fontSize: '0.9rem', color: '#1e3a8a', margin: 0 }}>
+              Bạn đang đăng nhập với vai trò: <strong>{user.roles?.join(', ')}</strong>. Tài khoản của bạn đã được xác thực an toàn qua Spring Security 7 JWT.
+            </p>
+          </div>
+        ) : (
+          <div style={{ marginTop: '1.25rem', display: 'flex', gap: '0.75rem' }}>
+            <Link
+              to="/login"
+              style={{
+                backgroundColor: '#2563eb',
+                color: 'white',
+                padding: '0.6rem 1.25rem',
+                borderRadius: '6px',
+                fontWeight: 600,
+                fontSize: '0.95rem',
+              }}
+            >
+              Đăng nhập ngay
+            </Link>
+            <Link
+              to="/register"
+              style={{
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                padding: '0.6rem 1.25rem',
+                borderRadius: '6px',
+                fontWeight: 600,
+                fontSize: '0.95rem',
+                border: '1px solid #d1d5db',
+              }}
+            >
+              Tạo tài khoản học viên
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Trạng thái kết nối Backend */}
@@ -80,32 +122,32 @@ export default function HomePage() {
         <div className={styles.grid}>
           <div className={styles.moduleCard}>
             <div className={styles.moduleIcon}>🔐</div>
-            <h4>Identity</h4>
-            <p>Xác thực, phân quyền RBAC, quản lý tài khoản người dùng và vai trò bảo mật.</p>
+            <h4>Identity (Phase 1 ✅)</h4>
+            <p>Xác thực JWT Stateless, phân quyền RBAC, quản lý tài khoản người dùng, mã hóa mật khẩu BCrypt.</p>
           </div>
           <div className={styles.moduleCard}>
             <div className={styles.moduleIcon}>📋</div>
-            <h4>Admission</h4>
-            <p>Tuyển sinh khóa học, tiếp nhận hồ sơ điện tử và quy trình thẩm định hồ sơ.</p>
+            <h4>Admission (Phase 2)</h4>
+            <p>Tuyển sinh khóa học, tiếp nhận hồ sơ điện tử và quy trình thẩm định hồ sơ theo hạng bằng.</p>
           </div>
           <div className={styles.moduleCard}>
             <div className={styles.moduleIcon}>📚</div>
-            <h4>Learning</h4>
+            <h4>Learning (Phase 3)</h4>
             <p>Bài học lý thuyết trực tuyến, tiến độ học tập và ngân hàng câu hỏi ôn luyện.</p>
           </div>
           <div className={styles.moduleCard}>
             <div className={styles.moduleIcon}>🏫</div>
-            <h4>Training</h4>
-            <p>Lập lịch học thực hành, xếp lớp, điểm danh và quản lý thời lượng lái xe.</p>
+            <h4>Training (Phase 3)</h4>
+            <p>Lập lịch học thực hành, xếp lớp, điểm danh và quản lý thời lượng lái xe DAT.</p>
           </div>
           <div className={styles.moduleCard}>
             <div className={styles.moduleIcon}>📝</div>
-            <h4>Examination</h4>
+            <h4>Examination (Phase 4)</h4>
             <p>Thẩm định điều kiện dự thi, quản lý kỳ thi và ghi nhận biên bản kết quả sát hạch.</p>
           </div>
           <div className={styles.moduleCard}>
             <div className={styles.moduleIcon}>💰</div>
-            <h4>Finance & Fleet</h4>
+            <h4>Finance & Fleet (Phase 5)</h4>
             <p>Quản lý biểu học phí, công nợ và điều phối đội xe tập lái an toàn.</p>
           </div>
         </div>
