@@ -85,8 +85,9 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P6-01`** | Dashboard Thống kê đào tạo & Doanh thu học phí | TSK-P5-05 | `TODO` | Biểu đồ tỷ lệ đỗ sát hạch, tổng km DAT tích lũy theo tháng, tỷ lệ hồ sơ tuyển sinh mới |
-| **`TSK-P6-02`** | Audit Log: Giám sát vết thao tác nghiệp vụ nhạy cảm | TSK-P5-05 | `TODO` | Ghi vết sửa điểm sát hạch, duyệt hồ sơ, thanh toán học phí phục vụ thanh tra |
+| **`TSK-P6-01`** | Dashboard Thống kê đào tạo, Tỷ lệ đỗ & Doanh thu học phí | TSK-P5-05 | `DONE` | Tổng hợp KPI thời gian thực: học viên, hồ sơ, tỷ lệ đỗ, doanh thu học phí, quãng đường DAT, xe khả dụng, thống kê chi tiết theo hạng GPLX |
+| **`TSK-P6-02`** | Audit Log: Giám sát vết thao tác nghiệp vụ nhạy cảm | TSK-P5-05 | `DONE` | Bảng `audit_logs` (Flyway V7), ghi nhận người thực hiện, thời gian, module, mã đối tượng, IP và chi tiết thay đổi; hỗ trợ tra cứu lọc theo phân hệ/hành động |
+| **`TSK-P6-03`** | Kiểm thử Tự động Toàn diện Phase 6 | TSK-P6-01..02| `DONE` | 7 tests mới (`ReportingServiceTest`, `ReportingControllerTest`); Tổng: 66/66 tests PASS 100% |
 
 ---
 
@@ -94,5 +95,5 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P7-01`** | Hoàn thiện Docker Compose Production & Multi-stage Build | TSK-P6-02 | `TODO` | Dockerfile backend & frontend tối ưu, kiểm thử khởi chạy 1-click từ máy trắng |
+| **`TSK-P7-01`** | Hoàn thiện Docker Compose Production & Multi-stage Build | TSK-P6-03 | `TODO` | Dockerfile backend & frontend tối ưu, kiểm thử khởi chạy 1-click từ máy trắng |
 | **`TSK-P7-02`** | Merge nhánh main & Release v1.0.0 | TSK-P7-01 | `TODO` | Merge `--no-ff` từ develop vào main, gắn Git tag `v1.0.0` |
