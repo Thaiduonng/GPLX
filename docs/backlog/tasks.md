@@ -36,12 +36,23 @@
 
 ---
 
-## Danh mục Tasks — Phase 2: Admission (Kế hoạch tiếp theo)
+## Danh mục Tasks — Phase 2: Admission (Tuyển sinh & Tiếp nhận hồ sơ điện tử)
 
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
-| **`TSK-P2-01`** | CSDL & Entity Danh mục Hạng GPLX (`license_categories`) | TSK-P1-01 | `TODO` | Flyway V3, Category entity (A1, A, B1, B, C1, C,... cấu hình động) |
-| **`TSK-P2-02`** | CSDL & Entity Hồ sơ Tuyển sinh (`applications`, `documents`) | TSK-P2-01 | `TODO` | Flyway V3, Application entity, trạng thái hồ sơ (ADM-001) |
-| **`TSK-P2-03`** | API Nộp hồ sơ tuyển sinh điện tử (`/applications/submit`) | TSK-P2-02 | `TODO` | DTO validation, kiểm tra điều kiện hồ sơ, upload tài liệu CCCD/sức khỏe |
-| **`TSK-P2-04`** | API Thẩm định & Phê duyệt hồ sơ (`/applications/{id}/review`) | TSK-P2-03 | `TODO` | Duyệt/từ chối/yêu cầu bổ sung kèm lý do (ADM-002, ADM-003), RBAC STAFF/ADMIN |
-| **`TSK-P2-05`** | Giao diện Đăng ký khóa học & Nộp hồ sơ Frontend | TSK-P2-03 | `TODO` | Form nộp hồ sơ, chọn hạng bằng lái, upload tài liệu, tra cứu trạng thái |
+| **`TSK-P2-01`** | CSDL & Entity Danh mục Hạng GPLX (`license_categories`) | TSK-P1-01 | `DONE` | Flyway V3, bảng `license_categories`, seed 6 hạng chuẩn A1, A, B1, B, C1, C cấu hình động |
+| **`TSK-P2-02`** | CSDL & Entity Hồ sơ Tuyển sinh (`applications`, `documents`, `status_history`) | TSK-P2-01 | `DONE` | Flyway V3, entities `AdmissionApplication`, `AdmissionDocument`, `ApplicationStatusHistory`, optimistic locking (`@Version`) |
+| **`TSK-P2-03`** | API Nộp hồ sơ điện tử (`POST /api/v1/admissions`) | TSK-P2-02 | `DONE` | Sinh mã `APP-CODE`, kiểm tra tuổi tối thiểu (ADM-004), chống nộp trùng lặp (ADM-005), lưu tài liệu |
+| **`TSK-P2-04`** | API Thẩm định & Xét duyệt hồ sơ (`POST /api/v1/admissions/{id}/review`) | TSK-P2-03 | `DONE` | Máy trạng thái (ADM-001), bắt buộc lý do khi từ chối/bổ sung (ADM-002), cấm hoàn tác hồ sơ đã duyệt (ADM-003) |
+| **`TSK-P2-05`** | API Tra cứu & Phân trang hồ sơ | TSK-P2-03 | `DONE` | `GET /api/v1/admissions/my-applications`, `GET /api/v1/admissions/{id}`, `GET /api/v1/admissions?status=...` có phân trang |
+| **`TSK-P2-06`** | Giao diện Frontend Nộp hồ sơ, Danh sách hồ sơ & Quản lý thẩm định | TSK-P2-03, 04 | `DONE` | `SubmitApplicationPage`, `MyApplicationsPage`, `ApplicationManagementPage`, tích hợp role-based navigation |
+| **`TSK-P2-07`** | Kiểm thử Tự động Toàn diện Phase 2 | TSK-P2-03, 04 | `DONE` | 11 tests cho Admission (6 unit tests, 5 integration tests) + 15 tests Phase 1; Tổng: 26/26 tests PASS |
+
+---
+
+## Danh mục Tasks — Phase 3: Learning & Training (Kế hoạch tiếp theo)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P3-01`** | Module Learning: Ngân hàng câu hỏi lý thuyết & Bài học online | TSK-P2-04 | `TODO` | Ngân hàng 600 câu hỏi, bộ đề thi thử, theo dõi tiến độ bài giảng lý thuyết (LRN-001, LRN-002) |
+| **`TSK-P3-02`** | Module Training: Lập lịch học, Lớp học, Điểm danh & Thực hành cabin/DAT | TSK-P2-04 | `TODO` | Quản lý lớp, chống xung đột lịch học (TRN-001), điểm danh (TRN-002), ghi nhận số km/giờ thực hành DAT |

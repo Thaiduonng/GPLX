@@ -2,6 +2,39 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.0] — 2026-10-23
+
+### Tuyển sinh & Tiếp nhận Hồ sơ điện tử (Phase 2 — Admission Module)
+- **Cơ sở dữ liệu & Entity:**
+  - Bổ sung Flyway migration `V3__create_admission_tables.sql` tạo 4 bảng: `license_categories`, `applications`, `application_documents`, `application_status_history`.
+  - Hạt giống (seed) dữ liệu 6 hạng GPLX chuẩn: A1, A, B1, B, C1, C với cấu hình động về độ tuổi tối thiểu và mức học phí.
+  - Xây dựng JPA Entity: `LicenseCategory`, `AdmissionApplication`, `AdmissionDocument`, `ApplicationStatusHistory`.
+  - Hỗ trợ Optimistic Locking qua `@Version private Long version` chống Lost Updates khi thẩm định đồng thời.
+  - Xây dựng JPA Repository: `LicenseCategoryRepository`, `AdmissionApplicationRepository`, `AdmissionDocumentRepository`, `ApplicationStatusHistoryRepository`.
+- **Nghiệp vụ & Tuân thủ Quy tắc:**
+  - `ADM-001`: Triển khai máy trạng thái tiếp nhận và xét duyệt (`SUBMITTED` ➔ `UNDER_REVIEW` ➔ `APPROVED` / `REJECTED` / `SUPPLEMENT_REQUIRED`).
+  - `ADM-002`: Bắt buộc ghi nhận lý do cụ thể khi từ chối hoặc yêu cầu bổ sung hồ sơ.
+  - `ADM-003`: Cấm hoàn tác hoặc thay đổi trạng thái hồ sơ đã được phê duyệt (`APPROVED`).
+  - `ADM-004`: Kiểm tra độ tuổi tối thiểu của học viên căn cứ theo ngày sinh và hạng bằng đăng ký.
+  - `ADM-005`: Chống nộp trùng lặp hồ sơ đang trong quá trình tiếp nhận/chờ duyệt theo số CCCD.
+- **REST API (`/api/v1`):**
+  - `GET /api/v1/license-categories`: Danh mục hạng bằng lái xe công khai (Public).
+  - `GET /api/v1/license-categories/{id}`: Chi tiết hạng bằng lái xe.
+  - `POST /api/v1/admissions`: Học viên nộp hồ sơ điện tử đính kèm tài liệu số hóa (Authenticated).
+  - `GET /api/v1/admissions/my-applications`: Học viên tra cứu danh sách hồ sơ của chính mình (Resource Ownership).
+  - `GET /api/v1/admissions/{id}`: Xem chi tiết hồ sơ, tài liệu và lịch sử thẩm định.
+  - `GET /api/v1/admissions`: Cán bộ tuyển sinh (`STAFF`, `ADMIN`, `MANAGER`) tra cứu danh sách hồ sơ có phân trang và lọc theo trạng thái.
+  - `POST /api/v1/admissions/{id}/review`: Cán bộ thực hiện thẩm định, ghi nhận ghi chú/lý do và cập nhật trạng thái.
+- **Frontend (React 19 + TypeScript):**
+  - Xây dựng Service `admissionService.ts` với đầy đủ kiểu dữ liệu TypeScript trong `types/admission.ts`.
+  - Trang Nộp hồ sơ (`SubmitApplicationPage.tsx`): Dropdown chọn hạng bằng hiển thị học phí và điều kiện tuổi, form kiểm tra tính hợp lệ của CCCD/ngày sinh, đính kèm tài liệu số hóa.
+  - Trang Hồ sơ của tôi (`MyApplicationsPage.tsx`): Danh sách hồ sơ đã nộp, trạng thái gắn nhãn màu sắc trực quan, modal xem chi tiết tài liệu và nhật ký thẩm định.
+  - Trang Quản lý & Thẩm định (`ApplicationManagementPage.tsx`): Bảng hồ sơ cho cán bộ tuyển sinh, bộ lọc trạng thái, popup thẩm định xét duyệt tuân thủ ADM-002.
+  - Cập nhật điều hướng `MainLayout.tsx` phân tách rõ quyền hạn học viên và cán bộ (`isStaffOrAdmin`).
+- **Kiểm thử:**
+  - 11 test cases mới cho module Admission (6 unit tests `AdmissionServiceTest`, 5 integration tests `AdmissionControllerTest`).
+  - Toàn bộ 26/26 test cases của hệ thống đạt kết quả 100% Passed.
+
 ## [0.2.0] — 2026-10-23
 
 ### Xác thực & Phân quyền (Phase 1 — Identity & Authentication)
@@ -48,7 +81,3 @@ Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhậ
   - Xây dựng `MainLayout.tsx` chuẩn responsive hỗ trợ tiếng Việt.
   - Xây dựng `HomePage.tsx` tích hợp gọi Health Check API và hiển thị bản đồ các module nghiệp vụ.
   - Xây dựng Axios client wrapper và type definitions `ApiResponse<T>`, `HealthStatus`.
-- **DevOps & Môi trường:**
-  - Thiết lập `docker-compose.yml` v2 đồng bộ MySQL 8.4 LTS, Backend và Frontend.
-  - Viết `backend.Dockerfile` đa tầng (multi-stage) và `frontend.Dockerfile`.
-  - Cung cấp `.env.example`, `.gitignore`, `.editorconfig`, `.gitattributes`, `README.md`.
