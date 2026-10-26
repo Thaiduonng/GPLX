@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,10 +15,11 @@ import java.util.Arrays;
 
 /**
  * Cấu hình tự động thực thi Flyway Database Migration.
- * Đảm bảo toàn bộ migration script (V1 đến V7) được áp dụng trước khi
+ * Đảm bảo toàn bộ migration script được áp dụng trước khi
  * Hibernate EntityManagerFactory tiến hành schema validation.
  */
 @Configuration
+@ConditionalOnProperty(name = "spring.flyway.enabled", havingValue = "true", matchIfMissing = true)
 public class FlywayConfig {
 
     private static final Logger log = LoggerFactory.getLogger(FlywayConfig.class);
@@ -46,7 +48,7 @@ public class FlywayConfig {
     @Bean
     public static BeanFactoryPostProcessor dependsOnFlywayPostProcessor() {
         return beanFactory -> {
-            if (beanFactory.containsBeanDefinition("entityManagerFactory")) {
+            if (beanFactory.containsBeanDefinition("entityManagerFactory") && beanFactory.containsBeanDefinition("flyway")) {
                 BeanDefinition def = beanFactory.getBeanDefinition("entityManagerFactory");
                 String[] current = def.getDependsOn();
                 if (current == null) {

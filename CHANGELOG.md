@@ -2,6 +2,23 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.8.0] — 2026-10-26
+
+### Kiểm Thử Toàn Diện, Xác Thực Phân Quyền & Nghiệm Thu Hệ Thống (Giai đoạn 6 — Phase 15)
+- **Kiểm Thử Toàn Diện Hệ Thống (100% BUILD SUCCESS):**
+  - Chạy toàn bộ test suites backend: **76/76 unit & integration tests PASS 100%** (bao gồm xác thực Spring Boot context, Authentication, Admission, Examination, Training, Support modules và Theory learning).
+  - Chuẩn hóa `FlywayConfig` với điều kiện `@ConditionalOnProperty(name = "spring.flyway.enabled", havingValue = "true", matchIfMissing = true)` tương thích mượt mà giữa môi trường Production MySQL 8.4 LTS và Test in-memory H2.
+- **Xác Thực Bảo Mật & Phân Quyền Đa Tầng (RBAC End-to-End):**
+  - Kiểm chứng thành công kịch bản bảo vệ dữ liệu nhạy cảm: Học viên (`ROLE_STUDENT`) bị chặn truy cập API quản trị bằng HTTP 403 Forbidden.
+  - Quản trị viên (`ROLE_ADMIN`, `ROLE_STAFF`) truy cập đầy đủ các endpoint cấu hình đề thi và phân trang ngân hàng câu hỏi bằng HTTP 200 OK.
+- **Xác Thực Đóng Gói Production Container:**
+  - Biên dịch Vite React 19 + TypeScript strict bundle 0 lỗi; container `gplx-frontend` phục vụ tại cổng 3000.
+  - Multi-stage build Maven Java 21 container `gplx-backend` thành công, phục vụ tại cổng 8088 (8080 internal).
+  - Cả 3 containers (`gplx-frontend`, `gplx-backend`, `gplx-mysql`) hoạt động ổn định ở trạng thái `Up (healthy)`.
+- **Hoàn Thiện Tài Liệu Hướng Dẫn & Nghiệm Thu:**
+  - Khởi tạo `docs/guides/theory-learning-and-exam-system-guide.md` hướng dẫn sử dụng chi tiết 6 phân khu chức năng và đối soát toàn diện 14 tiêu chí nghiệm thu theo Master Prompt (ĐẠT 14/14 tiêu chí).
+  - Cập nhật Task Backlog `docs/backlog/tasks.md` ghi nhận hoàn thành trọn vẹn Phase 15 (Giai đoạn 6).
+
 ## [1.7.0] — 2026-10-26
 
 ### Quản Trị Dữ Liệu Ngân Hàng Câu Hỏi & Cấu Hình Đề Thi GPLX (Giai đoạn 5 — Phase 14)
