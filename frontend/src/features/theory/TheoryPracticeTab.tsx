@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { learningService } from '../../services/learningService';
 import type {
   PracticeMode,
@@ -13,6 +13,11 @@ interface TheoryPracticeTabProps {
   initialMode?: PracticeMode;
 }
 
+interface QuestionAnswerState {
+  selectedAnswerId: number | null;
+  result: PracticeAnswerResult | null;
+}
+
 export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMode = 'PARALYSIS' }) => {
   const [mode, setMode] = useState<PracticeMode>(initialMode);
   const [category, setCategory] = useState<string>('B1');
@@ -23,9 +28,8 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
   const [questions, setQuestions] = useState<QuestionDetail[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  // Trạng thái câu hiện tại
-  const [selectedAnswerId, setSelectedAnswerId] = useState<number | null>(null);
-  const [answerResult, setAnswerResult] = useState<PracticeAnswerResult | null>(null);
+  // Lưu trữ trạng thái câu trả lời của từng câu hỏi trong phiên
+  const [answersMap, setAnswersMap] = useState<Record<number, QuestionAnswerState>>({});
 
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -53,8 +57,7 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
     setActiveSession(null);
     setQuestions([]);
     setCurrentIndex(0);
-    setSelectedAnswerId(null);
-    setAnswerResult(null);
+    setAnswersMap({});
 
     try {
       const session = await learningService.startPractice({
@@ -74,8 +77,29 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
     }
   };
 
+  const currentQuestion: QuestionDetail | undefined = questions[currentIndex];
+  const currentAnsState = currentQuestion ? answersMap[currentQuestion.id] : undefined;
+  const currentState: QuestionAnswerState = {
+    selectedAnswerId: currentAnsState?.selectedAnswerId ?? null,
+    result: currentAnsState?.result ?? null,
+  };
+
+  const handleSelectAnswer = (ansId: number) => {
+    if (!currentQuestion || currentState.result !== null) return;
+    setAnswersMap((prev) => {
+      const existing = prev[currentQuestion.id];
+      return {
+        ...prev,
+        [currentQuestion.id]: {
+          selectedAnswerId: ansId,
+          result: existing?.result ?? null,
+        },
+      };
+    });
+  };
+
   const handleCheckAnswer = async () => {
-    if (!activeSession || !currentQuestion || selectedAnswerId === null) return;
+    if (!activeSession || !currentQuestion || currentState.selectedAnswerId === null) return;
 
     setSubmitting(true);
     setErrorMsg('');
@@ -83,9 +107,17 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
       const res = await learningService.submitPracticeAnswer(
         activeSession.sessionCode,
         currentQuestion.id,
-        selectedAnswerId
+        currentState.selectedAnswerId
       );
-      setAnswerResult(res);
+
+      setAnswersMap((prev) => ({
+        ...prev,
+        [currentQuestion.id]: {
+          selectedAnswerId: currentState.selectedAnswerId,
+          result: res,
+        },
+      }));
+
       setActiveSession((prev) =>
         prev
           ? {
@@ -102,21 +134,17 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
     }
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = useCallback(() => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
-      setSelectedAnswerId(null);
-      setAnswerResult(null);
     }
-  };
+  }, [currentIndex, questions.length]);
 
-  const handlePrevQuestion = () => {
+  const handlePrevQuestion = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
-      setSelectedAnswerId(null);
-      setAnswerResult(null);
     }
-  };
+  }, [currentIndex]);
 
   const handleCompleteSession = async () => {
     if (!activeSession) return;
@@ -128,7 +156,48 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
     }
   };
 
-  const currentQuestion = questions[currentIndex];
+  // Keyboard Shortcuts: ArrowLeft, ArrowRight, Numbers 1-4, Enter
+  useEffect(() => {
+    if (!activeSession || activeSession.status === 'COMPLETED' || !currentQuestion) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextQuestion();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevQuestion();
+      } else if (['1', '2', '3', '4'].includes(e.key)) {
+        const optIdx = parseInt(e.key, 10) - 1;
+        if (currentQuestion.answers && currentQuestion.answers[optIdx]) {
+          handleSelectAnswer(currentQuestion.answers[optIdx].id);
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (!currentState.result && currentState.selectedAnswerId !== null) {
+          handleCheckAnswer();
+        } else if (currentState.result && currentIndex < questions.length - 1) {
+          handleNextQuestion();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeSession, currentQuestion, currentState, currentIndex, questions.length, handleNextQuestion, handlePrevQuestion]);
+
+  // Thống kê phiên
+  const correctCount = Object.values(answersMap).filter((a) => a?.result?.isCorrect).length;
+  const incorrectQuestions = questions.filter((q) => {
+    const res = answersMap[q.id]?.result;
+    return Boolean(res && !res.isCorrect);
+  });
+  const incorrectCount = Object.values(answersMap).filter((a) => {
+    const res = a?.result;
+    return Boolean(res && !res.isCorrect);
+  }).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -148,10 +217,10 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
         >
           <div>
             <h3 style={{ margin: '0 0 0.35rem 0', color: '#1e293b' }}>
-              🎯 Tùy chọn 8 Chế độ Rèn luyện Thực hành
+              🎯 Tùy chọn 8 Chế độ Rèn luyện Thực hành Chuyên sâu
             </h3>
             <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
-              Luyện tập với chế độ phản hồi đáp án tức thời giúp khắc sâu kiến thức và nguyên tắc lái xe an toàn.
+              Luyện tập với chế độ phản hồi đáp án tức thời giúp bạn khắc sâu kiến thức và nguyên tắc lái xe an toàn.
             </p>
           </div>
 
@@ -191,8 +260,8 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
                   value={topicId?.toString() || ''}
                   onChange={(e) => setTopicId(Number(e.target.value))}
                   options={topics.map((t) => ({
-                    value: t.id.toString(),
-                    label: `Chương ${t.orderIndex}: ${t.name}`,
+                    value: String(t?.id ?? ''),
+                    label: `Chương ${t?.orderIndex ?? ''}: ${t?.name ?? ''}`,
                   }))}
                 />
               </div>
@@ -220,29 +289,63 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
 
           {errorMsg && <Alert type="danger" message={errorMsg} />}
 
+          {/* Practice Summary Box after completion */}
           {activeSession && activeSession.status === 'COMPLETED' && (
             <div
               style={{
                 background: '#ecfdf5',
                 border: '1px solid #a7f3d0',
                 borderRadius: '8px',
-                padding: '1rem',
+                padding: '1.25rem',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '0.5rem',
+                flexDirection: 'column',
+                gap: '0.75rem',
               }}
             >
-              <div>
-                <strong style={{ color: '#065f46' }}>🎉 Đã hoàn tất phiên rèn luyện!</strong>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#047857', fontSize: '0.9rem' }}>
-                  Kết quả: Trả lời đúng {activeSession.correctAnswers} / {activeSession.answeredQuestions} câu hỏi.
-                </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div>
+                  <strong style={{ color: '#065f46', fontSize: '1.1rem' }}>
+                    🎉 Đã hoàn tất phiên rèn luyện ({mode})!
+                  </strong>
+                  <p style={{ margin: '0.25rem 0 0 0', color: '#047857', fontSize: '0.95rem' }}>
+                    Trả lời đúng <strong>{correctCount}</strong> / <strong>{questions.length}</strong> câu hỏi
+                    (Đạt {questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0}%).
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <AppButton variant="secondary" size="sm" onClick={() => startPractice()}>
+                    Luyện tập lại
+                  </AppButton>
+                  <AppButton variant="primary" size="sm" onClick={() => setActiveSession(null)}>
+                    Đổi chế độ khác
+                  </AppButton>
+                </div>
               </div>
-              <AppButton variant="secondary" size="sm" onClick={() => setActiveSession(null)}>
-                Đóng kết quả
-              </AppButton>
+
+              {incorrectQuestions.length > 0 && (
+                <div style={{ borderTop: '1px dashed #6ee7b7', paddingTop: '0.75rem' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#991b1b' }}>
+                    Các câu trả lời sai cần chú ý ({incorrectQuestions.length} câu):
+                  </span>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                    {incorrectQuestions.map((iq) => (
+                      <span
+                        key={iq.id}
+                        style={{
+                          fontSize: '0.75rem',
+                          padding: '0.2rem 0.5rem',
+                          background: '#fee2e2',
+                          color: '#b91c1c',
+                          borderRadius: '4px',
+                          border: '1px solid #fca5a5',
+                        }}
+                      >
+                        Câu #{iq.questionNumber} {iq.isParalysis ? '(Liệt)' : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -253,231 +356,361 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
           </div>
         </div>
       ) : (
-        /* Active Practice Interface */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Practice Header & Status Bar */}
-          <div
-            style={{
-              background: '#ffffff',
-              borderRadius: '12px',
-              padding: '1rem 1.5rem',
-              border: '1px solid #e2e8f0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '1rem',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>🎯</span>
-              <div>
-                <span style={{ fontWeight: 600, color: '#1e293b' }}>
-                  Câu {currentIndex + 1} / {questions.length}
-                </span>
-                <span style={{ color: '#64748b', fontSize: '0.85rem', marginLeft: '0.75rem' }}>
-                  Đúng: <strong style={{ color: '#10b981' }}>{activeSession.correctAnswers}</strong> | Sai: <strong style={{ color: '#ef4444' }}>{activeSession.answeredQuestions - activeSession.correctAnswers}</strong>
-                </span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <AppButton variant="secondary" size="sm" onClick={handleCompleteSession}>
-                Kết thúc phiên
-              </AppButton>
-            </div>
-          </div>
-
-          {/* Current Question Card */}
-          {currentQuestion && (
+        /* ACTIVE PRACTICE INTERFACE */
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.5rem', alignItems: 'start' }}>
+          {/* Main Question Practice Card */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Practice Header & Status Bar */}
             <div
               style={{
                 background: '#ffffff',
                 borderRadius: '12px',
-                padding: '1.75rem',
-                border: currentQuestion.isParalysis ? '1px solid #fca5a5' : '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                padding: '1rem 1.5rem',
+                border: '1px solid #e2e8f0',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '1.25rem',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '1rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    background: '#1e3a8a',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '6px',
-                  }}
-                >
-                  Câu số {currentQuestion.questionNumber}
-                </span>
-                {currentQuestion.isParalysis && (
-                  <span
-                    style={{
-                      background: '#fee2e2',
-                      color: '#b91c1c',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '6px',
-                      border: '1px solid #fca5a5',
-                    }}
-                  >
-                    ⚠️ CÂU ĐIỂM LIỆT
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ fontSize: '1.3rem' }}>🎯</span>
+                <div>
+                  <span style={{ fontWeight: 700, color: '#1e293b' }}>
+                    Câu {currentIndex + 1} / {questions.length}
                   </span>
-                )}
-                {currentQuestion.topicName && (
-                  <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                    Chủ đề: {currentQuestion.topicName}
+                  <span style={{ color: '#64748b', fontSize: '0.85rem', marginLeft: '0.75rem' }}>
+                    Đúng: <strong style={{ color: '#10b981' }}>{correctCount}</strong> | Sai:{' '}
+                    <strong style={{ color: '#ef4444' }}>{incorrectCount}</strong>
                   </span>
-                )}
-              </div>
-
-              <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1e293b', lineHeight: '1.6' }}>
-                {currentQuestion.content}
-              </div>
-
-              {currentQuestion.imageUrl && (
-                <div style={{ maxWidth: '400px' }}>
-                  <img
-                    src={currentQuestion.imageUrl}
-                    alt="Hình ảnh câu hỏi"
-                    style={{ width: '100%', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                  />
                 </div>
-              )}
-
-              {/* Options */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {currentQuestion.answers.map((ans, optIdx) => {
-                  const isSelected = selectedAnswerId === ans.id;
-                  let bg = '#ffffff';
-                  let border = '1px solid #e2e8f0';
-
-                  if (answerResult) {
-                    if (ans.id === answerResult.correctAnswerId) {
-                      bg = '#ecfdf5';
-                      border = '2px solid #10b981';
-                    } else if (isSelected && !answerResult.isCorrect) {
-                      bg = '#fef2f2';
-                      border = '2px solid #ef4444';
-                    }
-                  } else if (isSelected) {
-                    bg = '#eff6ff';
-                    border = '2px solid #3b82f6';
-                  }
-
-                  return (
-                    <label
-                      key={ans.id}
-                      style={{
-                        padding: '0.9rem 1.1rem',
-                        borderRadius: '8px',
-                        border,
-                        background: bg,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        cursor: answerResult ? 'default' : 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        name={`question-${currentQuestion.id}`}
-                        value={ans.id}
-                        checked={isSelected}
-                        disabled={answerResult !== null}
-                        onChange={() => setSelectedAnswerId(ans.id)}
-                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                      />
-                      <span style={{ fontWeight: 700, color: '#475569' }}>
-                        {String.fromCharCode(65 + optIdx)}.
-                      </span>
-                      <span style={{ flex: 1, fontSize: '0.95rem', color: '#1e293b' }}>
-                        {ans.answerText}
-                      </span>
-                      {answerResult && ans.id === answerResult.correctAnswerId && (
-                        <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>
-                          ✓ Chính xác
-                        </span>
-                      )}
-                      {answerResult && isSelected && !answerResult.isCorrect && (
-                        <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.85rem' }}>
-                          ✗ Chưa đúng
-                        </span>
-                      )}
-                    </label>
-                  );
-                })}
               </div>
 
-              {/* Instant Feedback Explanation */}
-              {answerResult && (
-                <div
-                  style={{
-                    background: answerResult.isCorrect ? '#f0fdf4' : '#fff1f2',
-                    border: answerResult.isCorrect ? '1px solid #bbf7d0' : '1px solid #fecdd3',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <div style={{ fontWeight: 700, color: answerResult.isCorrect ? '#166534' : '#991b1b' }}>
-                    {answerResult.isCorrect ? '🎉 Bạn đã trả lời đúng!' : '⚠️ Câu trả lời chưa chính xác.'}
-                  </div>
-                  {answerResult.explanation && (
-                    <div style={{ fontSize: '0.9rem', color: '#334155' }}>
-                      <strong>Giải thích: </strong> {answerResult.explanation}
-                    </div>
-                  )}
-                  {answerResult.legalReference && (
-                    <div style={{ fontSize: '0.85rem', color: '#475569' }}>
-                      <strong>Căn cứ: </strong> {answerResult.legalReference}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                <AppButton
-                  variant="secondary"
-                  size="sm"
-                  onClick={handlePrevQuestion}
-                  disabled={currentIndex === 0}
-                >
-                  ← Câu trước
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <AppButton variant="secondary" size="sm" onClick={handleCompleteSession}>
+                  Kết thúc phiên
                 </AppButton>
-
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  {!answerResult ? (
-                    <AppButton
-                      variant="primary"
-                      onClick={handleCheckAnswer}
-                      disabled={selectedAnswerId === null || submitting}
-                    >
-                      {submitting ? 'Đang kiểm tra...' : 'Kiểm tra đáp án'}
-                    </AppButton>
-                  ) : (
-                    <AppButton
-                      variant="primary"
-                      onClick={handleNextQuestion}
-                      disabled={currentIndex === questions.length - 1}
-                    >
-                      Câu tiếp theo →
-                    </AppButton>
-                  )}
-                </div>
               </div>
             </div>
-          )}
+
+            {/* Current Question Card */}
+            {currentQuestion && (
+              <div
+                style={{
+                  background: '#ffffff',
+                  borderRadius: '12px',
+                  padding: '1.75rem',
+                  border: currentQuestion.isParalysis ? '2px solid #fca5a5' : '1px solid #e2e8f0',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.25rem',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      background: '#1e3a8a',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    Câu số {currentQuestion.questionNumber}
+                  </span>
+                  {currentQuestion.isParalysis && (
+                    <span
+                      style={{
+                        background: '#fee2e2',
+                        color: '#b91c1c',
+                        fontWeight: 700,
+                        fontSize: '0.8rem',
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '6px',
+                        border: '1px solid #fca5a5',
+                      }}
+                    >
+                      ⚠️ CÂU ĐIỂM LIỆT (BẮT BUỘC ĐÚNG)
+                    </span>
+                  )}
+                  {currentQuestion.topicName && (
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                      Chương: {currentQuestion.topicName}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ fontSize: '1.15rem', fontWeight: 600, color: '#1e293b', lineHeight: '1.65' }}>
+                  {currentQuestion.content}
+                </div>
+
+                {currentQuestion.imageUrl && (
+                  <div style={{ maxWidth: '440px' }}>
+                    <img
+                      src={currentQuestion.imageUrl}
+                      alt="Hình ảnh câu hỏi"
+                      style={{ width: '100%', borderRadius: '8px', border: '1px solid #e2e8f0', objectFit: 'contain' }}
+                    />
+                  </div>
+                )}
+
+                {/* Options */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {currentQuestion.answers.map((ans, optIdx) => {
+                    const isSelected = currentState.selectedAnswerId === ans.id;
+                    const res = currentState.result;
+
+                    let bg = '#ffffff';
+                    let border = '1px solid #e2e8f0';
+
+                    if (res) {
+                      if (ans.id === res.correctAnswerId) {
+                        bg = '#ecfdf5';
+                        border = '2px solid #10b981';
+                      } else if (isSelected && !res.isCorrect) {
+                        bg = '#fef2f2';
+                        border = '2px solid #ef4444';
+                      }
+                    } else if (isSelected) {
+                      bg = '#eff6ff';
+                      border = '2px solid #3b82f6';
+                    }
+
+                    return (
+                      <div
+                        key={ans.id}
+                        onClick={() => handleSelectAnswer(ans.id)}
+                        style={{
+                          padding: '1rem 1.15rem',
+                          borderRadius: '8px',
+                          border,
+                          background: bg,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.85rem',
+                          cursor: res ? 'default' : 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '50%',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            background:
+                              res && ans.id === res.correctAnswerId
+                                ? '#10b981'
+                                : isSelected
+                                ? '#3b82f6'
+                                : '#f1f5f9',
+                            color:
+                              (res && ans.id === res.correctAnswerId) || isSelected
+                                ? '#ffffff'
+                                : '#64748b',
+                          }}
+                        >
+                          {String.fromCharCode(65 + optIdx)}
+                        </span>
+                        <span style={{ flex: 1, fontSize: '0.95rem', color: '#1e293b' }}>
+                          {ans.answerText}
+                        </span>
+                        {res && ans.id === res.correctAnswerId && (
+                          <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>
+                            ✓ Chính xác
+                          </span>
+                        )}
+                        {res && isSelected && !res.isCorrect && (
+                          <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.85rem' }}>
+                            ✗ Chưa đúng
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Instant Feedback Explanation */}
+                {currentState.result && (
+                  <div
+                    style={{
+                      background: currentState.result.isCorrect ? '#f0fdf4' : '#fff1f2',
+                      border: currentState.result.isCorrect ? '1px solid #bbf7d0' : '1px solid #fecdd3',
+                      borderRadius: '8px',
+                      padding: '1rem 1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, color: currentState.result.isCorrect ? '#166534' : '#991b1b' }}>
+                      {currentState.result.isCorrect ? '🎉 Bạn đã trả lời đúng!' : '⚠️ Câu trả lời chưa chính xác.'}
+                    </div>
+                    {currentState.result.explanation && (
+                      <div style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.6 }}>
+                        <strong>Giải thích: </strong> {currentState.result.explanation}
+                      </div>
+                    )}
+                    {currentState.result.legalReference && (
+                      <div style={{ fontSize: '0.85rem', color: '#475569' }}>
+                        <strong>Căn cứ: </strong> {currentState.result.legalReference}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                  <AppButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={handlePrevQuestion}
+                    disabled={currentIndex === 0}
+                  >
+                    ← Câu trước (Phím ←)
+                  </AppButton>
+
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    {!currentState.result ? (
+                      <AppButton
+                        variant="primary"
+                        onClick={handleCheckAnswer}
+                        disabled={currentState.selectedAnswerId === null || submitting}
+                      >
+                        {submitting ? 'Đang kiểm tra...' : 'Kiểm tra đáp án (Enter)'}
+                      </AppButton>
+                    ) : (
+                      <AppButton
+                        variant="primary"
+                        onClick={handleNextQuestion}
+                        disabled={currentIndex === questions.length - 1}
+                      >
+                        Câu tiếp theo → (Phím →)
+                      </AppButton>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Question Grid Navigator (Right Sidebar) */}
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '1.25rem',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              maxHeight: '620px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
+                Lưới câu hỏi ({questions.length})
+              </span>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                Đang ở câu {currentIndex + 1}
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(5, 1fr)',
+                gap: '0.4rem',
+                overflowY: 'auto',
+                paddingRight: '4px',
+              }}
+            >
+              {questions.map((q, idx) => {
+                const ansState = answersMap[q.id];
+                const isActive = idx === currentIndex;
+                const isAnswered = ansState?.result !== null && ansState?.result !== undefined;
+                const isCorrect = ansState?.result?.isCorrect === true;
+                const isWrong = ansState?.result && !ansState.result.isCorrect;
+
+                let border = '1px solid #e2e8f0';
+                let bg = '#ffffff';
+                let color = '#334155';
+
+                if (isActive) {
+                  border = '2px solid #2563eb';
+                  bg = '#eff6ff';
+                  color = '#1d4ed8';
+                } else if (isCorrect) {
+                  border = '1px solid #10b981';
+                  bg = '#ecfdf5';
+                  color = '#065f46';
+                } else if (isWrong) {
+                  border = '1px solid #ef4444';
+                  bg = '#fef2f2';
+                  color = '#991b1b';
+                } else if (q.isParalysis) {
+                  border = '1px solid #fca5a5';
+                  bg = '#fff1f2';
+                  color = '#991b1b';
+                }
+
+                return (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => setCurrentIndex(idx)}
+                    title={`Câu ${idx + 1}${q.isParalysis ? ' - Điểm liệt' : ''}`}
+                    style={{
+                      height: '36px',
+                      borderRadius: '6px',
+                      border,
+                      background: bg,
+                      color,
+                      fontWeight: isActive || isAnswered ? 700 : 500,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                    }}
+                  >
+                    {idx + 1}
+                    {isCorrect && (
+                      <span style={{ position: 'absolute', top: -3, right: 1, fontSize: '0.65rem', color: '#10b981' }}>✓</span>
+                    )}
+                    {isWrong && (
+                      <span style={{ position: 'absolute', top: -3, right: 1, fontSize: '0.65rem', color: '#ef4444' }}>✗</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem', fontSize: '0.75rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ width: 12, height: 12, borderRadius: 2, background: '#ecfdf5', border: '1px solid #10b981' }} />
+                <span>Trả lời đúng</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ width: 12, height: 12, borderRadius: 2, background: '#fef2f2', border: '1px solid #ef4444' }} />
+                <span>Trả lời sai</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ width: 12, height: 12, borderRadius: 2, background: '#eff6ff', border: '2px solid #2563eb' }} />
+                <span>Câu đang làm</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

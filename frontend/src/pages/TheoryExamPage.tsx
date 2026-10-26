@@ -36,7 +36,7 @@ export default function TheoryExamPage() {
     }
   };
 
-  const handleStartPracticeMode = (mode: 'PARALYSIS' | 'INCORRECT' | 'RANDOM') => {
+  const handleStartPracticeMode = (mode: PracticeMode) => {
     setPracticeInitialMode(mode);
     setActiveTab('PRACTICE');
   };
@@ -95,7 +95,7 @@ export default function TheoryExamPage() {
         )}
 
         {activeTab === 'REVIEW' && (
-          <TheoryReviewTab />
+          <TheoryReviewTab onStartPractice={handleStartPracticeMode} />
         )}
 
         {activeTab === 'ADMIN' && isStaffOrAdmin && (
