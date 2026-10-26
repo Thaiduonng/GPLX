@@ -2,6 +2,40 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.0] — 2026-10-26
+
+### Quản Trị Dữ Liệu Ngân Hàng Câu Hỏi & Cấu Hình Đề Thi GPLX (Giai đoạn 5 — Phase 14)
+- **Quản lý Ngân Hàng 600 Câu Hỏi Sát Hạch (TheoryAdminConfigTab.tsx):**
+  - Giao diện tra cứu và phân trang ngân hàng câu hỏi đa tiêu chí: lọc theo 7 chương lý thuyết, theo hạng GPLX (A1, A2, B1, B, C), lọc riêng câu hỏi điểm liệt ⚠️, tìm kiếm theo số thứ tự hoặc từ khóa nội dung.
+  - Modal xem chi tiết đầy đủ câu hỏi: hiển thị hình ảnh minh họa đúng tỷ lệ, danh sách phương án A/B/C/D với đánh dấu trực quan đáp án đúng, lời giải thích chi tiết và căn cứ văn bản quy phạm pháp luật.
+  - Hỗ trợ thêm mới (createQuestion) và chỉnh sửa (updateQuestion) câu hỏi trắc nghiệm với form validation nghiêm ngặt: kiểm tra tối thiểu 2 phương án, bắt buộc có duy nhất 1 đáp án đúng theo quy chuẩn sát hạch GPLX Việt Nam.
+  - Hỗ trợ xóa an toàn câu hỏi (deleteQuestion) khỏi ngân hàng dữ liệu với hộp thoại xác nhận modal.
+- **Cấu hình Đề thi Sát hạch theo Hạng GPLX:**
+  - Bảng điều khiển cấu hình thời lượng thi, số lượng câu hỏi, điểm sàn tối thiểu đạt yêu cầu, phiên bản quy chế áp dụng cho từng hạng A1, A2, B1, B, C.
+  - Modal điều chỉnh thông số đề thi linh hoạt, lưu trữ căn cứ pháp lý (Thông tư 12/2017/TT-BGTVT và Thông tư 04/2022/TT-BGTVT).
+- **Nhập / Xuất Hàng Loạt & Quản Lý Phiên Bản (Bulk Import / Export & Legal Verification):**
+  - Chức năng Nhập hàng loạt câu hỏi từ định dạng JSON (Bulk Import): Kiểm tra cú pháp trước khi nhập, tự động ánh xạ chương tương ứng, báo cáo chi tiết số lượng thành công / thất bại và danh sách lỗi validation cụ thể.
+  - Chức năng Xuất dữ liệu câu hỏi (Export JSON) tải về máy tính để sao lưu hoặc kiểm toán dữ liệu.
+  - Quản lý phiên bản dữ liệu và trạng thái kiểm soát pháp lý: Bộ 600 câu hỏi Cục Đường bộ Việt Nam, 60 câu điểm liệt ở trạng thái VERIFIED.
+- **Kiểm thử Tự động Backend & Frontend:**
+  - Bổ sung unit tests cho QuestionAdminServiceTest (5/5 PASS), tổng cộng 7/7 tests module lý thuyết đạt 100%.
+  - Đóng gói Docker frontend production bundle Nginx Alpine hoàn tất không lỗi.
+
+## [1.6.0] — 2026-10-26
+
+### Giao Diện Thi Thử Lý Thuyết Sát Hạch Chuyên Sâu (Giai đoạn 4 — Phase 13)
+- **Phòng Thi Trực Tuyến Tập Trung & Giám Sát Thời Gian Thực (TheoryMockExamTab.tsx):**
+  - Cơ chế đếm ngược thời gian chính xác (Countdown Timer) với cảnh báo đổi màu khi thời gian dưới 2 phút, tự động nộp bài khi hết giờ (handleAutoSubmit).
+  - Lưới điều hướng câu hỏi thời gian thực (Question Grid Navigator): Phân định rõ câu đã làm (xanh lá), chưa làm (xám nhạt), đang xem (viền xanh đậm) và câu điểm liệt (chấm đỏ cảnh báo).
+  - Tích hợp tính năng **Cắm cờ xem lại (Flag for review)**: Cho phép học viên đánh dấu các câu phân vân bằng icon 🚩 và lọc rà soát trước khi nộp bài.
+  - Cơ chế tự động lưu tiến độ ngầm trên đám mây (learningService.saveExamProgress) mỗi khi học viên chọn phương án, phòng ngừa sự cố mất điện hoặc tải lại trang.
+  - Hệ thống phím tắt phòng thi: Phím số 1..4 để chọn đáp án A..D, Mũi tên Trái/Phải để chuyển câu, phím F để cắm cờ xem lại.
+  - Hộp thoại xác nhận nộp bài an toàn (Modal Confirm Submit), thống kê số câu đã làm, số câu chưa làm, cảnh báo câu cắm cờ và chống bấm nhầm hoặc spam nộp bài.
+- **Màn Hình Kết Quả & Tra Cứu Lịch Sử Thi Đầy Đủ:**
+  - Kết luận ĐẠT / KHÔNG ĐẠT, thời gian làm bài, điểm số chi tiết và cảnh báo nổi bật nếu trượt do sai câu điểm liệt.
+  - Bộ lọc xem lại kết quả: Xem tất cả câu, chỉ xem câu làm sai, hoặc xem các câu điểm liệt.
+  - Sub-tab **Lịch sử các lượt thi thử** (getMockExamHistory): Bảng thống kê toàn bộ các bài thi đã làm trong quá khứ kèm nút xem lại chi tiết bài thi cũ.
+
 ## [1.5.0] — 2026-10-26
 
 ### Giao Diện Học Tập, Rèn Luyện & Ôn Tập Chuyên Sâu (Giai đoạn 3 — Phase 12)
