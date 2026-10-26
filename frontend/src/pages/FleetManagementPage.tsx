@@ -26,12 +26,12 @@ export const FleetManagementPage: React.FC = () => {
 
   // Modal bảo dưỡng
   const [showMaintModal, setShowMaintModal] = useState<boolean>(false);
-  const [maintDate, setMaintDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [maintDate, setMaintDate] = useState<string>(new Date().toISOString().split('T')[0] || '');
   const [maintDesc, setMaintDesc] = useState<string>('');
   const [maintCost, setMaintCost] = useState<number>(1000000);
   const [maintPerformer, setMaintPerformer] = useState<string>('Gara Trung Tâm');
 
-  const isAdminOrManager = user?.roles.some(r => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
+  const isAdminOrManager = user?.roles?.some(r => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
 
   const loadData = async () => {
     try {
@@ -43,7 +43,7 @@ export const FleetManagementPage: React.FC = () => {
       ]);
       setVehicles(vData);
       setCategories(cData);
-      if (cData.length > 0) setCategoryId(cData[0].id);
+      if (cData.length > 0 && cData[0]) setCategoryId(cData[0].id);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Không thể tải danh sách phương tiện.');
     } finally {
@@ -343,6 +343,18 @@ export const FleetManagementPage: React.FC = () => {
                     style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                 </div>
+              </div>
+
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Đơn vị thực hiện:</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Gara Trung Tâm"
+                  value={maintPerformer}
+                  onChange={(e) => setMaintPerformer(e.target.value)}
+                  style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
               </div>
 
               <div style={{ marginBottom: '12px' }}>

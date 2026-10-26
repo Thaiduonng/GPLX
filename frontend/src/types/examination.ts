@@ -1,4 +1,4 @@
-export type ExamType = 'GRADUATION' | 'OFFICIAL';
+export type ExamType = 'GRADUATION' | 'CERTIFICATION';
 
 export type ExamSessionStatus = 'PLANNED' | 'REGISTRATION_OPEN' | 'REGISTRATION_CLOSED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 

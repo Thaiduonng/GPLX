@@ -19,6 +19,13 @@ export const admissionService = {
   },
 
   /**
+   * Alias tương thích getCategories
+   */
+  async getCategories(): Promise<LicenseCategory[]> {
+    return this.getActiveCategories();
+  },
+
+  /**
    * Lấy thông tin một hạng GPLX theo ID
    */
   async getCategoryById(id: number): Promise<LicenseCategory> {

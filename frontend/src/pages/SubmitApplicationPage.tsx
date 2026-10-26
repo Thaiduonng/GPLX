@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import { admissionService } from '../services/admissionService';
-import { DocumentType, DocumentUploadItem, Gender, LicenseCategory } from '../types/admission';
+import { DocumentUploadItem, Gender, LicenseCategory } from '../types/admission';
 
 export default function SubmitApplicationPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [categories, setCategories] = useState<LicenseCategory[]>([]);
@@ -19,7 +19,7 @@ export default function SubmitApplicationPage() {
   const [address, setAddress] = useState('');
 
   // Documents demo
-  const [documents, setDocuments] = useState<DocumentUploadItem[]>([
+  const [documents] = useState<DocumentUploadItem[]>([
     {
       documentType: 'NATIONAL_ID_FRONT',
       fileName: 'cccd_mat_truoc.jpg',
@@ -45,7 +45,7 @@ export default function SubmitApplicationPage() {
       .getActiveCategories()
       .then((data) => {
         setCategories(data);
-        if (data.length > 0) {
+        if (data.length > 0 && data[0]) {
           setSelectedCategoryId(data[0].id);
         }
       })
@@ -68,7 +68,7 @@ export default function SubmitApplicationPage() {
   const currentAge = calculateAge(dateOfBirth);
   const isUnderAge = selectedCategory && dateOfBirth ? currentAge < selectedCategory.minAge : false;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');

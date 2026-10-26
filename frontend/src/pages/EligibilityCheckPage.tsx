@@ -18,7 +18,7 @@ export const EligibilityCheckPage: React.FC = () => {
       try {
         const cats = await admissionService.getCategories();
         setCategories(cats);
-        if (cats.length > 0 && !cats.some(c => c.code === 'B1')) {
+        if (cats.length > 0 && cats[0] && !cats.some((c: LicenseCategory) => c.code === 'B1')) {
           setSelectedCategory(cats[0].code);
         }
       } catch (err: any) {
