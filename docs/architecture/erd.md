@@ -1,7 +1,7 @@
 # Sơ Đồ Thực Thể Quan Hệ (Entity-Relationship Diagram - ERD)
 `docs/architecture/erd.md`
 
-Sơ đồ ERD mô hình hóa toàn diện các thực thể dữ liệu và mối liên kết khóa ngoại giữa các module trong hệ thống GPLX Training System:
+Sơ đồ ERD mô hình hóa toàn diện các thực thể dữ liệu và mối liên kết khóa ngoại giữa các module trong hệ thống GPLX Training System (được đối chiếu và chuẩn hóa 100% với MySQL 8.4 LTS runtime schema):
 
 ```mermaid
 erDiagram
@@ -21,21 +21,22 @@ erDiagram
     course_lessons ||--o{ learning_progress : "bài học"
     theory_questions ||--o{ theory_answers : "phương án trả lời"
 
-    license_categories ||--o{ training_classes : "hạng đào tạo"
+    courses ||--o{ training_classes : "mở lớp đào tạo"
     users ||--o{ training_classes : "giáo viên chủ nhiệm"
     training_classes ||--o{ class_enrollments : "danh sách lớp"
     users ||--o{ class_enrollments : "học viên"
     training_classes ||--o{ training_schedules : "thời khóa biểu"
-    vehicles ||--o{ training_schedules : "xe tập lái"
+    users ||--o{ training_schedules : "giáo viên phụ trách"
     training_schedules ||--o{ attendance_records : "điểm danh ca học"
 
     users ||--o{ dat_practice_sessions : "học viên"
-    vehicles ||--o{ dat_practice_sessions : "xe giám sát DAT"
+    users ||--o{ dat_practice_sessions : "giáo viên giám sát"
 
     license_categories ||--o{ exam_sessions : "hạng sát hạch"
     exam_sessions ||--o{ exam_candidates : "danh sách thi"
     users ||--o{ exam_candidates : "thí sinh"
     exam_candidates ||--|| exam_results : "kết quả sát hạch"
+    users ||--o{ exam_results : "sát hạch viên chấm"
 
     users ||--o{ fee_invoices : "học viên nợ phí"
     license_categories ||--o{ fee_invoices : "biểu phí theo hạng"
@@ -115,12 +116,25 @@ erDiagram
         datetime created_at
     }
 
+    courses {
+        bigint id PK
+        varchar course_code UK
+        varchar name
+        bigint category_id FK
+        text description
+        int total_hours
+        tinyint is_active
+        datetime created_at
+        datetime updated_at
+    }
+
     training_classes {
         bigint id PK
         varchar class_code UK
         varchar name
-        bigint category_id FK
+        bigint course_id FK
         bigint instructor_id FK
+        int max_students
         date start_date
         date end_date
         varchar status
@@ -128,13 +142,24 @@ erDiagram
         datetime updated_at
     }
 
+    class_enrollments {
+        bigint id PK
+        bigint class_id FK
+        bigint user_id FK
+        varchar status
+        datetime enrolled_at
+        datetime created_at
+        datetime updated_at
+    }
+
     training_schedules {
         bigint id PK
         bigint class_id FK
+        bigint instructor_id FK
         varchar schedule_type
         varchar title
         varchar location
-        bigint vehicle_id FK
+        varchar status
         datetime start_time
         datetime end_time
         datetime created_at
@@ -143,15 +168,18 @@ erDiagram
 
     dat_practice_sessions {
         bigint id PK
-        bigint student_id FK
+        bigint user_id FK
         bigint instructor_id FK
-        bigint vehicle_id FK
+        varchar session_type
         decimal distance_km
         int duration_minutes
+        varchar status
+        varchar device_id
+        text note
         datetime start_time
         datetime end_time
-        tinyint is_valid
         datetime created_at
+        datetime updated_at
     }
 
     exam_sessions {
@@ -168,10 +196,11 @@ erDiagram
 
     exam_candidates {
         bigint id PK
-        bigint session_id FK
-        bigint student_id FK
+        bigint exam_session_id FK
+        bigint user_id FK
         varchar candidate_number UK
-        varchar eligibility_status
+        varchar status
+        text disqualification_reason
         datetime registered_at
         datetime created_at
         datetime updated_at
@@ -180,12 +209,17 @@ erDiagram
     exam_results {
         bigint id PK
         bigint candidate_id FK
+        bigint examiner_id FK
         int theory_score
+        tinyint theory_passed
         int simulation_score
-        int practice_yard_score
-        int practice_road_score
+        tinyint simulation_passed
+        int yard_score
+        tinyint yard_passed
+        int road_score
+        tinyint road_passed
         varchar final_result
-        varchar note
+        text examiner_note
         datetime graded_at
         datetime created_at
         datetime updated_at

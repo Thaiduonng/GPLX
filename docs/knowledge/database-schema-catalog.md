@@ -1,7 +1,7 @@
 # Danh Mục Lược Đồ Cơ Sở Dữ Liệu (Database Schema Catalog)
 `docs/knowledge/database-schema-catalog.md`
 
-Tài liệu này lập danh mục và phân loại chi tiết toàn bộ **30 bảng dữ liệu thực tế** đang hoạt động trong cơ sở dữ liệu `gplx_db` của hệ thống GPLX Training System.
+Tài liệu này lập danh mục và phân loại chi tiết toàn bộ **30 bảng dữ liệu thực tế** đang hoạt động trong cơ sở dữ liệu `gplx_db` của hệ thống GPLX Training System (đã đối chiếu thực tế 100% với MySQL 8.4 LTS runtime schema).
 
 ---
 
@@ -154,26 +154,42 @@ Tài liệu này lập danh mục và phân loại chi tiết toàn bộ **30 b�
 #### 3.3. Bảng `theory_questions` & `theory_answers`
 - **Module:** `learning`
 - **Mục đích:** Ngân hàng 600 câu hỏi trắc nghiệm sát hạch GPLX.
-- **Cột quan trọng:** `is_critical` (Câu điểm liệt - nếu sai trượt ngay theo LRN-002), `question_text`, `image_url`, `chapter`.
+- **Cột quan trọng:** `is_paralysis` (Câu điểm liệt - sai điểm liệt trượt ngay), `content`, `image_url`, `explanation`.
 - **Entity JPA:** `TheoryQuestion.java`, `TheoryAnswer.java`.
 
 #### 3.4. Bảng `training_classes` & `class_enrollments`
 - **Module:** `training`
 - **Mục đích:** Quản lý lớp học đào tạo tập trung và danh sách học viên theo khóa.
 - **Khóa chính:** `id` (BIGINT AUTO_INCREMENT).
-- **Khóa ngoại:** `fk_classes_category → license_categories(id)`, `fk_classes_instructor → users(id)`, `fk_enrollments_class → training_classes(id)`, `fk_enrollments_student → users(id)`.
+- **Ràng buộc duy nhất:** `uk_training_classes_code (code)` trên `training_classes`, `uk_enrollment_class_user (class_id, user_id)` trên `class_enrollments`.
+- **Khóa ngoại:** 
+  - `fk_classes_course → courses(id) ON DELETE RESTRICT`
+  - `fk_classes_instructor → users(id) ON DELETE SET NULL`
+  - `fk_enrollments_class → training_classes(id) ON DELETE CASCADE`
+  - `fk_enrollments_user → users(id) ON DELETE CASCADE`
+- **Cột quan trọng:** `training_classes.max_students`, `training_classes.status`, `class_enrollments.enrolled_at`.
 - **Entity JPA:** `TrainingClass.java`, `ClassEnrollment.java`.
 
 #### 3.5. Bảng `training_schedules` & `attendance_records`
 - **Module:** `training`
-- **Mục đích:** Lịch học lý thuyết, thực hành sa hình, đường trường và điểm danh từng ca (TRN-001, TRN-002).
-- **Khóa ngoại:** `fk_schedules_class → training_classes(id)`, `fk_schedules_vehicle → vehicles(id)`, `fk_attendance_schedule → training_schedules(id)`.
+- **Mục đích:** Lịch học lý thuyết, thực hành và điểm danh từng ca (TRN-001, TRN-002).
+- **Khóa chính:** `id` (BIGINT AUTO_INCREMENT).
+- **Ràng buộc duy nhất:** `uk_attendance_schedule_user (schedule_id, user_id)`.
+- **Khóa ngoại:** 
+  - `fk_schedules_class → training_classes(id) ON DELETE CASCADE`
+  - `fk_schedules_instructor → users(id) ON DELETE RESTRICT`
+  - `fk_attendance_schedule → training_schedules(id) ON DELETE CASCADE`
+  - `fk_attendance_user → users(id) ON DELETE CASCADE`
 - **Entity JPA:** `TrainingSchedule.java`, `AttendanceRecord.java`.
 
 #### 3.6. Bảng `dat_practice_sessions`
 - **Module:** `training`
 - **Mục đích:** Lưu vết các phiên thực hành lái xe đường trường từ thiết bị giám sát hành trình DAT (TRN-003).
-- **Cột quan trọng:** `student_id`, `instructor_id`, `vehicle_id`, `distance_km`, `duration_minutes`, `start_time`, `end_time`, `is_valid`.
+- **Khóa chính:** `id` (BIGINT AUTO_INCREMENT).
+- **Khóa ngoại:** 
+  - `fk_dat_user → users(id) ON DELETE CASCADE`
+  - `fk_dat_instructor → users(id) ON DELETE RESTRICT`
+- **Cột quan trọng:** `user_id`, `instructor_id`, `session_type`, `distance_km`, `duration_minutes`, `start_time`, `end_time`, `status`, `device_id`, `note`.
 - **Entity JPA:** `DatPracticeSession.java`.
 
 ---
@@ -183,20 +199,34 @@ Tài liệu này lập danh mục và phân loại chi tiết toàn bộ **30 b�
 #### 4.1. Bảng `exam_sessions`
 - **Module:** `examination`
 - **Mục đích:** Kỳ thi sát hạch lý thuyết và thực hành (Tốt nghiệp nội bộ / Sát hạch chính thức).
-- **Cột quan trọng:** `session_code`, `category_id`, `exam_type` (`GRADUATION`, `CERTIFICATION`), `exam_date`, `status` (`SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
+- **Khóa chính:** `id` (BIGINT AUTO_INCREMENT).
+- **Ràng buộc duy nhất:** `uk_exam_sessions_code (exam_code)`.
+- **Khóa ngoại:** `fk_exam_sessions_category → license_categories(id) ON DELETE RESTRICT`.
+- **Cột quan trọng:** `exam_code`, `name`, `category_id`, `exam_type` (`GRADUATION`, `CERTIFICATION`), `exam_date`, `status` (`PLANNED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
 - **Entity JPA:** `ExamSession.java`.
 
 #### 4.2. Bảng `exam_candidates`
 - **Module:** `examination`
 - **Mục đích:** Thí sinh dự thi, số báo danh và trạng thái đủ điều kiện dự thi (EXM-001).
-- **Khóa ngoại:** `fk_candidates_session → exam_sessions(id)`, `fk_candidates_student → users(id)`.
-- **Ràng buộc duy nhất:** `uk_candidates_session_student (session_id, student_id)`.
+- **Khóa chính:** `id` (BIGINT AUTO_INCREMENT).
+- **Ràng buộc duy nhất:** 
+  - `uk_exam_candidate_user (exam_session_id, user_id)`
+  - `uk_exam_candidate_sbd (exam_session_id, candidate_number)`
+- **Khóa ngoại:** 
+  - `fk_candidates_session → exam_sessions(id) ON DELETE CASCADE`
+  - `fk_candidates_user → users(id) ON DELETE RESTRICT`
+- **Cột quan trọng:** `exam_session_id`, `user_id`, `candidate_number`, `eligibility_status`, `disqualification_reason`.
 - **Entity JPA:** `ExamCandidate.java`.
 
 #### 4.3. Bảng `exam_results`
 - **Module:** `examination`
 - **Mục đích:** Kết quả 4 phần thi: Lý thuyết, Mô phỏng, Sa hình, Đường trường và kết luận đỗ/trượt (EXM-002, EXM-003).
-- **Khóa ngoại:** `fk_results_candidate → exam_candidates(id) ON DELETE CASCADE`.
+- **Khóa chính:** `id` (BIGINT AUTO_INCREMENT).
+- **Ràng buộc duy nhất:** `uk_exam_results_candidate (candidate_id)`.
+- **Khóa ngoại:** 
+  - `fk_results_candidate → exam_candidates(id) ON DELETE RESTRICT`
+  - `fk_results_examiner → users(id) ON DELETE SET NULL`
+- **Cột quan trọng:** `theory_score`, `theory_passed`, `simulation_score`, `simulation_passed`, `yard_score`, `yard_passed`, `road_score`, `road_passed`, `final_result`, `examiner_id`, `examiner_note`.
 - **Entity JPA:** `ExamResult.java`.
 
 ---
@@ -206,13 +236,21 @@ Tài liệu này lập danh mục và phân loại chi tiết toàn bộ **30 b�
 #### 5.1. Bảng `fee_invoices` & `payment_receipts`
 - **Module:** `finance`
 - **Mục đích:** Hóa đơn học phí và biên lai thu tiền.
-- **Ràng buộc duy nhất:** `uk_payment_receipts_idempotency (idempotency_key)` đảm bảo tính Idempotency FIN-001.
+- **Ràng buộc duy nhất:** `uk_payment_receipts_idempotency (idempotency_key)` đảm bảo tính Idempotency FIN-001, `uk_payment_receipts_code (receipt_code)`, `uk_fee_invoices_code (invoice_code)`.
+- **Khóa ngoại:** 
+  - `fk_fee_invoices_user → users(id) ON DELETE RESTRICT`
+  - `fk_fee_invoices_category → license_categories(id) ON DELETE RESTRICT`
+  - `fk_payment_receipts_invoice → fee_invoices(id) ON DELETE RESTRICT`
 - **Entity JPA:** `FeeInvoice.java`, `PaymentReceipt.java`.
 
 #### 5.2. Bảng `vehicles` & `vehicle_maintenances`
 - **Module:** `fleet`
 - **Mục đích:** Xe tập lái, hạn đăng kiểm và nhật ký bảo dưỡng kỹ thuật (FLT-001).
-- **Khóa ngoại:** `fk_vehicles_category → license_categories(id)`, `fk_maintenances_vehicle → vehicles(id) ON DELETE CASCADE`.
+- **Khóa chính:** `id` (BIGINT AUTO_INCREMENT).
+- **Ràng buộc duy nhất:** `uk_vehicles_plate (plate_number)`.
+- **Khóa ngoại:** 
+  - `fk_vehicles_category → license_categories(id) ON DELETE RESTRICT`
+  - `fk_maintenances_vehicle → vehicles(id) ON DELETE CASCADE`
 - **Entity JPA:** `Vehicle.java`, `VehicleMaintenance.java`.
 
 ---
@@ -222,6 +260,7 @@ Tài liệu này lập danh mục và phân loại chi tiết toàn bộ **30 b�
 #### 6.1. Bảng `audit_logs`
 - **Module:** `reporting`
 - **Mục đích:** Lưu trữ nhật ký kiểm toán bất biến các sự kiện hệ thống phục vụ hậu kiểm và tuân thủ pháp lý.
+- **Khóa chính:** `id` (BIGINT AUTO_INCREMENT).
 - **Khóa ngoại:** `fk_audit_logs_user → users(id) ON DELETE SET NULL`.
 - **Chỉ mục:** `idx_audit_logs_resource`, `idx_audit_logs_action`, `idx_audit_logs_created_at`.
 - **Entity JPA:** `AuditLog.java`.
@@ -230,3 +269,6 @@ Tài liệu này lập danh mục và phân loại chi tiết toàn bộ **30 b�
 - **Module:** `support`
 - **Mục đích:** Quản lý thông báo người dùng và khách hàng tiềm năng.
 - **Ràng buộc duy nhất:** `uk_notifications_dedup (deduplication_key)`.
+- **Khóa ngoại:** 
+  - `fk_notifications_user → users(id) ON DELETE CASCADE`
+  - `fk_crm_leads_assigned → users(id) ON DELETE SET NULL`

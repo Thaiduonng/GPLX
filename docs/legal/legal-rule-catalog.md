@@ -1,7 +1,7 @@
 # Danh Mục Quy Tắc Pháp Lý Hệ Thống (Legal Rule Catalog)
 `docs/legal/legal-rule-catalog.md`
 
-Tài liệu này hệ thống hóa toàn bộ các quy tắc pháp lý bắt buộc (Legal Rules), phân loại trạng thái xác minh, điều khoản căn cứ và liên kết trực tiếp tới mã nguồn hệ thống GPLX Training System.
+Tài liệu này hệ thống hóa toàn bộ các quy tắc pháp lý bắt buộc (Legal Rules), phân loại trạng thái xác minh, điều khoản căn cứ và liên kết trực tiếp tới mã nguồn hệ thống GPLX Training System (đã đối chiếu thực tế 100% với MySQL 8.4 LTS runtime schema).
 
 ---
 
@@ -71,18 +71,19 @@ Tài liệu này hệ thống hóa toàn bộ các quy tắc pháp lý bắt bu�
 - **Mô tả:** Học viên học lái xe ô tô (hạng B, C1, C) bắt buộc phải tích lũy đủ thời gian và quãng đường thực hành lái xe trên đường thông qua thiết bị DAT được cơ quan nhà nước kiểm định.
 - **Nguồn căn cứ:** `SRC-TT-02` (Thông tư 04/2022/TT-BGTVT, sửa đổi bổ sung Thông tư 12/2017/TT-BGTVT).
 - **Trạng thái:** `VERIFIED`.
-- **Quy tắc hệ thống suy ra (`TRN-003`):** Mỗi phiên thực hành DAT được lưu vết trong `dat_practice_sessions` kèm trạng thái `is_valid`. Chỉ các phiên hợp lệ mới được cộng dồn vào tiến độ học viên.
-- **Bảng/Cột liên quan:** `dat_practice_sessions.distance_km`, `dat_practice_sessions.duration_minutes`, `dat_practice_sessions.is_valid`.
+- **Quy tắc hệ thống suy ra (`TRN-003`):** Mỗi phiên thực hành DAT được lưu vết trong `dat_practice_sessions` kèm trạng thái `status = 'VERIFIED'`. Chỉ các phiên hợp lệ mới được cộng dồn vào tiến độ học viên.
+- **Bảng/Cột liên quan:** `dat_practice_sessions.distance_km`, `dat_practice_sessions.duration_minutes`, `dat_practice_sessions.status`.
 - **API liên quan:** `GET /api/v1/training/dat/summary`.
 - **Test Case kiểm chứng:** `TrainingServiceTest.testDatAccumulation()`.
 
 ---
 
 ### 2.5. `LEG-TRAINING-003` — Định mức chi tiết km và giờ DAT theo từng hạng
-- **Mô tả:** Số km thực hành cụ thể (ví dụ: Hạng B số sàn dự kiến 810 km / 40 giờ; Hạng B số tự động dự kiến 710 km / 24 giờ).
+- **Mô tả:** Số km thực hành cụ thể theo hạng (ví dụ: Hạng B1/B tối thiểu 810 km và 20 giờ; hạng C tối thiểu 825 km).
 - **Trạng thái:** `NEEDS_VERIFICATION`.
 - **Lý do:** Đang trong giai đoạn ban hành Thông tư hướng dẫn chi tiết thi hành Luật số 36/2024/QH15.
-- **Xử lý hệ thống:** **Tuyệt đối không hard-code số km/giờ cố định vào mã nguồn Java.** Thiết kế dưới dạng tham số cấu hình linh hoạt trong Database, có ghi chú "Thông số tham chiếu đang chờ văn bản xác minh chính thức".
+- **Hiện trạng mã nguồn:** Hiện tại mã nguồn `DatPracticeServiceImpl.java` đang tạm gán giá trị mặc định tĩnh `TARGET_DISTANCE_KM = 810.0` và `TARGET_DURATION_MINUTES = 1200` (20 giờ).
+- **Kế hoạch hành động:** Chuyển các chỉ số này thành tham số cấu hình động gắn với bảng `license_categories` (cột `min_dat_distance_km`, `min_dat_duration_hours`) để tránh hard-code khi Thông tư mới có hiệu lực.
 
 ---
 
@@ -91,7 +92,7 @@ Tài liệu này hệ thống hóa toàn bộ các quy tắc pháp lý bắt bu�
   1. Hồ sơ tuyển sinh ở trạng thái đã phê duyệt (`status = 'APPROVED'`).
   2. Đã hoàn thành 100% nghĩa vụ học phí (`fee_invoices.status = 'PAID'`).
   3. Hoàn thành tiến độ các môn học lý thuyết bắt buộc.
-  4. Hoàn thành 100% định mức km và thời gian thực hành đường trường DAT.
+  4. Hoàn thành 100% định mức km và thời gian thực hành đường trường DAT (với ô tô).
 - **Nguồn căn cứ:** `SRC-TT-01` (Điều 25 Thông tư 12/2017/TT-BGTVT) & `SRC-TT-02`.
 - **Trạng thái:** `VERIFIED`.
 - **Quy tắc hệ thống suy ra (`EXM-001`):** API kiểm tra điều kiện trả về `ELIGIBLE` hoặc `INELIGIBLE` kèm danh sách chi tiết các tiêu chí chưa đạt.
@@ -104,8 +105,8 @@ Tài liệu này hệ thống hóa toàn bộ các quy tắc pháp lý bắt bu�
 - **Mô tả:** Bộ đề thi trắc nghiệm lý thuyết được trích xuất ngẫu nhiên từ ngân hàng 600 câu hỏi. Nếu thí sinh trả lời sai câu hỏi điểm liệt (tình huống mất an toàn giao thông nghiêm trọng), bài thi bị đánh giá `FAILED` (Trượt) ngay lập tức kể cả khi đạt đủ tổng số câu đúng.
 - **Nguồn căn cứ:** `SRC-TT-01`, Hướng dẫn của Cục Đường bộ Việt Nam.
 - **Trạng thái:** `VERIFIED`.
-- **Quy tắc hệ thống suy ra (`LRN-002`):** Thuộc tính `theory_questions.is_critical = 1`. Thuật toán chấm điểm thi kiểm tra danh sách câu sai, nếu có bất kỳ câu điểm liệt nào thì gán `is_passed = false`.
-- **Bảng/Cột liên quan:** `theory_questions.is_critical`.
+- **Quy tắc hệ thống suy ra (`LRN-002`):** Thuộc tính `theory_questions.is_paralysis = 1`. Thuật toán chấm điểm thi kiểm tra danh sách câu sai, nếu có bất kỳ câu điểm liệt nào thì gán `is_passed = false`.
+- **Bảng/Cột liên quan:** `theory_questions.is_paralysis`.
 - **API liên quan:** `POST /api/v1/learning/theory-test/submit`.
 - **Test Case kiểm chứng:** `LearningServiceTest.testCriticalQuestionFailure()`.
 

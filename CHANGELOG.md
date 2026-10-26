@@ -2,6 +2,21 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0] — 2026-10-26
+
+### Quản trị Tri Thức CSDL & Chuẩn Hóa Pháp Lý Toàn Diện (Phase 8 — Database & Legal Knowledge Base)
+- **Database Knowledge Base:**
+  - Xây dựng 9 tài liệu kiến thức CSDL cốt lõi trong `docs/knowledge/`: `project-context.md`, `module-catalog.md`, `database-overview.md`, `database-schema-catalog.md`, `database-relationships.md`, `data-dictionary.md`, `data-ownership.md`, `data-lifecycle.md`, `database-change-log.md`.
+  - Cập nhật sơ đồ ERD tổng thể `docs/architecture/erd.md` và kiến trúc CSDL `docs/architecture/database-design.md`, `rule-versioning-design.md`.
+- **Legal Knowledge Base:**
+  - Thiết lập 5 tài liệu pháp lý chuyên sâu trong `docs/legal/`: `legal-register.md`, `legal-source-catalog.md`, `legal-rule-catalog.md`, `legal-change-log.md`, `legal-verification-process.md`.
+  - Xây dựng ma trận truy vết pháp lý hai chiều `docs/knowledge/legal-database-traceability.md` liên kết từ Luật định ➔ Quy tắc ➔ Module ➔ Bảng/Cột CSDL ➔ API ➔ Test case.
+- **Đối chiếu & Chuẩn Hóa Tính Nhất Quán (Consistency Check):**
+  - Truy vấn trực tiếp MySQL 8.4 LTS runtime (`INFORMATION_SCHEMA.COLUMNS` & `INFORMATION_SCHEMA.KEY_COLUMN_USAGE`) để đối soát 1:1 với 30 bảng thực tế.
+  - Chuẩn hóa các sai lệch về tên cột và khóa ngoại giữa ERD/tài liệu và CSDL thực tế: `training_classes.course_id`, `class_enrollments.user_id`, `training_schedules.instructor_id`, `dat_practice_sessions.user_id` / `status`, `exam_candidates.exam_session_id`, `exam_results.yard_score` / `road_score`.
+  - Phát hiện và ghi nhận rủi ro quy tắc `LEG-TRAINING-003` (đang ở trạng thái `NEEDS_VERIFICATION` nhưng tạm thời hard-code định mức DAT trong Service layer); tạo task `TSK-P8-04` để chuyển thành tham số cấu hình động.
+  - Cập nhật checklist kiểm tra tính nhất quán `docs/knowledge/knowledge-consistency-checklist.md` và backlog `docs/backlog/tasks.md`.
+
 ## [1.0.0] — 2026-10-23
 
 ### Phát hành Chính thức Nghiệm thu Đồ án (Phase 7 — Final Polish & Release v1.0.0)

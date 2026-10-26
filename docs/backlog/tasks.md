@@ -97,3 +97,16 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | :--- | :--- | :--- | :--- | :--- |
 | **`TSK-P7-01`** | Hoàn thiện Docker Compose Production & Multi-stage Build | TSK-P6-03 | `DONE` | Multi-stage Dockerfile cho backend (Temurin JDK/JRE 21 non-root) và frontend (Node 20 + Nginx Alpine), cấu hình Nginx reverse proxy & SPA fallback, healthcheck đồng bộ |
 | **`TSK-P7-02`** | Merge nhánh main & Release v1.0.0 | TSK-P7-01 | `DONE` | Merge `--no-ff` từ develop vào main, gắn Git tag `v1.0.0`, tài liệu hoàn chỉnh sẵn sàng nghiệm thu bảo vệ đồ án tốt nghiệp |
+
+
+---
+
+## Danh mục Tasks — Phase 8: Database & Legal Knowledge Consistency (Quản trị Tri Thức CSDL & Pháp Lý)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P8-01`** | Thiết lập Database Knowledge Base toàn diện | TSK-P7-02 | `DONE` | 9 tài liệu chuyên sâu trong `docs/knowledge/` (`project-context.md`, `module-catalog.md`, `database-overview.md`, `database-schema-catalog.md`, `database-relationships.md`, `data-dictionary.md`, `data-ownership.md`, `data-lifecycle.md`, `database-change-log.md`), cập nhật `erd.md` và `database-design.md` |
+| **`TSK-P8-02`** | Thiết lập Legal Knowledge Base chuẩn hóa | TSK-P7-02 | `DONE` | 5 tài liệu pháp lý chuyên sâu trong `docs/legal/` (`legal-register.md`, `legal-source-catalog.md`, `legal-rule-catalog.md`, `legal-change-log.md`, `legal-verification-process.md`) |
+| **`TSK-P8-03`** | Kiểm tra đối soát tính nhất quán MySQL Runtime & Tài liệu | TSK-P8-01..02| `DONE` | Truy vấn `INFORMATION_SCHEMA` trên MySQL 8.4 LTS; chuẩn hóa 100% tên bảng, tên cột, khóa ngoại và ràng buộc toàn vẹn giữa Entity, Migration và ERD |
+| **`TSK-P8-04`** | Động hóa cấu hình định mức thực hành DAT (`LEG-TRAINING-003`) | TSK-P8-03 | `TODO` | Chuyển định mức km/giờ từ hằng số hard-code trong `DatPracticeServiceImpl.java` thành các thuộc tính động cấu hình theo từng hạng GPLX trong bảng `license_categories` (`min_dat_distance_km`, `min_dat_duration_hours`) |
+| **`TSK-P8-05`** | Quản lý quy định chuyển đổi hạng GPLX theo Điều 89 Luật 36/2024 | TSK-P8-03 | `TODO` | Chuẩn bị lược đồ bảng lưu lịch sử chuyển đổi hoặc cấp đổi GPLX theo lộ trình Thông tư hướng dẫn mới của Bộ Công an / Bộ GTVT |

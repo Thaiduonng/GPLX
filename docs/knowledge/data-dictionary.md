@@ -1,7 +1,7 @@
 # Từ Điển Dữ Liệu (Data Dictionary)
 `docs/knowledge/data-dictionary.md`
 
-Tài liệu này định nghĩa chi tiết ngữ nghĩa nghiệp vụ, kiểu dữ liệu, các ràng buộc validation, tính nhạy cảm PII và vòng đời của từng cột dữ liệu trọng yếu trong hệ thống GPLX Training System.
+Tài liệu này định nghĩa chi tiết ngữ nghĩa nghiệp vụ, kiểu dữ liệu, các ràng buộc validation, tính nhạy cảm PII và vòng đời của từng cột dữ liệu trọng yếu trong hệ thống GPLX Training System (đã đối chiếu thực tế 100% với MySQL 8.4 LTS runtime schema).
 
 ---
 
@@ -39,11 +39,12 @@ Tài liệu này định nghĩa chi tiết ngữ nghĩa nghiệp vụ, kiểu d�
 
 | Bảng | Tên Cột | Kiểu Dữ Liệu | Bắt Buộc | Đơn Vị | Giá Trị Hợp Lệ / Enum | Dữ Liệu Nhạy Cảm | Ý Nghĩa Nghiệp Vụ & Quy Tắc Validation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `theory_questions` | `is_critical` | TINYINT(1) | YES | - | `1` (Điểm liệt), `0` (Bình thường) | KHÔNG | Câu hỏi điểm liệt; nếu học viên trả lời sai sẽ trượt ngay bài thi lý thuyết. |
+| `theory_questions` | `is_paralysis` | TINYINT(1) | YES | - | `1` (Điểm liệt), `0` (Bình thường) | KHÔNG | Câu hỏi điểm liệt; nếu học viên trả lời sai sẽ trượt ngay bài thi lý thuyết. |
 | `training_schedules`| `schedule_type` | VARCHAR(30) | YES | - | `THEORY`, `PRACTICE_YARD`, `PRACTICE_ROAD`, `CABIN_SIMULATION` | KHÔNG | Hình thức học: Lý thuyết tập trung, Sa hình, Đường trường, Cabin. |
-| `dat_practice_sessions`| `distance_km`| DECIMAL(8,2) | YES | Kilômét | Số thực >= 0 | KHÔNG | Quãng đường học viên thực hành lái xe đường trường ghi nhận qua DAT. |
+| `dat_practice_sessions`| `distance_km`| DECIMAL(6,2) | YES | Kilômét | Số thực >= 0 | KHÔNG | Quãng đường học viên thực hành lái xe đường trường ghi nhận qua DAT. |
 | `dat_practice_sessions`| `duration_minutes`| INT | YES | Phút | Số nguyên >= 0 | KHÔNG | Thời gian thực hành thực tế được thiết bị giám sát công nhận. |
-| `dat_practice_sessions`| `is_valid` | TINYINT(1) | YES | - | `1` (Hợp lệ), `0` (Không hợp lệ) | KHÔNG | Cờ công nhận phiên học (loại trừ nếu vi phạm tốc độ hoặc gian lận khuôn mặt). |
+| `dat_practice_sessions`| `status` | VARCHAR(30) | YES | - | `VERIFIED`, `REJECTED`, `PENDING` | KHÔNG | Trạng thái xác thực phiên DAT của học viên. |
+| `dat_practice_sessions`| `device_id` | VARCHAR(50) | NO | - | Chuỗi mã định danh thiết bị | KHÔNG | Mã định danh thiết bị giám sát hành trình gắn trên phương tiện. |
 
 ---
 
@@ -51,14 +52,20 @@ Tài liệu này định nghĩa chi tiết ngữ nghĩa nghiệp vụ, kiểu d�
 
 | Bảng | Tên Cột | Kiểu Dữ Liệu | Bắt Buộc | Đơn Vị | Giá Trị Hợp Lệ / Enum | Dữ Liệu Nhạy Cảm | Ý Nghĩa Nghiệp Vụ & Quy Tắc Validation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `exam_sessions` | `exam_code` | VARCHAR(50) | YES | - | Mã kỳ thi duy nhất (`UK`) | KHÔNG | Mã kỳ thi sát hạch (VD: `EXAM-B1-2026-01`). |
 | `exam_sessions` | `exam_type` | VARCHAR(30) | YES | - | `GRADUATION` (Thi tốt nghiệp), `CERTIFICATION` (Sát hạch cấp bằng) | KHÔNG | Phân loại kỳ thi sát hạch theo cấp thẩm quyền. |
-| `exam_sessions` | `status` | VARCHAR(30) | YES | - | `SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED` | KHÔNG | Tiến trình tổ chức kỳ thi sát hạch. |
-| `exam_candidates` | `eligibility_status`| VARCHAR(30)| YES | - | `ELIGIBLE`, `INELIGIBLE`, `PENDING_REVIEW` | KHÔNG | Kết luận đủ điều kiện dự thi dựa trên hồ sơ, học phí và tiến độ DAT. |
+| `exam_sessions` | `status` | VARCHAR(30) | YES | - | `PLANNED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED` | KHÔNG | Tiến trình tổ chức kỳ thi sát hạch. |
+| `exam_candidates` | `candidate_number` | VARCHAR(20) | YES | - | Chuỗi số báo danh (SBD) duy nhất theo kỳ | KHÔNG | Số báo danh thí sinh trong kỳ sát hạch. |
+| `exam_candidates` | `eligibility_status`| VARCHAR(30)| YES | - | `QUALIFIED`, `DISQUALIFIED`, `PENDING` | KHÔNG | Kết luận đủ điều kiện dự thi dựa trên hồ sơ, học phí và tiến độ DAT. |
 | `exam_results` | `theory_score` | INT | NO | Điểm | Số câu đúng (0 đến 35/40 tùy hạng) | KHÔNG | Điểm thi trắc nghiệm lý thuyết. |
+| `exam_results` | `theory_passed` | TINYINT(1) | NO | - | `1` (Đạt), `0` (Không đạt) | KHÔNG | Trạng thái đạt phần thi lý thuyết. |
 | `exam_results` | `simulation_score`| INT | NO | Điểm | Thang điểm 0 - 50 | KHÔNG | Điểm thi phần mềm mô phỏng các tình huống giao thông. |
-| `exam_results` | `practice_yard_score`| INT | NO | Điểm | Thang điểm 0 - 100 | KHÔNG | Điểm thi thực hành lái xe trong sa hình (Đạt từ 80/100 trở lên). |
-| `exam_results` | `practice_road_score`| INT | NO | Điểm | Thang điểm 0 - 100 | KHÔNG | Điểm thi thực hành lái xe trên đường giao thông công cộng. |
-| `exam_results` | `final_result` | VARCHAR(20) | YES | - | `PASSED` (Đỗ), `FAILED` (Trượt) | KHÔNG | Kết luận chung của kỳ sát hạch. Bất biến sau khi khóa sổ. |
+| `exam_results` | `simulation_passed`| TINYINT(1) | NO | - | `1` (Đạt), `0` (Không đạt) | KHÔNG | Trạng thái đạt phần thi mô phỏng tình huống. |
+| `exam_results` | `yard_score` | INT | NO | Điểm | Thang điểm 0 - 100 | KHÔNG | Điểm thi thực hành lái xe trong sa hình (Đạt từ 80/100 trở lên). |
+| `exam_results` | `yard_passed` | TINYINT(1) | NO | - | `1` (Đạt), `0` (Không đạt) | KHÔNG | Trạng thái đạt phần thi lái xe trong sa hình. |
+| `exam_results` | `road_score` | INT | NO | Điểm | Thang điểm 0 - 100 | KHÔNG | Điểm thi thực hành lái xe trên đường giao thông công cộng. |
+| `exam_results` | `road_passed` | TINYINT(1) | NO | - | `1` (Đạt), `0` (Không đạt) | KHÔNG | Trạng thái đạt phần thi lái xe trên đường trường. |
+| `exam_results` | `final_result` | VARCHAR(30) | YES | - | `PASSED` (Đỗ), `FAILED` (Trượt), `PENDING` (Chờ chấm) | KHÔNG | Kết luận chung của kỳ sát hạch. Bất biến sau khi khóa sổ. |
 
 ---
 
