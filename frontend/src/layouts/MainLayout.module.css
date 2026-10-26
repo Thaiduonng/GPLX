@@ -5,7 +5,7 @@
   background-color: var(--color-bg-app);
 }
 
-/* Header */
+/* Primary Header */
 .header {
   background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
   color: var(--color-text-white);
@@ -16,13 +16,53 @@
 }
 
 .headerContainer {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0.75rem 1.5rem;
+  padding: 0.65rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-4);
+}
+
+/* GÓC TRÁI: Menu Toggle, Brand Logo & Main Nav */
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1;
+  min-width: 0;
+}
+
+.menuToggleButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  min-height: 38px;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.menuToggleButton:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.menuToggleButton:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.menuToggleLabel {
+  display: inline-block;
 }
 
 .brand {
@@ -35,8 +75,8 @@
 }
 
 .brandIconWrapper {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   background-color: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--radius-md);
@@ -47,33 +87,46 @@
   flex-shrink: 0;
 }
 
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
 .brandTitle {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.01em;
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.2;
   color: #ffffff;
+  white-space: nowrap;
 }
 
 .brandSubtitle {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.82);
   margin: 0;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
-/* Navigation Links */
-.desktopNav {
+/* Left Navigation Links */
+.leftNav {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.leftNav::-webkit-scrollbar {
+  display: none;
 }
 
 .navLink {
   color: rgba(255, 255, 255, 0.9);
-  padding: 0.5rem 0.85rem;
+  padding: 0.45rem 0.75rem;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -81,8 +134,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 40px;
+  min-height: 38px;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .navLink:hover {
@@ -103,58 +157,12 @@
   box-shadow: inset 0 -3px 0 0 #fde047;
 }
 
-.userSection {
+/* GÓC PHẢI: Khu vực Tài khoản / Đăng ký - Đăng nhập */
+.rightSection {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   flex-shrink: 0;
-  margin-left: 0.5rem;
-}
-
-.userBadge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--font-size-sm);
-  color: #f8fafc;
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 0.375rem 0.85rem;
-  border-radius: var(--radius-full);
-}
-
-.roleTag {
-  font-size: var(--font-size-xs);
-  padding: 0.15rem 0.55rem;
-  border-radius: var(--radius-sm);
-  background-color: rgba(255, 255, 255, 0.25);
-  font-weight: var(--font-weight-semibold);
-  color: #ffffff;
-}
-
-.logoutButton {
-  background-color: rgba(220, 38, 38, 0.9);
-  color: white;
-  border: none;
-  padding: 0.5rem 0.85rem;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 38px;
-  transition: background-color var(--transition-fast);
-}
-
-.logoutButton:hover {
-  background-color: var(--color-danger);
-}
-
-.logoutButton:focus-visible {
-  outline: 3px solid #ffffff;
-  outline-offset: 2px;
 }
 
 .authButtons {
@@ -164,39 +172,47 @@
 }
 
 .loginButton {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.5rem 1rem;
+  padding: 0.45rem 0.95rem;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
-  transition: background-color var(--transition-fast);
+  gap: 6px;
+  min-height: 38px;
+  transition: all var(--transition-fast);
 }
 
 .loginButton:hover {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.22);
   color: #ffffff;
   text-decoration: none;
+}
+
+.loginButton:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
 }
 
 .registerButton {
   background-color: #ffffff;
   color: var(--color-primary);
-  padding: 0.5rem 1.15rem;
+  border: 1px solid transparent;
+  padding: 0.45rem 1.05rem;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
+  gap: 6px;
+  min-height: 38px;
   box-shadow: var(--shadow-sm);
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .registerButton:hover {
@@ -206,27 +222,12 @@
   transform: translateY(-1px);
 }
 
-/* Mobile Toggle */
-.mobileToggle {
-  display: none;
-  background-color: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-.mobileToggle:focus-visible {
+.registerButton:focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 2px;
 }
 
-/* Secondary Role Bar */
+/* Role Workspace Sub-bar */
 .workspaceBar {
   background-color: #0f172a;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -234,9 +235,9 @@
 }
 
 .workspaceContainer {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0.5rem 1.5rem;
+  padding: 0.45rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -269,7 +270,7 @@
 
 .wsLink {
   color: #cbd5e1;
-  padding: 0.375rem 0.75rem;
+  padding: 0.35rem 0.75rem;
   border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
@@ -278,7 +279,7 @@
   align-items: center;
   gap: 6px;
   text-decoration: none;
-  min-height: 36px;
+  min-height: 34px;
 }
 
 .wsLink:hover {
@@ -298,10 +299,194 @@
   font-weight: var(--font-weight-semibold);
 }
 
+/* THANH MENU GÓC TRÁI (LEFT DRAWER) */
+.drawerBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-modal-backdrop);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.leftDrawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 320px;
+  max-width: 85vw;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  animation: slideInLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.drawerHeader {
+  padding: var(--space-4);
+  background-color: #1e3a8a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.drawerBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.drawerBrandIcon {
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.drawerTitle {
+  font-size: 0.95rem;
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.drawerSubtitle {
+  font-size: 0.7rem;
+  color: #bfdbfe;
+  margin: 0;
+}
+
+.drawerCloseButton {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.drawerCloseButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.drawerBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.drawerGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drawerGroupLabel {
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted-foreground);
+  margin-bottom: 4px;
+}
+
+.drawerLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-main);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+}
+
+.drawerLink:hover {
+  background-color: #f1f5f9;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.drawerFooter {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.drawerApiLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+}
+
+.drawerApiLink:hover {
+  background-color: #dbeafe;
+  text-decoration: none;
+}
+
+.drawerVersion {
+  font-size: 0.6875rem;
+  color: var(--color-muted-foreground);
+  margin: 0;
+  text-align: center;
+}
+
 /* Main Content Area */
 .main {
   flex: 1;
-  max-width: 1400px;
+  max-width: 1440px;
   width: 100%;
   margin: 0 auto;
   padding: var(--space-6) 1.5rem;
@@ -318,7 +503,7 @@
 }
 
 .footerContainer {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -347,40 +532,25 @@
   line-height: 1.5;
 }
 
-/* Mobile Responsive */
-@media (max-width: 1024px) {
-  .desktopNav {
+/* Mobile & Tablet Responsive */
+@media (max-width: 1100px) {
+  .leftNav {
     display: none;
   }
-  .desktopNav.open {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: #1e3a8a;
-    padding: 1.25rem 1.5rem;
-    box-shadow: var(--shadow-xl);
-    gap: 0.75rem;
-    align-items: stretch;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  .menuToggleLabel {
+    display: none;
   }
-  .mobileToggle {
-    display: flex;
+}
+
+@media (max-width: 640px) {
+  .brandText {
+    display: none;
   }
-  .userSection {
-    margin-left: 0;
-    flex-direction: column;
-    align-items: stretch;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    padding-top: 0.75rem;
+  .headerContainer {
+    padding: 0.5rem 1rem;
   }
-  .authButtons {
-    flex-direction: column;
-    width: 100%;
-  }
-  .loginButton, .registerButton {
-    justify-content: center;
+  .authButtons .loginButton span,
+  .authButtons .registerButton span {
+    display: none;
   }
 }
