@@ -3,6 +3,9 @@ package vn.edu.gplx.modules.learning.domain;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
@@ -18,6 +21,10 @@ public class TheoryQuestion extends BaseEntity {
     @Column(name = "category_code", nullable = false, length = 20)
     private String categoryCode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topic_id")
+    private TheoryTopic topic;
+
     @Column(name = "question_number", nullable = false)
     private int questionNumber;
 
@@ -32,6 +39,15 @@ public class TheoryQuestion extends BaseEntity {
 
     @Column(name = "is_paralysis", nullable = false)
     private boolean isParalysis = false; // Câu hỏi điểm liệt
+
+    @Column(name = "version", nullable = false, length = 50)
+    private String version = "VN-600-2020";
+
+    @Column(name = "verification_status", nullable = false, length = 30)
+    private String verificationStatus = "VERIFIED";
+
+    @Column(name = "legal_reference", length = 255)
+    private String legalReference;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
@@ -55,6 +71,14 @@ public class TheoryQuestion extends BaseEntity {
 
     public void setCategoryCode(String categoryCode) {
         this.categoryCode = categoryCode;
+    }
+
+    public TheoryTopic getTopic() {
+        return topic;
+    }
+
+    public void setTopic(TheoryTopic topic) {
+        this.topic = topic;
     }
 
     public int getQuestionNumber() {
@@ -95,6 +119,30 @@ public class TheoryQuestion extends BaseEntity {
 
     public void setParalysis(boolean paralysis) {
         isParalysis = paralysis;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void setVerificationStatus(String verificationStatus) {
+        this.verificationStatus = verificationStatus;
+    }
+
+    public String getLegalReference() {
+        return legalReference;
+    }
+
+    public void setLegalReference(String legalReference) {
+        this.legalReference = legalReference;
     }
 
     public List<TheoryAnswer> getAnswers() {

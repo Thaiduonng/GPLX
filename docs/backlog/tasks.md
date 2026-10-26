@@ -124,3 +124,16 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P9-05`** | Nâng cấp toàn diện Phân hệ Nghiệp vụ Cán bộ & Quản trị | TSK-P9-03 | `DONE` | `ApplicationManagementPage` thẩm định hồ sơ chuẩn ADM-002; `ExamGradingPage` chấm điểm 4 môn sát hạch EXM-002; `FleetManagementPage` cảnh báo hạn kiểm định FLT-001 & modal bảo dưỡng; `DashboardPage` KPI charts; `AuditLogPage` tra cứu nhật ký kiểm toán. |
 | **`TSK-P9-06`** | Loại bỏ 100% kiểu `any`, Format Chuẩn Tiếng Việt & Đóng gói Docker | TSK-P9-04..05 | `DONE` | Loại bỏ toàn bộ `any`, định dạng tiền tệ VND / ngày giờ tiếng Việt (`formatters.ts`), bổ sung `.dockerignore`, biên dịch Vite `npm run build` 0 lỗi và Nginx container hoạt động mượt mà tại `http://localhost:3000`. |
 
+
+---
+
+## Danh mục Tasks — Phase 10: Phân Hệ Học Tập, Rèn Luyện & Thi Thử Lý Thuyết GPLX Việt Nam
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **TSK-P10-01** | Chuẩn hóa Căn cứ Pháp lý & Cấu trúc 600 Câu hỏi GPLX | TSK-P9-06 | DONE | Khởi tạo question-bank-source.md (7 chương, 60 câu điểm liệt), exam-format-by-license-class.md (cấu trúc đề A1, A2, B1, B, C theo Thông tư 12 & 04), legal-verification-log.md trạng thái VERIFIED. |
+| **TSK-P10-02** | Database Migrations V9 & V10 cho Phân hệ Lý thuyết | TSK-P10-01 | DONE | Tạo bảng 	heory_topics, exam_configurations, ookmarked_questions, practice_sessions, practice_answers, mock_exam_sessions, mock_exam_session_answers; audit fields created_at, updated_at; seed 7 chương, cấu hình đề và câu hỏi mẫu. |
+| **TSK-P10-03** | Triển khai Domain & Application Services Backend | TSK-P10-02 | DONE | Java 21 Spring Boot 4.1.1: TheoryTopicService, TheoryBookmarkService, TheoryPracticeService (8 chế độ rèn luyện), TheoryExamService (bảo mật đề, chấm điểm server, rẽ nhánh điểm liệt, idempotent), TheoryStatisticsService, ExamConfigService, QuestionAdminService. |
+| **TSK-P10-04** | Xây dựng REST API Controllers & Unit Test Bảo Mật | TSK-P10-03 | DONE | TheoryExamController, TheoryLearningController, TheoryAdminController; bộ test TheoryExamSecureWorkflowTest và TheoryExamServiceTest đạt BUILD SUCCESS 100%. |
+| **TSK-P10-05** | Xây dựng Giao diện React Frontend Chuyên Sâu 5 Phân Khu | TSK-P10-04 | DONE | Nâng cấp TheoryExamPage với 6 Tabs: Tổng quan & KPI, Học theo 7 chương, Rèn luyện 8 chế độ tương tác, Thi thử chuẩn theo từng hạng GPLX, Ôn tập câu sai & Bookmark, Quản trị cấu hình đề thi. |
+| **TSK-P10-06** | Kiểm thử Tích hợp End-to-End & Đóng gói Docker Stack | TSK-P10-05 | DONE | Build Docker Compose thành công, các container gplx-frontend, gplx-backend, gplx-mysql hoạt động healthy, API 	opics và questions phản hồi chuẩn xác. |
