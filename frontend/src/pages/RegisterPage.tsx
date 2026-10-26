@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
+import { Icons } from '../components/ui';
 import styles from './LoginPage.module.css';
 
 export default function RegisterPage() {
@@ -58,14 +59,17 @@ export default function RegisterPage() {
     <div className={styles.container}>
       <div className={styles.card} style={{ maxWidth: '520px' }}>
         <div className={styles.header}>
-          <div className={styles.icon}>📝</div>
+          <div className={styles.iconWrapper}>
+            <Icons.ClipboardList size={32} />
+          </div>
           <h2>Đăng ký Tài khoản Mới</h2>
           <p>Tạo tài khoản học viên để tham gia đào tạo và nộp hồ sơ GPLX</p>
         </div>
 
         {errorMessage && (
-          <div className={styles.errorAlert}>
-            ⚠️ {errorMessage}
+          <div className={styles.errorAlert} role="alert">
+            <span className={styles.errorIcon}>!</span>
+            <span>{errorMessage}</span>
           </div>
         )}
 
@@ -93,6 +97,7 @@ export default function RegisterPage() {
               onChange={(e) => setUsername(e.target.value)}
               disabled={loading}
               required
+              autoComplete="username"
             />
           </div>
 
@@ -106,6 +111,7 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
               required
+              autoComplete="email"
             />
           </div>
 
@@ -118,6 +124,7 @@ export default function RegisterPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               disabled={loading}
+              autoComplete="tel"
             />
           </div>
 
@@ -145,6 +152,7 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
               required
+              autoComplete="new-password"
             />
           </div>
 
@@ -158,6 +166,7 @@ export default function RegisterPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={loading}
               required
+              autoComplete="new-password"
             />
           </div>
 

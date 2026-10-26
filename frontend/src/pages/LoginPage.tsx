@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
+import { Icons } from '../components/ui';
 import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
@@ -40,14 +41,17 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <div className={styles.icon}>🔐</div>
+          <div className={styles.iconWrapper}>
+            <Icons.ShieldCheck size={32} />
+          </div>
           <h2>Đăng nhập Hệ thống</h2>
           <p>Nhập thông tin tài khoản để truy cập hệ thống đào tạo GPLX</p>
         </div>
 
         {errorMessage && (
-          <div className={styles.errorAlert}>
-            ⚠️ {errorMessage}
+          <div className={styles.errorAlert} role="alert">
+            <span className={styles.errorIcon}>!</span>
+            <span>{errorMessage}</span>
           </div>
         )}
 
@@ -62,6 +66,7 @@ export default function LoginPage() {
               onChange={(e) => setUsernameOrEmail(e.target.value)}
               disabled={loading}
               required
+              autoComplete="username"
             />
           </div>
 
@@ -75,6 +80,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
               required
+              autoComplete="current-password"
             />
           </div>
 
