@@ -4,6 +4,20 @@ Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhậ
 
 ## [1.9.0] — 2026-10-26
 
+### Tái Thiết Kế Menu Góc Trái & Khu Vực Quản Lý Tài Khoản / Người Dùng (Góc Phải)
+- **Tái Cấu Trúc Header Điều Hướng Góc Trái:**
+  - Tích hợp nút bật thanh menu (`menuToggleButton`) ở góc trái đi kèm Drawer danh mục phân hệ toàn diện (`Left Drawer`).
+  - Đặt toàn bộ các liên kết điều hướng chính (Trang chủ, Khóa học, Thi thử 600 câu, Lịch học & DAT, Xe tập lái, Kỳ sát hạch, API Spec) ở góc trái bên cạnh thương hiệu.
+- **Đưa Nút Đăng Nhập / Đăng Ký Cố Định Sang Góc Phải (Chưa Đăng Nhập):**
+  - Cụm nút bấm Đăng ký & Đăng nhập nằm cố định ở góc phải với độ tương phản cao và kích thước touch target 44px.
+- **Tích Hợp Menu Quản Lý Người Dùng / Tài Khoản Ở Góc Phải (Sau Khi Đăng Nhập):**
+  - Khởi tạo component `UserAccountMenu.tsx`: Hiển thị Avatar tròn với ký tự viết tắt, tên người dùng, vai trò và icon mũi tên.
+  - Dropdown Menu tài khoản đa tầng:
+    - **Quản lý tài khoản cá nhân:** Modal thông tin tài khoản chi tiết (ID, Email, SĐT, Roles, JWT status) và Tab Đổi mật khẩu an toàn.
+    - **Quản lý người dùng hệ thống (Admin & Staff):** Modal tra cứu danh sách người dùng, tìm kiếm theo tên/username/email, lọc theo vai trò và xem chi tiết.
+    - **Lối tắt nhanh:** Xem hồ sơ của tôi, Kết quả thi sát hạch, Lịch sử nộp học phí.
+    - **Đăng xuất an toàn:** Đăng xuất khỏi phiên làm việc.
+
 ### Nâng Cấp Hệ Thống Giao Diện UI/UX Pro Max (Enterprise Government Portal & LMS)
 - **Tích Hợp Design System Master từ `ui-ux-pro-max`:**
   - Khởi tạo Source of Truth thiết kế tại `design-system/gplx-enterprise-portal/MASTER.md` theo phong cách `Accessible & Ethical` kết hợp `Enterprise Gateway`.
