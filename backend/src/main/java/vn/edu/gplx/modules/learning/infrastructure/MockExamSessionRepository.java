@@ -1,5 +1,7 @@
 package vn.edu.gplx.modules.learning.infrastructure;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,7 @@ import java.util.Optional;
 public interface MockExamSessionRepository extends JpaRepository<MockExamSession, Long> {
     Optional<MockExamSession> findBySessionCode(String sessionCode);
     List<MockExamSession> findByUserIdOrderByStartedAtDesc(Long userId);
+    Page<MockExamSession> findByUserIdOrderByStartedAtDesc(Long userId, Pageable pageable);
 
     long countByUserId(Long userId);
     long countByUserIdAndPassedTrue(Long userId);

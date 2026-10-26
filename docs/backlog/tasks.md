@@ -137,3 +137,17 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **TSK-P10-04** | Xây dựng REST API Controllers & Unit Test Bảo Mật | TSK-P10-03 | DONE | TheoryExamController, TheoryLearningController, TheoryAdminController; bộ test TheoryExamSecureWorkflowTest và TheoryExamServiceTest đạt BUILD SUCCESS 100%. |
 | **TSK-P10-05** | Xây dựng Giao diện React Frontend Chuyên Sâu 5 Phân Khu | TSK-P10-04 | DONE | Nâng cấp TheoryExamPage với 6 Tabs: Tổng quan & KPI, Học theo 7 chương, Rèn luyện 8 chế độ tương tác, Thi thử chuẩn theo từng hạng GPLX, Ôn tập câu sai & Bookmark, Quản trị cấu hình đề thi. |
 | **TSK-P10-06** | Kiểm thử Tích hợp End-to-End & Đóng gói Docker Stack | TSK-P10-05 | DONE | Build Docker Compose thành công, các container gplx-frontend, gplx-backend, gplx-mysql hoạt động healthy, API 	opics và questions phản hồi chuẩn xác. |
+
+
+---
+
+## Danh mục Tasks — Phase 11: Chuyên Sâu Database & Backend Phân Hệ Lý Thuyết GPLX (Giai đoạn 2)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P11-01`** | CSDL & Flyway Migration V11 Cấu Trúc Đề Thi 7 Chương | TSK-P10-02 | `DONE` | Khởi tạo `V11__seed_exam_structure_and_import_helpers.sql` chuẩn hóa cấu trúc đề thi `structure_json` cho các hạng A1, A2, B1, B, C theo Thông tư 12 & 04; áp dụng thành công trên MySQL 8.4 LTS. |
+| **`TSK-P11-02`** | Cơ Chế Bảo Mật & Lưu Tiến Độ Thi Thời Gian Thực | TSK-P10-03 | `DONE` | Nâng cấp `TheoryExamService` với API `POST /api/v1/theory/mock-exam/{sessionCode}/progress` lưu trạng thái từng câu thời gian thực; cơ chế tự động đánh dấu hết giờ `EXPIRED`; chống nộp lặp (idempotent); sinh đề phân bổ 7 chương bắt buộc có câu điểm liệt. |
+| **`TSK-P11-03`** | Quản Trị Ngân Hàng Câu Hỏi: Bulk Import & Export JSON | TSK-P10-03 | `DONE` | Triển khai API `POST /api/v1/admin/theory/questions/import` và `GET /api/v1/admin/theory/questions/export` trên `TheoryAdminController` & `QuestionAdminService`; kiểm tra ràng buộc bắt buộc tối thiểu 2 phương án và duy nhất 1 đáp án đúng theo quy định GPLX Việt Nam. |
+| **`TSK-P11-04`** | Tìm Kiếm & Phân Trang Nâng Cao Cho Câu Hỏi & Lịch Sử | TSK-P10-03 | `DONE` | Bổ sung query `searchQuestionsAdvanced` trong `TheoryQuestionRepository`; nâng cấp phân trang `Pageable` cho câu hỏi theo chủ đề, lọc câu điểm liệt, phân trang lịch sử rèn luyện và lịch sử thi thử. |
+| **`TSK-P11-05`** | Bộ Kiểm Thử Tự Động Backend Chuyên Sâu | TSK-P11-02..04 | `DONE` | Mở rộng `TheoryExamSecureWorkflowTest` và khởi tạo `QuestionAdminServiceTest` kiểm thử toàn diện: lưu tiến độ, xử lý quá giờ, chống nộp đúp, validation import (10/10 tests PASS 100%). |
+| **`TSK-P11-06`** | Đóng Gói Docker Container & Kiểm Thử Runtime Thực Tế | TSK-P11-05 | `DONE` | Multi-stage build lại `gplx-backend` container; kiểm thử trực tiếp trên container với chuỗi kịch bản: Topics -> Questions Pagination -> Start Exam -> Realtime Progress Save -> Submit Exam -> Paginated History. Tất cả phản hồi HTTP 200 OK. |

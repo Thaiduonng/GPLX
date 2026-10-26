@@ -2,6 +2,8 @@ package vn.edu.gplx.modules.learning.application.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.gplx.modules.learning.api.dto.PracticeAnswerRequest;
@@ -260,6 +262,13 @@ public class TheoryPracticeServiceImpl implements TheoryPracticeService {
         return sessionRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(this::toSummary)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PracticeSessionSummaryResponse> getUserPracticeHistory(Long userId, Pageable pageable) {
+        return sessionRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
+                .map(this::toSummary);
     }
 
     private PracticeSessionSummaryResponse toSummary(PracticeSession s) {

@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.gplx.modules.identity.application.UserPrincipal;
+import vn.edu.gplx.modules.learning.api.dto.ExamProgressResponse;
 import vn.edu.gplx.modules.learning.api.dto.ExamResultResponse;
 import vn.edu.gplx.modules.learning.api.dto.ExamSubmitRequest;
 import vn.edu.gplx.modules.learning.api.dto.MockExamResultResponse;
 import vn.edu.gplx.modules.learning.api.dto.MockExamSessionResponse;
 import vn.edu.gplx.modules.learning.api.dto.MockExamSummaryResponse;
 import vn.edu.gplx.modules.learning.api.dto.QuestionResponse;
+import vn.edu.gplx.modules.learning.api.dto.SaveExamProgressRequest;
 import vn.edu.gplx.modules.learning.api.dto.StartMockExamRequest;
 import vn.edu.gplx.modules.learning.api.dto.SubmitMockExamRequest;
 import vn.edu.gplx.modules.learning.application.TheoryExamService;
@@ -65,6 +70,18 @@ public class TheoryExamController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "Lưu tạm câu trả lời thời gian thực (phòng sự cố mất điện / tải lại trang)")
+    @PostMapping("/mock-exam/{sessionCode}/progress")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<ExamProgressResponse>> saveProgress(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable String sessionCode,
+            @Valid @RequestBody SaveExamProgressRequest request) {
+        ExamProgressResponse response = examService.saveProgress(sessionCode, userPrincipal.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @Operation(summary = "Nộp bài thi thử trực tuyến và nhận kết quả tự động")
     @PostMapping("/mock-exam/{sessionCode}/submit")
     @PreAuthorize("isAuthenticated()")
@@ -88,13 +105,14 @@ public class TheoryExamController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
-    @Operation(summary = "Lấy lịch sử các lần thi thử của học viên")
+    @Operation(summary = "Lấy lịch sử các lần thi thử của học viên (có phân trang)")
     @GetMapping("/mock-exam/history")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<List<MockExamSummaryResponse>>> getExamHistory(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        List<MockExamSummaryResponse> history = examService.getUserExamHistory(userPrincipal.getId());
+    public ResponseEntity<ApiResponse<Page<MockExamSummaryResponse>>> getExamHistory(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<MockExamSummaryResponse> history = examService.getUserExamHistory(userPrincipal.getId(), pageable);
         return ResponseEntity.ok(ApiResponse.success(history));
     }
 

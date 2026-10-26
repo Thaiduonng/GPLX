@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.gplx.modules.identity.application.UserPrincipal;
 import vn.edu.gplx.modules.learning.api.dto.PracticeAnswerRequest;
@@ -59,13 +63,17 @@ public class TheoryLearningController {
         return ResponseEntity.ok(ApiResponse.success(topics));
     }
 
-    @Operation(summary = "Lấy danh sách câu hỏi học tập thuộc chủ đề")
+    @Operation(summary = "Lấy danh sách câu hỏi học tập thuộc chủ đề (có tìm kiếm, lọc và phân trang)")
     @GetMapping("/topics/{topicId}/questions")
-    public ResponseEntity<ApiResponse<List<QuestionDetailResponse>>> getQuestionsByTopic(
+    public ResponseEntity<ApiResponse<Page<QuestionDetailResponse>>> getQuestionsByTopic(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long topicId) {
+            @PathVariable Long topicId,
+            @RequestParam(required = false) String categoryCode,
+            @RequestParam(required = false) Boolean isParalysis,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 20) Pageable pageable) {
         Long userId = userPrincipal != null ? userPrincipal.getId() : null;
-        List<QuestionDetailResponse> questions = topicService.getQuestionsByTopic(topicId, userId);
+        Page<QuestionDetailResponse> questions = topicService.getQuestionsByTopic(topicId, userId, categoryCode, isParalysis, keyword, pageable);
         return ResponseEntity.ok(ApiResponse.success(questions));
     }
 
@@ -138,13 +146,14 @@ public class TheoryLearningController {
         return ResponseEntity.ok(ApiResponse.success("Hoàn tất phiên rèn luyện", summary));
     }
 
-    @Operation(summary = "Lấy lịch sử các phiên rèn luyện của người học")
+    @Operation(summary = "Lấy lịch sử các phiên rèn luyện của người học (có phân trang)")
     @GetMapping("/practice/history")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<List<PracticeSessionSummaryResponse>>> getPracticeHistory(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        List<PracticeSessionSummaryResponse> history = practiceService.getUserPracticeHistory(userPrincipal.getId());
+    public ResponseEntity<ApiResponse<Page<PracticeSessionSummaryResponse>>> getPracticeHistory(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<PracticeSessionSummaryResponse> history = practiceService.getUserPracticeHistory(userPrincipal.getId(), pageable);
         return ResponseEntity.ok(ApiResponse.success(history));
     }
 

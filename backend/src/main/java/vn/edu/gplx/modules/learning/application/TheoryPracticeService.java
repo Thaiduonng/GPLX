@@ -1,5 +1,7 @@
 package vn.edu.gplx.modules.learning.application;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import vn.edu.gplx.modules.learning.api.dto.PracticeAnswerRequest;
 import vn.edu.gplx.modules.learning.api.dto.PracticeAnswerResultResponse;
 import vn.edu.gplx.modules.learning.api.dto.PracticeSessionStartRequest;
@@ -14,4 +16,5 @@ public interface TheoryPracticeService {
     PracticeAnswerResultResponse submitAnswer(String sessionCode, Long userId, PracticeAnswerRequest request);
     PracticeSessionSummaryResponse completeSession(String sessionCode, Long userId);
     List<PracticeSessionSummaryResponse> getUserPracticeHistory(Long userId);
+    Page<PracticeSessionSummaryResponse> getUserPracticeHistory(Long userId, Pageable pageable);
 }

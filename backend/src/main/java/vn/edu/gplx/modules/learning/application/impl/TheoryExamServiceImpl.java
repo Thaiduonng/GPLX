@@ -1,10 +1,15 @@
 package vn.edu.gplx.modules.learning.application.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.gplx.modules.learning.api.dto.AnswerResponse;
+import vn.edu.gplx.modules.learning.api.dto.ExamProgressResponse;
 import vn.edu.gplx.modules.learning.api.dto.ExamQuestionOptionResponse;
 import vn.edu.gplx.modules.learning.api.dto.ExamQuestionResponse;
 import vn.edu.gplx.modules.learning.api.dto.ExamResultResponse;
@@ -13,6 +18,7 @@ import vn.edu.gplx.modules.learning.api.dto.MockExamResultResponse;
 import vn.edu.gplx.modules.learning.api.dto.MockExamSessionResponse;
 import vn.edu.gplx.modules.learning.api.dto.MockExamSummaryResponse;
 import vn.edu.gplx.modules.learning.api.dto.QuestionResponse;
+import vn.edu.gplx.modules.learning.api.dto.SaveExamProgressRequest;
 import vn.edu.gplx.modules.learning.api.dto.StartMockExamRequest;
 import vn.edu.gplx.modules.learning.api.dto.StudyAnswerOptionResponse;
 import vn.edu.gplx.modules.learning.api.dto.SubmitMockExamRequest;
@@ -36,7 +42,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,11 +50,13 @@ import java.util.UUID;
 public class TheoryExamServiceImpl implements TheoryExamService {
 
     private static final Logger log = LoggerFactory.getLogger(TheoryExamServiceImpl.class);
+    private static final int GRACE_PERIOD_SECONDS = 30; // Dung sai độ trễ mạng khi nộp bài
 
     private final TheoryQuestionRepository questionRepository;
     private final ExamConfigurationRepository configRepository;
     private final MockExamSessionRepository examSessionRepository;
     private final MockExamSessionAnswerRepository sessionAnswerRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TheoryExamServiceImpl(TheoryQuestionRepository questionRepository,
                                  ExamConfigurationRepository configRepository,
@@ -69,37 +76,12 @@ public class TheoryExamServiceImpl implements TheoryExamService {
     public MockExamSessionResponse startMockExam(Long userId, StartMockExamRequest request) {
         String category = request.categoryCode().toUpperCase();
         ExamConfiguration config = configRepository.findByCategoryCodeAndActiveTrue(category)
-                .orElseGet(() -> {
-                    // Fallback cấu hình mặc định
-                    return new ExamConfiguration(category, 30, 20, 27, "DEFAULT", true, "Quy chế chung");
-                });
+                .orElseGet(() -> new ExamConfiguration(category, 30, 20, 27, "DEFAULT", true, "Quy chế chung"));
 
-        // Lấy danh sách câu hỏi phù hợp với hạng thi
-        List<TheoryQuestion> eligibleQuestions = questionRepository.findForLicenseCategory(category);
-        if (eligibleQuestions.isEmpty()) {
-            eligibleQuestions = questionRepository.findAll();
-        }
+        // Lựa chọn câu hỏi theo cơ cấu cấu hình hoặc fallback
+        List<TheoryQuestion> selected = generateQuestionsFromStructure(config, category);
 
-        // Đảm bảo có ít nhất 1 câu hỏi điểm liệt
-        List<TheoryQuestion> paralysisQuestions = eligibleQuestions.stream().filter(TheoryQuestion::isParalysis).toList();
-        List<TheoryQuestion> normalQuestions = eligibleQuestions.stream().filter(q -> !q.isParalysis()).toList();
-
-        List<TheoryQuestion> selected = new ArrayList<>();
-        if (!paralysisQuestions.isEmpty()) {
-            List<TheoryQuestion> shuffledParalysis = new ArrayList<>(paralysisQuestions);
-            Collections.shuffle(shuffledParalysis);
-            selected.add(shuffledParalysis.get(0)); // Thêm 1 câu điểm liệt bắt buộc
-        }
-
-        List<TheoryQuestion> shuffledNormal = new ArrayList<>(normalQuestions);
-        Collections.shuffle(shuffledNormal);
-
-        int remainingCount = config.getTotalQuestions() - selected.size();
-        for (int i = 0; i < Math.min(remainingCount, shuffledNormal.size()); i++) {
-            selected.add(shuffledNormal.get(i));
-        }
-
-        // Đảo ngẫu nhiên lại danh sách câu hỏi trong đề
+        // Đảo ngẫu nhiên lại thứ tự câu hỏi trong đề
         Collections.shuffle(selected);
 
         // Tạo phiên thi trong cơ sở dữ liệu
@@ -136,6 +118,7 @@ public class TheoryExamServiceImpl implements TheoryExamService {
                     q.getContent(),
                     q.getImageUrl(),
                     q.isParalysis(),
+                    null, // Chưa có đáp án đã chọn ban đầu
                     options
             ));
         }
@@ -152,6 +135,85 @@ public class TheoryExamServiceImpl implements TheoryExamService {
                 remainingSeconds,
                 clientQuestions
         );
+    }
+
+    private List<TheoryQuestion> generateQuestionsFromStructure(ExamConfiguration config, String category) {
+        List<TheoryQuestion> selected = new ArrayList<>();
+        Set<Long> chosenIds = new HashSet<>();
+
+        // Kiểm tra nếu có structure_json phân bổ từng chương
+        if (config.getStructureJson() != null && !config.getStructureJson().isBlank()) {
+            try {
+                JsonNode root = objectMapper.readTree(config.getStructureJson());
+
+                // 1. Chọn câu điểm liệt bắt buộc
+                int paralysisNeeded = root.has("paralysis") ? root.get("paralysis").asInt() : 1;
+                List<TheoryQuestion> paralysisCandidates = new ArrayList<>(questionRepository.findParalysisForLicenseCategory(category));
+                if (paralysisCandidates.isEmpty()) {
+                    paralysisCandidates = questionRepository.findByIsParalysisTrueOrderByQuestionNumberAsc();
+                }
+                Collections.shuffle(paralysisCandidates);
+                for (int i = 0; i < Math.min(paralysisNeeded, paralysisCandidates.size()); i++) {
+                    TheoryQuestion q = paralysisCandidates.get(i);
+                    selected.add(q);
+                    chosenIds.add(q.getId());
+                }
+
+                // 2. Chọn câu theo từng chương nếu có cấu hình
+                Map<String, String> topicCodeMapping = Map.of(
+                        "rules", "CH1_RULES",
+                        "transport", "CH2_TRANSPORT",
+                        "culture", "CH3_CULTURE",
+                        "technique", "CH4_TECHNIQUES",
+                        "repair", "CH5_REPAIR",
+                        "signs", "CH6_SIGNS",
+                        "scenarios", "CH7_SCENARIOS"
+                );
+
+                for (Map.Entry<String, String> entry : topicCodeMapping.entrySet()) {
+                    String jsonKey = entry.getKey();
+                    String topicCode = entry.getValue();
+
+                    if (root.has(jsonKey)) {
+                        int countNeeded = root.get(jsonKey).asInt();
+                        List<TheoryQuestion> topicQuestions = new ArrayList<>(questionRepository.findByTopicCodeAndParalysis(topicCode, false));
+                        Collections.shuffle(topicQuestions);
+
+                        int added = 0;
+                        for (TheoryQuestion q : topicQuestions) {
+                            if (!chosenIds.contains(q.getId())) {
+                                selected.add(q);
+                                chosenIds.add(q.getId());
+                                added++;
+                                if (added >= countNeeded) break;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Không thể parse structure_json cho hạng {}: {}", category, e.getMessage());
+            }
+        }
+
+        // Nếu số câu chưa đủ totalQuestions (do thiếu câu mẫu trong topic), bổ sung thêm từ ngân hàng
+        if (selected.size() < config.getTotalQuestions()) {
+            List<TheoryQuestion> all = new ArrayList<>(questionRepository.findForLicenseCategory(category));
+            if (all.isEmpty()) {
+                all = questionRepository.findAll();
+            }
+            Collections.shuffle(all);
+            for (TheoryQuestion q : all) {
+                if (!chosenIds.contains(q.getId())) {
+                    selected.add(q);
+                    chosenIds.add(q.getId());
+                    if (selected.size() >= config.getTotalQuestions()) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return selected;
     }
 
     @Override
@@ -177,6 +239,7 @@ public class TheoryExamServiceImpl implements TheoryExamService {
                     q.getContent(),
                     q.getImageUrl(),
                     q.isParalysis(),
+                    sa.getSelectedAnswer() != null ? sa.getSelectedAnswer().getId() : null, // Khôi phục câu đã làm
                     options
             );
         }).toList();
@@ -198,6 +261,59 @@ public class TheoryExamServiceImpl implements TheoryExamService {
     }
 
     @Override
+    public ExamProgressResponse saveProgress(String sessionCode, Long userId, SaveExamProgressRequest request) {
+        MockExamSession session = examSessionRepository.findBySessionCode(sessionCode)
+                .orElseThrow(() -> new ResourceNotFoundException("MockExamSession", "sessionCode", sessionCode));
+
+        if (!session.getUserId().equals(userId)) {
+            throw new BadRequestException("Bạn không có quyền thao tác trên đề thi này");
+        }
+
+        long elapsedSeconds = Duration.between(session.getStartedAt(), Instant.now()).getSeconds();
+        long allowedSeconds = (long) session.getDurationMinutes() * 60 + GRACE_PERIOD_SECONDS;
+        boolean isExpired = elapsedSeconds > allowedSeconds;
+
+        if (isExpired && !"COMPLETED".equals(session.getStatus())) {
+            session.setStatus("EXPIRED");
+            examSessionRepository.save(session);
+        }
+
+        if ("COMPLETED".equals(session.getStatus()) || "EXPIRED".equals(session.getStatus())) {
+            long remaining = Math.max(0, (long) session.getDurationMinutes() * 60 - elapsedSeconds);
+            return new ExamProgressResponse(sessionCode, countAnsweredQuestions(session.getId()), session.getTotalQuestions(), remaining, true);
+        }
+
+        // Tìm câu hỏi trong đề thi
+        List<MockExamSessionAnswer> answers = sessionAnswerRepository.findByMockExamIdOrderByOrderIndexAsc(session.getId());
+        for (MockExamSessionAnswer sa : answers) {
+            if (sa.getQuestion().getId().equals(request.questionId())) {
+                if (request.selectedAnswerId() != null) {
+                    TheoryAnswer answer = sa.getQuestion().getAnswers().stream()
+                            .filter(a -> a.getId().equals(request.selectedAnswerId()))
+                            .findFirst()
+                            .orElse(null);
+                    sa.setSelectedAnswer(answer);
+                } else {
+                    sa.setSelectedAnswer(null);
+                }
+                sessionAnswerRepository.save(sa);
+                break;
+            }
+        }
+
+        int answeredCount = countAnsweredQuestions(session.getId());
+        long remaining = Math.max(0, (long) session.getDurationMinutes() * 60 - elapsedSeconds);
+
+        return new ExamProgressResponse(sessionCode, answeredCount, session.getTotalQuestions(), remaining, false);
+    }
+
+    private int countAnsweredQuestions(Long mockExamId) {
+        return (int) sessionAnswerRepository.findByMockExamIdOrderByOrderIndexAsc(mockExamId).stream()
+                .filter(a -> a.getSelectedAnswer() != null)
+                .count();
+    }
+
+    @Override
     public MockExamResultResponse submitMockExamSession(String sessionCode, Long userId, SubmitMockExamRequest request) {
         MockExamSession session = examSessionRepository.findBySessionCode(sessionCode)
                 .orElseThrow(() -> new ResourceNotFoundException("MockExamSession", "sessionCode", sessionCode));
@@ -206,10 +322,14 @@ public class TheoryExamServiceImpl implements TheoryExamService {
             throw new BadRequestException("Bạn không có quyền nộp bài thi này");
         }
 
-        // IDEMPOTENCY: Nếu đã hoàn thành trước đó, trả luôn kết quả
+        // IDEMPOTENCY: Nếu đã hoàn thành trước đó, trả luôn kết quả đã lưu
         if ("COMPLETED".equals(session.getStatus())) {
             return buildResultResponse(session);
         }
+
+        long elapsedSeconds = Duration.between(session.getStartedAt(), Instant.now()).getSeconds();
+        long allowedSeconds = (long) session.getDurationMinutes() * 60 + GRACE_PERIOD_SECONDS;
+        boolean isTimeExpired = elapsedSeconds > allowedSeconds;
 
         List<MockExamSessionAnswer> sessionAnswers = sessionAnswerRepository.findByMockExamIdOrderByOrderIndexAsc(session.getId());
         Map<Long, Long> userAnswers = request.answers() != null ? request.answers() : Collections.emptyMap();
@@ -219,7 +339,10 @@ public class TheoryExamServiceImpl implements TheoryExamService {
 
         for (MockExamSessionAnswer sa : sessionAnswers) {
             TheoryQuestion question = sa.getQuestion();
-            Long selectedAnswerId = userAnswers.get(question.getId());
+            // Nếu client có gửi trong submit request thì dùng, không thì lấy đáp án đã lưu trước đó trong saveProgress
+            Long selectedAnswerId = userAnswers.containsKey(question.getId())
+                    ? userAnswers.get(question.getId())
+                    : (sa.getSelectedAnswer() != null ? sa.getSelectedAnswer().getId() : null);
 
             TheoryAnswer selectedAnswer = null;
             if (selectedAnswerId != null) {
@@ -249,16 +372,16 @@ public class TheoryExamServiceImpl implements TheoryExamService {
         }
         sessionAnswerRepository.saveAll(sessionAnswers);
 
-        boolean passed = !failedParalysis && (correctCount >= session.getPassingScore());
+        boolean passed = !failedParalysis && (correctCount >= session.getPassingScore()) && !isTimeExpired;
         session.setScore(correctCount);
         session.setPassed(passed);
         session.setFailedParalysis(failedParalysis);
-        session.setStatus("COMPLETED");
+        session.setStatus(isTimeExpired ? "EXPIRED" : "COMPLETED");
         session.setCompletedAt(Instant.now());
         examSessionRepository.save(session);
 
-        log.info("Mock exam completed: sessionCode={}, user={}, score={}/{}, passed={}, failedParalysis={}",
-                sessionCode, userId, correctCount, session.getTotalQuestions(), passed, failedParalysis);
+        log.info("Mock exam completed: sessionCode={}, user={}, score={}/{}, passed={}, failedParalysis={}, expired={}",
+                sessionCode, userId, correctCount, session.getTotalQuestions(), passed, failedParalysis, isTimeExpired);
 
         return buildResultResponse(session);
     }
@@ -267,20 +390,31 @@ public class TheoryExamServiceImpl implements TheoryExamService {
     @Transactional(readOnly = true)
     public List<MockExamSummaryResponse> getUserExamHistory(Long userId) {
         return examSessionRepository.findByUserIdOrderByStartedAtDesc(userId).stream()
-                .map(s -> new MockExamSummaryResponse(
-                        s.getId(),
-                        s.getSessionCode(),
-                        s.getCategoryCode(),
-                        s.getScore(),
-                        s.getTotalQuestions(),
-                        s.getPassingScore(),
-                        s.isPassed(),
-                        s.isFailedParalysis(),
-                        s.getStatus(),
-                        s.getStartedAt(),
-                        s.getCompletedAt()
-                ))
+                .map(this::toSummaryResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MockExamSummaryResponse> getUserExamHistory(Long userId, Pageable pageable) {
+        return examSessionRepository.findByUserIdOrderByStartedAtDesc(userId, pageable)
+                .map(this::toSummaryResponse);
+    }
+
+    private MockExamSummaryResponse toSummaryResponse(MockExamSession s) {
+        return new MockExamSummaryResponse(
+                s.getId(),
+                s.getSessionCode(),
+                s.getCategoryCode(),
+                s.getScore(),
+                s.getTotalQuestions(),
+                s.getPassingScore(),
+                s.isPassed(),
+                s.isFailedParalysis(),
+                s.getStatus(),
+                s.getStartedAt(),
+                s.getCompletedAt()
+        );
     }
 
     @Override
