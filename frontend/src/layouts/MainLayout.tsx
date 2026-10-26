@@ -111,6 +111,13 @@ export default function MainLayout() {
                 Thi thử 600 câu
               </Link>
               <Link
+                to="/theory-review"
+                className={`${styles.navLink} ${isActive('/theory-review') || isActive('/student/review') ? styles.active : ''}`}
+              >
+                <Icons.RefreshCw size={16} />
+                Ôn tập thông minh
+              </Link>
+              <Link
                 to="/training/schedules"
                 className={`${styles.navLink} ${isActive('/training/schedules') ? styles.active : ''}`}
               >
@@ -230,6 +237,13 @@ export default function MainLayout() {
                     <Icons.Award size={14} />
                     Kết quả sát hạch
                   </Link>
+                  <Link
+                    to="/student/review"
+                    className={`${styles.wsLink} ${isActive('/student/review') || isActive('/theory-review') ? styles.active : ''}`}
+                  >
+                    <Icons.RefreshCw size={14} />
+                    Ôn tập củng cố
+                  </Link>
                 </>
               )}
 
@@ -325,6 +339,10 @@ export default function MainLayout() {
                 <Link to="/theory-exam" className={styles.drawerLink} onClick={() => setLeftDrawerOpen(false)}>
                   <Icons.ClipboardList size={16} />
                   <span>Thi thử 600 câu lý thuyết</span>
+                </Link>
+                <Link to="/theory-review" className={styles.drawerLink} onClick={() => setLeftDrawerOpen(false)}>
+                  <Icons.RefreshCw size={16} />
+                  <span>Ôn tập thông minh & Spaced Repetition</span>
                 </Link>
                 <Link to="/examination/sessions" className={styles.drawerLink} onClick={() => setLeftDrawerOpen(false)}>
                   <Icons.Award size={16} />

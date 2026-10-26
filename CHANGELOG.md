@@ -2,6 +2,39 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0] — 2026-10-26
+
+### Triển Khai Phân Hệ Ôn Tập GPLX — Spaced Repetition & Củng Cố Kiến Thức (Full-Stack)
+- **Kiến Trúc & Phân Định Trách Nhiệm Chức Năng:**
+  - Thiết lập phân hệ **Ôn tập (Review)** chuyên biệt tách biệt khỏi Học tập (tiếp nhận kiến thức) và Rèn luyện/Thi thử (thực hành đề thi).
+  - Trọng tâm phân hệ là củng cố kiến thức chưa vững, xóa điểm yếu, ôn lại các câu từng làm sai và câu hỏi điểm liệt ⚠️ với thuật toán lặp lại ngắt quãng khoa học.
+- **Cơ Sở Dữ Liệu & Migrations (Flyway V12):**
+  - Khởi tạo file migration `V12__create_review_module_tables.sql` tạo 3 bảng quan hệ:
+    - `question_retention_states`: Quản lý trạng thái ghi nhớ từng câu hỏi của người học, cấp độ hộp Leitner 1..5, chu kỳ ngắt quãng 1->3->7->14->30 ngày, số lần đúng/sai liên tiếp, điểm ưu tiên (`priority_score`) và trạng thái thành thạo (`NEEDS_PRACTICE`, `REVIEWING`, `MASTERED`).
+    - `review_sessions`: Lưu trữ các phiên ôn tập độc lập (`session_code`, `review_mode`, `category_code`, `total_questions`, `correct_count`, `incorrect_count`, `status`).
+    - `review_session_answers`: Lưu chi tiết từng lượt trả lời trong phiên ôn, phương án chọn, tính đúng/sai và dấu thời gian.
+- **Backend Domain, Application Service & DTOs (Java 21 & Spring Boot):**
+  - Domain Model `QuestionRetentionState`: Thuật toán lặp lại ngắt quãng (Spaced Repetition / Leitner System), nâng cấp hộp khi đúng và reset về Hộp 1 khi sai, tính điểm ưu tiên thông minh dựa trên: câu điểm liệt (+35), tần suất sai (+10/lần), tỷ lệ sai (+20), quá hạn ôn (+20) và cấp độ hộp 1-2 (+15).
+  - Service `TheoryReviewService` & `TheoryReviewServiceImpl`:
+    - Tự động đồng bộ câu hỏi sai từ lịch sử luyện tập `PracticeAnswer` sang `QuestionRetentionState`.
+    - Sinh hàng đợi ôn tập thông minh (`SMART`) ưu tiên câu điểm liệt chưa vững và câu quá hạn ôn tập.
+    - Chấm điểm tức thì (Idempotent), phản hồi giải thích đáp án và căn cứ pháp lý.
+    - Kết thúc phiên ôn, tính tỷ lệ chính xác và đưa ra khuyến nghị ôn tập tiếp theo.
+  - REST Controller `TheoryReviewController`: 10 endpoints chuẩn OpenAPI tại `/api/v1/review/**`.
+  - Unit Test Suite `TheoryReviewServiceTest`: 5 test cases kiểm thử tự động đạt chuẩn.
+- **Frontend Module Ôn Tập React 19 + TypeScript + Vite:**
+  - Khởi tạo `TheoryReviewPage.tsx` và `TheoryReviewPage.module.css`:
+    - **Dashboard tổng quan:** 6 thẻ KPI (câu cần ôn, câu sai chưa củng cố, câu đến hạn hôm nay, câu điểm liệt cần ôn, câu đã lưu, tỷ lệ đúng gần đây), biểu đồ thanh tiến độ theo 7 chương, lịch sử phiên ôn gần nhất và banner gợi ý thông minh.
+    - **6 Tab chuyển đổi nghiệp vụ:** Tổng quan, Ôn câu trả lời sai (gộp các lần làm bài, hiển thị số lần sai), Ôn câu điểm liệt (lọc Đang củng cố / Đã thành thạo), Ôn câu đã đánh dấu, Ôn theo 7 chủ đề, Lịch sử phiên ôn.
+    - **Màn hình phiên ôn tập trực tiếp (Live Session):** Giao diện tập trung, thanh tiến độ làm bài, huy hiệu câu điểm liệt, nút lưu bookmark, lựa chọn đáp án trắc nghiệm A-B-C-D, hiển thị giải thích đáp án và căn cứ pháp lý, huy hiệu hộp Leitner 1..5 và chu kỳ ôn tiếp theo.
+    - **Màn hình tổng kết phiên ôn:** Biểu đồ tỷ lệ chính xác, số câu đúng/sai, đánh giá thuật toán và nút bắt đầu phiên ôn câu sai ngay lập tức.
+- **Tích Hợp Hệ Thống Điều Hướng & Routing Toàn Diện:**
+  - Đăng ký routes `/student/review` và `/theory-review` trong `App.tsx`.
+  - Tích hợp liên kết `Ôn tập thông minh` vào Navigation Header góc trái, Drawer hệ thống, thanh Workspace Bar học viên (`MainLayout.tsx`) và thẻ lối tắt nhanh trên Trang chủ (`HomePage.tsx`).
+- **Đóng Gói & Kiểm Thử Tích Hợp End-to-End (E2E):**
+  - Đóng gói Docker Compose backend và frontend với Spring Boot 4.1.1 (Java 21) và Nginx Alpine.
+  - Chạy kịch bản kiểm thử E2E tự động qua API thực tế: Đăng nhập -> Lấy Dashboard -> Lấy 7 chủ đề -> Lấy 6 câu điểm liệt -> Khởi tạo phiên ôn -> Nộp đáp án -> Cập nhật hộp Leitner -> Hoàn tất phiên và ghi nhận lịch sử (ĐẠT 8/8 BƯỚC).
+
 ## [1.9.0] — 2026-10-26
 
 ### Tái Thiết Kế Menu Góc Trái & Khu Vực Quản Lý Tài Khoản / Người Dùng (Góc Phải)

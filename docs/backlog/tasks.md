@@ -217,3 +217,18 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P16-05`** | Tái Cấu Trúc MainLayout & Giao Diện Trang Chủ HomePage | TSK-P16-03..04 | `DONE` | Tái thiết kế Header phong cách Cổng thông tin Quốc gia, thanh Workspace Bar phân chia 4 phân hệ, Hero Banner uy tín, lộ trình 4 bước và lưới các phân hệ Modular Monolith. |
 | **`TSK-P16-06`** | Đóng Gói Docker Frontend & Kiểm Thử Runtime | TSK-P16-05 | `DONE` | Biên dịch `tsc -b && vite build` 0 lỗi; đóng gói container Nginx `gplx-frontend` v1.9.0; phản hồi HTTP 200 OK tại cổng 3000 kết nối backend 8088. |
 | **`TSK-P16-07`** | Tái Cấu Trúc Menu Góc Trái & Khu Vực Quản Lý Tài Khoản / Người Dùng Góc Phải | TSK-P16-05 | `DONE` | Bố trí thanh menu và drawer bên góc trái; đưa nút Đăng nhập/Đăng ký sang góc phải; sau đăng nhập hiển thị UserAccountMenu góc phải kèm quản lý tài khoản (hồ sơ, đổi mật khẩu) và quản lý người dùng hệ thống. |
+
+
+---
+
+## Danh mục Tasks — Phase 17: Phân Hệ Ôn Tập GPLX — Spaced Repetition & Củng Cố Kiến Thức (Full-Stack)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P17-01`** | Database Migration V12 & Domain Entities Spaced Repetition | TSK-P16-07 | `DONE` | Flyway V12 tạo 3 bảng (`question_retention_states`, `review_sessions`, `review_session_answers`); Entity `QuestionRetentionState` thực thi thuật toán Leitner 5 hộp, chu kỳ 1->3->7->14->30 ngày và công thức tính điểm ưu tiên (`priorityScore`). |
+| **`TSK-P17-02`** | Infrastructure Repositories & Dữ Liệu Lịch Sử | TSK-P17-01 | `DONE` | Khởi tạo 3 repositories Spring Data JPA; bổ sung query truy vấn danh sách câu hỏi đã đánh dấu; đồng bộ tự động câu sai từ lịch sử làm bài `PracticeAnswer`. |
+| **`TSK-P17-03`** | Application Service & DTOs Nghiệp Vụ Ôn Tập | TSK-P17-02 | `DONE` | `TheoryReviewService` và `TheoryReviewServiceImpl`: Tổng quan chỉ số Dashboard, sinh hàng đợi ôn tập thông minh (Smart Review Queue), chấm điểm và cập nhật chu kỳ ngắt quãng, tổng kết và đưa ra gợi ý củng cố. |
+| **`TSK-P17-04`** | REST API Controller Chuẩn OpenAPI 3.1.1 | TSK-P17-03 | `DONE` | `TheoryReviewController` cung cấp 10 endpoints tại `/api/v1/review/**`: Overview, Danh sách câu sai, 60 câu điểm liệt, Danh sách bookmark, Thống kê 7 chủ đề, Bắt đầu phiên, Nộp đáp án tức thì, Hoàn tất phiên, Lịch sử phiên ôn. |
+| **`TSK-P17-05`** | Backend Unit Tests Suite | TSK-P17-03 | `DONE` | Khởi tạo `TheoryReviewServiceTest`: 5 kịch bản kiểm thử (Leitner thăng/hạ hộp khi trả lời đúng/sai, reset chu kỳ, Dashboard cho học viên mới, tạo phiên ôn thông minh, hoàn thành phiên và gợi ý bước tiếp theo). |
+| **`TSK-P17-06`** | Frontend Giao Diện Ôn Tập React 19 + TypeScript | TSK-P17-04 | `DONE` | `TheoryReviewPage.tsx` và `reviewService.ts`: Dashboard 6 thẻ KPI, 6 tab nghiệp vụ (Tổng quan, Ôn câu sai, Ôn điểm liệt, Ôn câu đã lưu, Ôn theo 7 chủ đề, Lịch sử phiên ôn) + Màn hình phiên ôn trực tiếp với phản hồi tức thì, Leitner box level và giải thích pháp lý. |
+| **`TSK-P17-07`** | Điều Hướng Routing, Layout & Kiểm Thử Tích Hợp E2E | TSK-P17-05..06 | `DONE` | Tích hợp route `/student/review` và `/theory-review` vào `App.tsx`; bổ sung liên kết vào Header, Drawer góc trái, Workspace bar học viên và `HomePage.tsx`; đóng gói Docker container và chạy kiểm thử E2E 8/8 bước thành công 100%. |
