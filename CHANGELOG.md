@@ -2,6 +2,46 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.0] — 2026-10-26
+
+### Phân Hệ Học Tập, Rèn Luyện & Thi Thử Lý Thuyết GPLX Việt Nam (Phase 10 — Theory Learning & Exam System)
+- **Tài liệu Nguồn & Quy chuẩn Pháp lý (docs/legal/):**
+  - Khởi tạo question-bank-source.md: Chuẩn hóa 600 câu hỏi Cục Đường bộ Việt Nam thành 7 chương nghiệp vụ và 60 câu điểm liệt (VERIFIED).
+  - Khởi tạo exam-format-by-license-class.md: Cấu trúc đề thi sát hạch lý thuyết chính thức theo hạng A1 (25 câu / 19p / Đạt 21), A2 (25 câu / 19p / Đạt 23), B1 (30 câu / 20p / Đạt 27), B (35 câu / 22p / Đạt 32), C (40 câu / 24p / Đạt 36) theo Thông tư 12/2017/TT-BGTVT và Thông tư 04/2022/TT-BGTVT.
+  - Khởi tạo legal-verification-log.md: Nhật ký đối soát văn bản quy phạm pháp luật.
+- **Database & Flyway Migrations (V9, V10):**
+  - Tạo bảng 	heory_topics lưu trữ danh mục 7 chương lý thuyết chuẩn Cục ĐBVN.
+  - Bổ sung 	opic_id, ersion, erification_status, legal_reference vào bảng 	heory_questions.
+  - Tạo bảng exam_configurations: Quản lý cấu hình thông số đề thi theo hạng GPLX và phiên bản quy chế.
+  - Tạo bảng ookmarked_questions: Lưu trữ các câu hỏi đánh dấu yêu thích theo người dùng.
+  - Tạo bảng practice_sessions & practice_answers: Lưu trữ phiên rèn luyện và câu trả lời tương tác tức thời.
+  - Tạo bảng mock_exam_sessions & mock_exam_session_answers: Lưu trữ phiên thi thử trực tuyến bảo mật.
+  - Bổ sung audit fields (created_at, updated_at) trên tất cả các bảng lý thuyết tuân thủ BaseEntity (V10).
+  - Seed 7 chương lý thuyết chuẩn, cấu hình đề thi các hạng và 25+ câu hỏi mẫu bao quát đủ các chương, biển báo và sa hình.
+- **Backend Application & Domain Services (Java 21, Spring Boot 4.1.1):**
+  - Khởi tạo các Domain Entities: TheoryTopic, ExamConfiguration, BookmarkedQuestion, PracticeSession, PracticeAnswer, MockExamSession, MockExamSessionAnswer.
+  - Triển khai TheoryTopicService: Cung cấp danh mục 7 chương, đếm tiến độ học viên, lấy câu hỏi theo chương kèm lời giải và luật.
+  - Triển khai TheoryBookmarkService: Đánh dấu/bỏ đánh dấu câu hỏi yêu thích (toggle), tra cứu danh sách đã lưu.
+  - Triển khai TheoryPracticeService: Hỗ trợ 8 chế độ rèn luyện chuyên sâu (TOPIC, CATEGORY, UNANSWERED, INCORRECT, PARALYSIS, BOOKMARKED, RANDOM, ALL) kèm phản hồi đáp án ngay (Instant Feedback).
+  - Triển khai TheoryExamService chuẩn hóa: Sinh đề thi bảo mật không trả về isCorrect cho client; chấm điểm server-side; trượt ngay khi sai câu điểm liệt (hasFailedParalysis); cơ chế chống nộp đúp (idempotent).
+  - Triển khai TheoryStatisticsService: Tính toán chính xác các chỉ số từ DB (số câu đã học, tỷ lệ đúng/sai, số đề đạt/trượt, tiến độ 7 chương, danh sách câu sai).
+  - Triển khai ExamConfigService & QuestionAdminService: Quản trị cấu hình đề thi theo từng hạng và CRUD ngân hàng câu hỏi.
+  - Cung cấp đầy đủ REST API Controllers: TheoryExamController, TheoryLearningController, TheoryAdminController.
+- **Kiểm thử Tự động Backend (Unit Tests):**
+  - TheoryExamSecureWorkflowTest: Kiểm chứng bảo mật đề thi không lộ đáp án đúng; kiểm chứng quy chế trượt tức thì khi sai câu hỏi điểm liệt.
+  - Toàn bộ unit tests đạt kết quả BUILD SUCCESS (0 failures, 0 errors).
+- **Frontend React 19 + TypeScript + Vite:**
+  - Nâng cấp learning.ts và learningService.ts kết nối toàn bộ hệ thống API lý thuyết.
+  - TheoryOverviewTab: Dashboard trực quan với 4 thẻ KPI, thanh tiến độ 7 chương, 3 phím tắt rèn luyện thông minh.
+  - TheoryTopicStudyTab: Học chuyên sâu 7 chương, lọc câu điểm liệt, hiển thị đáp án đúng, giải thích và căn cứ pháp lý, bookmark câu hỏi.
+  - TheoryPracticeTab: Giao diện tương tác 8 chế độ rèn luyện, kiểm tra kết quả ngay từng câu, giải thích tại chỗ.
+  - TheoryMockExamTab: Màn hình thi thử chuẩn Bộ GTVT theo từng hạng bằng, đồng hồ đếm ngược, lưới chuyển nhanh 25-40 câu, cảnh báo câu điểm liệt, hộp thoại xác nhận nộp bài, kết luận Đạt/Trượt chi tiết.
+  - TheoryReviewTab: Quản lý danh sách câu từng làm sai và câu đã đánh dấu.
+  - TheoryAdminConfigTab: Màn hình điều chỉnh thông số đề thi theo từng hạng cho Quản trị viên / Cán bộ đào tạo.
+- **Vận hành Docker Stack:**
+  - Build thành công Docker image cho gplx-frontend và gplx-backend.
+  - Cả 3 containers (gplx-frontend:3000, gplx-backend:8088, gplx-mysql:3306) đang hoạt động ổn định và healthy.
+
 ## [1.2.0] — 2026-10-26
 
 ### Nâng Cấp Toàn Diện UI/UX & Xây Dựng Hệ Thống Design System Chuyên Nghiệp (Phase 9)
