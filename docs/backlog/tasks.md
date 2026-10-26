@@ -190,3 +190,15 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **TSK-P14-03** | Nhập Hàng Loạt Câu Hỏi Từ JSON (Bulk Import) | TSK-P14-01 | DONE | Chức năng nhập hàng loạt với tiền kiểm tra cú pháp JSON, kiểm tra tính toàn vẹn (tối thiểu 2 đáp án, duy nhất 1 đáp án đúng theo quy định GPLX); hiển thị báo cáo thành công/thất bại chi tiết. |
 | **TSK-P14-04** | Xuất Dữ Liệu Ngân Hàng Câu Hỏi (Export JSON) & Xác Minh Pháp Lý | TSK-P14-02 | DONE | Xuất dữ liệu câu hỏi ra file JSON tiêu chuẩn theo chương hoặc hạng; quản lý thông tin phiên bản Bộ 600 câu hỏi Cục ĐBVN và 60 câu điểm liệt ở trạng thái VERIFIED (Thông tư 12 & Thông tư 04). |
 | **TSK-P14-05** | Kiểm Thử Tự Động Backend & Đóng Gói Docker Toàn Diện | TSK-P14-02..04 | DONE | Mở rộng bộ unit tests QuestionAdminServiceTest đạt 5/5 PASS (tổng 7/7 tests module lý thuyết); đóng gói Docker frontend v1.7.0 phục vụ tại cổng 3000. |
+
+
+---
+
+## Danh mục Tasks — Phase 15: Kiểm Thử Toàn Diện & Nghiệm Thu Hệ Thống (Giai đoạn 6)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P15-01`** | Kiểm Thử Tự Động Backend Toàn Bộ (Test Suites) | TSK-P14-05 | `DONE` | Toàn bộ 76/76 unit & integration tests chạy thành công 100% BUILD SUCCESS; chuẩn hóa FlywayConfig tương thích giữa MySQL 8.4 và H2 in-memory test. |
+| **`TSK-P15-02`** | Xác Thực Bảo Mật Phân Quyền RBAC Phía Server | TSK-P15-01 | `DONE` | Kiểm chứng kịch bản thực tế: Học viên `ROLE_STUDENT` bị chặn truy cập API Admin bằng HTTP 403; Quản trị viên `ROLE_ADMIN` truy cập đầy đủ API cấu hình và ngân hàng câu hỏi bằng HTTP 200. |
+| **`TSK-P15-03`** | Đóng Gói Docker Compose & Xác Thực Container Healthy | TSK-P15-02 | `DONE` | Đóng gói production bundle cho `gplx-frontend` (Nginx Alpine) và `gplx-backend` (Eclipse Temurin 21 JRE); cả 3 containers (Frontend, Backend, MySQL) đạt trạng thái Up (healthy). |
+| **`TSK-P15-04`** | Tài Liệu Hướng Dẫn Sử Dụng & Báo Cáo Nghiệm Thu | TSK-P15-03 | `DONE` | Khởi tạo `docs/guides/theory-learning-and-exam-system-guide.md` hướng dẫn 6 phân khu chức năng và đối soát toàn diện 14 tiêu chí nghiệm thu theo Master Prompt (ĐẠT 14/14). |
