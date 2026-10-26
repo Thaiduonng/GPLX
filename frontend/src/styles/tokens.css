@@ -1,72 +1,106 @@
 :root {
-  /* Brand Colors */
+  /* ==========================================================================
+     UI/UX PRO MAX DESIGN SYSTEM TOKENS
+     Preset: Accessible & Ethical | Category: Government Portal & Public Education
+     ========================================================================== */
+
+  /* Brand Colors (Primary Deep Trust Blue) */
   --color-primary: #1e40af;
   --color-primary-hover: #1d4ed8;
   --color-primary-light: #eff6ff;
   --color-primary-dark: #1e3a8a;
+  --color-on-primary: #ffffff;
 
-  --color-secondary: #0f766e;
-  --color-secondary-hover: #115e59;
-  --color-secondary-light: #f0fdfa;
+  /* Secondary Colors (Action Blue) */
+  --color-secondary: #2563eb;
+  --color-secondary-hover: #1d4ed8;
+  --color-secondary-light: #dbeafe;
+  --color-secondary-dark: #1e3a8a;
+  --color-on-secondary: #ffffff;
 
-  --color-accent: #2563eb;
-  --color-accent-light: #dbeafe;
+  /* Accent / CTA Colors (Service Green - Đạt chuẩn hành chính công) */
+  --color-accent: #16a34a;
+  --color-accent-hover: #15803d;
+  --color-accent-light: #dcfce7;
+  --color-on-accent: #ffffff;
 
   /* Functional Status Colors */
   --color-success: #15803d;
   --color-success-hover: #166534;
   --color-success-bg: #f0fdf4;
-  --color-success-border: #bbf7d0;
+  --color-success-border: #86efac;
 
   --color-warning: #b45309;
   --color-warning-hover: #92400e;
   --color-warning-bg: #fffbeb;
   --color-warning-border: #fde68a;
 
-  --color-danger: #b91c1c;
-  --color-danger-hover: #991b1b;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
   --color-danger-bg: #fef2f2;
-  --color-danger-border: #fecaca;
+  --color-danger-border: #fca5a5;
+  --color-destructive: #dc2626;
+  --color-on-destructive: #ffffff;
 
-  --color-info: #0369a1;
-  --color-info-hover: #075985;
+  --color-info: #0284c7;
+  --color-info-hover: #0369a1;
   --color-info-bg: #f0f9ff;
   --color-info-border: #bae6fd;
 
   /* Neutrals & Surfaces */
   --color-bg-app: #f8fafc;
+  --color-background: #eff6ff;
   --color-surface: #ffffff;
+  --color-card: #ffffff;
   --color-surface-hover: #f1f5f9;
   --color-surface-subtle: #f8fafc;
-  
-  --color-border: #e2e8f0;
-  --color-border-hover: #cbd5e1;
-  --color-border-focus: #3b82f6;
+  --color-muted: #e9eff5;
+
+  /* Borders (WCAG 2.1 AA compliant contrast) */
+  --color-border: #cbd5e1;
+  --color-border-subtle: #e2e8f0;
+  --color-border-hover: #94a3b8;
+  --color-border-focus: #1e40af;
+  --color-ring: #1e40af;
 
   /* Typography Colors */
   --color-text-main: #0f172a;
-  --color-text-secondary: #475569;
+  --color-foreground: #0f172a;
+  --color-card-foreground: #0f172a;
+  --color-text-secondary: #334155;
+  --color-muted-foreground: #475569;
   --color-text-muted: #64748b;
   --color-text-white: #ffffff;
 
   /* Typography Scales */
-  --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-base: 'Be Vietnam Pro', 'Atkinson Hyperlegible', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
 
   --font-size-xs: 0.75rem;     /* 12px */
   --font-size-sm: 0.875rem;    /* 14px */
-  --font-size-md: 1rem;        /* 16px */
+  --font-size-md: 1rem;        /* 16px - Base Accessible */
   --font-size-lg: 1.125rem;    /* 18px */
   --font-size-xl: 1.25rem;     /* 20px */
   --font-size-2xl: 1.5rem;     /* 24px */
   --font-size-3xl: 1.875rem;   /* 30px */
+  --font-size-4xl: 2.25rem;    /* 36px */
 
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 
-  /* Spacing */
+  /* Spacing (Tokens from UI/UX Pro Max Master) */
+  --space-xs: 0.25rem; /* 4px */
+  --space-sm: 0.5rem;  /* 8px */
+  --space-md: 1rem;    /* 16px */
+  --space-lg: 1.5rem;  /* 24px */
+  --space-xl: 2rem;    /* 32px */
+  --space-2xl: 3rem;   /* 48px */
+  --space-3xl: 4rem;   /* 64px */
+
+  /* Legacy Numeric Spacing Compatibility */
   --space-1: 0.25rem;  /* 4px */
   --space-2: 0.5rem;   /* 8px */
   --space-3: 0.75rem;  /* 12px */
@@ -85,17 +119,22 @@
   --radius-xl: 1rem;     /* 16px */
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  /* Shadows (Natural, Non-Harsh) */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
 
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Focus & Accessibility Tokens */
+  --focus-ring: 0 0 0 3px rgba(30, 64, 175, 0.35);
+  --focus-ring-error: 0 0 0 3px rgba(220, 38, 38, 0.35);
+  --touch-target-min: 44px;
 
   /* Z-Index */
   --z-base: 0;

@@ -12,3 +12,4 @@ export * from './Alert';
 export * from './PageHeader';
 export * from './DataTable';
 export * from './Tabs';
+export * from './Icons';

@@ -2,6 +2,33 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.9.0] — 2026-10-26
+
+### Nâng Cấp Hệ Thống Giao Diện UI/UX Pro Max (Enterprise Government Portal & LMS)
+- **Tích Hợp Design System Master từ `ui-ux-pro-max`:**
+  - Khởi tạo Source of Truth thiết kế tại `design-system/gplx-enterprise-portal/MASTER.md` theo phong cách `Accessible & Ethical` kết hợp `Enterprise Gateway`.
+  - Chuẩn hóa bảng màu thương hiệu: Primary Trust Blue (`#1E40AF`), Action Blue (`#3B82F6`), Service Green CTA (`#16A34A`), Dark Text (`#0F172A`), Border chuẩn WCAG 2.1 AA (`#CBD5E1`).
+  - Typography đa tầng: Tích hợp font Google `Be Vietnam Pro` (400, 500, 600, 700, 800) và `Atkinson Hyperlegible` đảm bảo hiển thị tiếng Việt dấu thanh chuẩn mực, rõ ràng, chống mỏi mắt.
+- **Chuẩn Hóa Tiêu Chuẩn Tiếp Cận & Khả Năng Sử Dụng (WCAG 2.1 AA Compliance):**
+  - Bổ sung đường dẫn bỏ qua tiện ích: `<a href="#main-content" className="skip-to-content">` hỗ trợ bàn phím và thiết bị đọc màn hình (Screen Readers).
+  - Tích hợp vòng nét rõ ràng `:focus-visible` (3px outline với offset 2px) cho toàn bộ các phần tử tương tác.
+  - Hỗ trợ cơ chế `@media (prefers-reduced-motion: reduce)` giảm chuyển động cho người dùng nhạy cảm.
+  - Tối thiểu 44×44px touch targets trên mobile và tablet cho các nút bấm, ô input, dropdown select và liên kết điều hướng.
+- **Thay Thế Toàn Bộ Biểu Tượng Emoji Thành Bộ Icon SVG Vector Độc Lập (`Icons.tsx`):**
+  - Khởi tạo thư viện icon vector chuẩn SVG nhẹ, sắc nét: `Car`, `BookOpen`, `GraduationCap`, `ClipboardList`, `Calendar`, `Activity`, `FileText`, `CreditCard`, `ShieldCheck`, `Award`, `User`, `LogOut`, `CheckCircle`, `Plus`, `RefreshCw`, `Menu`, `X`, `BarChart`, `Server`, `ExternalLink`.
+  - Triệt để loại bỏ emoji trên Header, MainLayout, Footer, Hero Banner, Thẻ KPI và Trang chủ theo đúng nguyên tắc của `AGENTS.md` và `MASTER.md`.
+- **Tái Cấu Trúc Toàn Diện Các Component Dùng Chung (`frontend/src/components/ui/`):**
+  - `tokens.css` & `global.css`: Nâng cấp hệ thống spacing (`--space-xs`..`--space-3xl`), shadows mềm mại (`--shadow-xs`..`--shadow-xl`), focus tokens (`--focus-ring`).
+  - `AppButton`: Bổ sung micro-interactions (`active: scale(0.98)`), hover nâng nhẹ không giật layout, chiều cao tối thiểu chuẩn 44px (`md`) và 48px (`lg`).
+  - `AppInput`, `AppSelect`, `AppTextarea`: Gắn kết chặt chẽ `id` - `htmlFor`, viền border sắc nét, focus ring phát sáng tự nhiên, chevron SVG tùy biến.
+  - `StatusBadge` & `StatCard`: Nâng cấp độ tương phản văn bản, bo góc mềm mại, hiển thị icon trung tâm rõ nét.
+  - `MainLayout`: Thiết kế lại Header phong cách Cổng thông tin Nhà nước tin cậy, menu ngăn nắp, thanh Workspace Bar phân chia 4 phân hệ rõ ràng (`Học viên`, `Tuyển sinh & Đào tạo`, `Sát hạch`, `Quản trị & Giám sát`).
+  - `HomePage`: Hero banner tràn viền uy tín, lộ trình 4 bước trực quan, 6 thẻ phân hệ Modular Monolith dẫn link chuẩn xác.
+- **Đóng Gói & Triển Khai Kiểm Thử:**
+  - Build frontend production với `tsc -b && vite build` đạt 0 lỗi.
+  - Deploy Nginx container `gplx-frontend` tại cổng 3000, kiểm tra `curl.exe -I http://localhost:3000` trả về HTTP 200 OK.
+  - Kết nối thông suốt với `gplx-backend` tại cổng 8088.
+
 ## [1.8.0] — 2026-10-26
 
 ### Kiểm Thử Toàn Diện, Xác Thực Phân Quyền & Nghiệm Thu Hệ Thống (Giai đoạn 6 — Phase 15)
