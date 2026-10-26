@@ -97,7 +97,7 @@ export default function MainLayout() {
                   👤 <strong>{user.fullName || user.username}</strong>
                   {user.roles && user.roles.length > 0 && (
                     <span style={{ marginLeft: '0.35rem', fontSize: '0.75rem', backgroundColor: 'rgba(255,255,255,0.2)', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
-                      {user.roles[0].replace('ROLE_', '')}
+                      {user.roles[0]?.replace('ROLE_', '')}
                     </span>
                   )}
                 </span>

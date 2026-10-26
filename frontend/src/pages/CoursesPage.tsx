@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { learningService } from '../services/learningService';
 import { Course, Lesson } from '../types/learning';
 import { useAuth } from '../features/auth/AuthContext';
@@ -21,7 +21,7 @@ export default function CoursesPage() {
       .getCourses()
       .then((data) => {
         setCourses(data);
-        if (data.length > 0) {
+        if (data.length > 0 && data[0]) {
           handleSelectCourse(data[0]);
         }
       })
@@ -32,7 +32,7 @@ export default function CoursesPage() {
   }, []);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: any;
     if (activeLesson) {
       setStudyTimerSeconds(0);
       interval = setInterval(() => {
@@ -48,7 +48,7 @@ export default function CoursesPage() {
     try {
       const lessonList = await learningService.getLessons(course.id);
       setLessons(lessonList);
-      if (lessonList.length > 0) {
+      if (lessonList.length > 0 && lessonList[0]) {
         setActiveLesson(lessonList[0]);
       }
     } catch (err: any) {

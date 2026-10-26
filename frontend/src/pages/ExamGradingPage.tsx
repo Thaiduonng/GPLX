@@ -25,7 +25,7 @@ export const ExamGradingPage: React.FC = () => {
       try {
         const data = await examinationService.getExamSessions();
         setSessions(data);
-        if (data.length > 0) {
+        if (data.length > 0 && data[0]) {
           setSelectedSessionId(data[0].id);
         }
       } catch (err: any) {

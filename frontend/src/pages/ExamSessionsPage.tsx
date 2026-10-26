@@ -21,7 +21,7 @@ export const ExamSessionsPage: React.FC = () => {
   const [location, setLocation] = useState<string>('');
   const [examType, setExamType] = useState<ExamType>('CERTIFICATION');
 
-  const isAdminOrManager = user?.roles.some(r => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
+  const isAdminOrManager = user?.roles?.some(r => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
 
   const loadData = async () => {
     try {
@@ -33,7 +33,7 @@ export const ExamSessionsPage: React.FC = () => {
       ]);
       setSessions(sessionsData);
       setCategories(catsData);
-      if (catsData.length > 0) {
+      if (catsData.length > 0 && catsData[0]) {
         setCategoryId(catsData[0].id);
       }
     } catch (err: any) {

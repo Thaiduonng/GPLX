@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { learningService } from '../services/learningService';
 import { ExamResult, TheoryQuestion } from '../types/learning';
-import { useAuth } from '../features/auth/AuthContext';
 
 export default function TheoryExamPage() {
-  const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'PRACTICE' | 'MOCK_EXAM'>('PRACTICE');
   const [category, setCategory] = useState('B1');
   const [questions, setQuestions] = useState<TheoryQuestion[]>([]);
@@ -141,7 +139,6 @@ export default function TheoryExamPage() {
         </div>
       )}
 
-      {/* Kết quả thi thử */}
       {examResult && (
         <div
           style={{

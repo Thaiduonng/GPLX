@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { trainingService } from '../services/trainingService';
 import { DatSummary, TrainingClass, TrainingSchedule } from '../types/training';
 import { useAuth } from '../features/auth/AuthContext';
@@ -24,7 +24,7 @@ export default function TrainingSchedulePage() {
     try {
       const data = await trainingService.getClasses();
       setClasses(data);
-      if (data.length > 0) {
+      if (data.length > 0 && data[0]) {
         setSelectedClassId(data[0].id);
         loadSchedules(data[0].id);
       }
@@ -87,6 +87,12 @@ export default function TrainingSchedulePage() {
           Theo dõi lịch học tập trung, thực hành sa hình, thực hành đường trường và thiết bị giám sát DAT
         </p>
       </div>
+
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '1.5rem', color: '#64748b' }}>
+          Đang tải dữ liệu đào tạo...
+        </div>
+      )}
 
       {errorMsg && (
         <div style={{ background: '#fef2f2', borderLeft: '4px solid #ef4444', padding: '1rem', color: '#991b1b', marginBottom: '1.5rem', borderRadius: '4px' }}>
