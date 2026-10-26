@@ -1,21 +1,53 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import axios from 'axios';
 import { learningService } from '../services/learningService';
-import { ExamResult, TheoryQuestion } from '../types/learning';
+import type { ExamResult, TheoryQuestion } from '../types/learning';
+import {
+  PageHeader,
+  Tabs,
+  AppButton,
+  AppSelect,
+  Alert,
+  LoadingSpinner,
+  StatusBadge,
+} from '../components/ui';
 
 export default function TheoryExamPage() {
   const [activeTab, setActiveTab] = useState<'PRACTICE' | 'MOCK_EXAM'>('PRACTICE');
-  const [category, setCategory] = useState('B1');
+  const [category, setCategory] = useState<string>('B1');
   const [questions, setQuestions] = useState<TheoryQuestion[]>([]);
   const [mockQuestions, setMockQuestions] = useState<TheoryQuestion[]>([]);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [examResult, setExamResult] = useState<ExamResult | null>(null);
 
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  // Mock Exam Timer (20 minutes = 1200s)
+  const [timeLeft, setTimeLeft] = useState<number>(1200);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   useEffect(() => {
     loadPracticeQuestions();
   }, [category]);
+
+  // Countdown timer for mock exam
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (isTimerRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setIsTimerRunning(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, timeLeft]);
 
   const loadPracticeQuestions = async () => {
     setLoading(true);
@@ -23,8 +55,14 @@ export default function TheoryExamPage() {
     try {
       const data = await learningService.getQuestions(category);
       setQuestions(data);
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || err.message || 'Không thể tải ngân hàng câu hỏi.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || 'Không thể tải ngân hàng câu hỏi.');
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg('Lỗi không xác định khi tải câu hỏi.');
+      }
     } finally {
       setLoading(false);
     }
@@ -35,12 +73,20 @@ export default function TheoryExamPage() {
     setErrorMsg('');
     setExamResult(null);
     setUserAnswers({});
+    setTimeLeft(1200); // 20 mins
     try {
       const data = await learningService.generateMockExam(category, 20);
       setMockQuestions(data);
       setActiveTab('MOCK_EXAM');
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || err.message || 'Không thể tạo đề thi thử.');
+      setIsTimerRunning(true);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || 'Không thể tạo đề thi thử.');
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg('Lỗi không xác định khi tạo đề thi.');
+      }
     } finally {
       setLoading(false);
     }
@@ -61,108 +107,120 @@ export default function TheoryExamPage() {
     }
 
     setLoading(true);
+    setIsTimerRunning(false);
     try {
       const result = await learningService.submitMockExam({
         categoryCode: category,
         userAnswers,
       });
       setExamResult(result);
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || err.message || 'Lỗi nộp bài thi thử.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || 'Lỗi nộp bài thi thử.');
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg('Lỗi không xác định khi nộp bài.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const formattedTimer = useMemo(() => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }, [timeLeft]);
+
   return (
-    <div style={{ maxWidth: '1000px', margin: '2rem auto', padding: '0 1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h2 style={{ fontSize: '1.6rem', color: '#1e3a8a', fontWeight: 700, margin: 0 }}>
-            🚦 Ngân Hàng Câu Hỏi & Thi Thử Lý Thuyết GPLX
-          </h2>
-          <p style={{ color: '#6b7280', fontSize: '0.95rem', margin: '0.25rem 0 0 0' }}>
-            Hệ thống 600 câu hỏi sát hạch chuẩn Tổng cục Đường bộ Việt Nam
-          </p>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <PageHeader
+        title="Ngân Hàng Câu Hỏi & Thi Thử Lý Thuyết GPLX"
+        description="Bộ 600 câu hỏi sát hạch theo tiêu chuẩn Cục Đường bộ Việt Nam, bao gồm 60 câu điểm liệt bắt buộc phải đạt."
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '220px' }}>
+              <AppSelect
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                options={[
+                  { value: 'B1', label: 'Hạng B1 (Ô tô tự động)' },
+                  { value: 'B', label: 'Hạng B (Ô tô số sàn/tự động)' },
+                  { value: 'A1', label: 'Hạng A1 (Mô tô đến 125cc)' },
+                  { value: 'C', label: 'Hạng C (Xe tải trên 3.5T)' },
+                ]}
+              />
+            </div>
+          </div>
+        }
+      />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            style={{ padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.9rem', fontWeight: 600 }}
-          >
-            <option value="B1">Hạng B1 (Ô tô tự động)</option>
-            <option value="B">Hạng B (Ô tô số sàn/tự động)</option>
-            <option value="A1">Hạng A1 (Mô tô đến 125cc)</option>
-            <option value="C">Hạng C (Xe tải)</option>
-          </select>
-
-          <button
-            onClick={() => {
-              setActiveTab('PRACTICE');
-              loadPracticeQuestions();
-            }}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              border: 'none',
-              background: activeTab === 'PRACTICE' ? '#2563eb' : '#e2e8f0',
-              color: activeTab === 'PRACTICE' ? 'white' : '#334155',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            📖 Ôn tập
-          </button>
-
-          <button
-            onClick={startMockExam}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              border: 'none',
-              background: activeTab === 'MOCK_EXAM' ? '#2563eb' : '#e2e8f0',
-              color: activeTab === 'MOCK_EXAM' ? 'white' : '#334155',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            ⏱️ Thi thử trực tuyến
-          </button>
-        </div>
-      </div>
+      <Tabs
+        tabs={[
+          { id: 'PRACTICE', label: '📖 Ngân hàng ôn tập', badge: questions.length },
+          { id: 'MOCK_EXAM', label: '⏱️ Đề thi thử sát hạch', badge: mockQuestions.length || undefined },
+        ]}
+        activeTab={activeTab}
+        onChange={(tabId) => {
+          if (tabId === 'PRACTICE') {
+            setActiveTab('PRACTICE');
+            loadPracticeQuestions();
+          } else {
+            if (mockQuestions.length === 0) {
+              startMockExam();
+            } else {
+              setActiveTab('MOCK_EXAM');
+            }
+          }
+        }}
+      />
 
       {errorMsg && (
-        <div style={{ background: '#fef2f2', borderLeft: '4px solid #ef4444', padding: '1rem', color: '#991b1b', marginBottom: '1.5rem', borderRadius: '4px' }}>
-          ⚠️ {errorMsg}
-        </div>
+        <Alert
+          type="danger"
+          message={errorMsg}
+          onClose={() => setErrorMsg('')}
+        />
       )}
 
+      {/* Kết quả thi thử */}
       {examResult && (
         <div
           style={{
-            background: examResult.passed ? '#f0fdf4' : '#fef2f2',
-            border: examResult.passed ? '2px solid #22c55e' : '2px solid #ef4444',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            marginBottom: '2rem',
+            backgroundColor: examResult.passed ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
+            border: `2px solid ${examResult.passed ? 'var(--color-success-border)' : 'var(--color-danger-border)'}`,
+            borderRadius: 'var(--radius-xl)',
+            padding: 'var(--space-6)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-4)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '2.5rem' }}>{examResult.passed ? '🎉' : '❌'}</span>
-            <div>
-              <h3 style={{ fontSize: '1.4rem', color: examResult.passed ? '#166534' : '#991b1b', margin: 0, fontWeight: 700 }}>
-                {examResult.passed ? 'KẾT QUẢ: ĐẠT' : 'KẾT QUẢ: KHÔNG ĐẠT'}
-              </h3>
-              <p style={{ margin: '0.25rem 0 0 0', color: '#4b5563', fontSize: '0.95rem' }}>
-                Số câu đúng: <strong>{examResult.correctAnswers} / {examResult.totalQuestions}</strong> câu (Yêu cầu tối thiểu: {examResult.passingScore} câu đúng)
+          <div style={{ fontSize: '3rem' }}>{examResult.passed ? '🎉' : '❌'}</div>
+          <div>
+            <h3
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: 700,
+                color: examResult.passed ? 'var(--color-success)' : 'var(--color-danger)',
+                margin: '0 0 4px 0',
+              }}
+            >
+              {examResult.passed ? 'KẾT QUẢ: ĐẠT SÁT HẠCH LÝ THUYẾT' : 'KẾT QUẢ: KHÔNG ĐẠT'}
+            </h3>
+            <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+              Điểm số: <strong>{examResult.correctAnswers} / {examResult.totalQuestions}</strong> câu đúng (Điểm chuẩn đạt tối thiểu: {examResult.passingScore} câu)
+            </p>
+            {examResult.failedDueToParalysisQuestion && (
+              <p style={{ margin: '6px 0 0 0', fontSize: 'var(--font-size-sm)', color: 'var(--color-danger)', fontWeight: 600 }}>
+                ⚠️ BẠN ĐÃ TRẢ LỜI SAI CÂU HỎI ĐIỂM LIỆT! Theo Luật GTĐB, sai câu điểm liệt bị đánh trượt toàn bộ bài thi lý thuyết.
               </p>
-              {examResult.failedDueToParalysisQuestion && (
-                <div style={{ color: '#dc2626', fontWeight: 600, marginTop: '0.35rem', fontSize: '0.9rem' }}>
-                  ⚠️ BẠN ĐÃ TRẢ LỜI SAI CÂU HỎI ĐIỂM LIỆT! Theo quy chế sát hạch GPLX, sai câu điểm liệt bị đánh trượt bài thi.
-                </div>
-              )}
+            )}
+            <div style={{ marginTop: '12px' }}>
+              <AppButton variant="primary" size="sm" onClick={startMockExam}>
+                Làm đề thi thử mới
+              </AppButton>
             </div>
           </div>
         </div>
@@ -170,51 +228,229 @@ export default function TheoryExamPage() {
 
       {/* Tab Ôn tập */}
       {activeTab === 'PRACTICE' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {questions.map((q) => (
-            <div key={q.id} style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span style={{ fontWeight: 700, color: '#1e40af' }}>Câu {q.questionNumber}:</span>
-                {q.isParalysis && (
-                  <span style={{ background: '#fee2e2', color: '#dc2626', padding: '0.25rem 0.6rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 700 }}>
-                    ⚠️ CÂU ĐIỂM LIỆT
-                  </span>
-                )}
-              </div>
-              <h4 style={{ fontSize: '1.05rem', color: '#1f2937', marginBottom: '1rem', fontWeight: 600 }}>{q.content}</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-                {q.answers.map((ans) => (
-                  <div key={ans.id} style={{ padding: '0.65rem 1rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.92rem', color: '#334155' }}>
-                    {ans.orderIndex}. {ans.answerText}
-                  </div>
-                ))}
-              </div>
-              {q.explanation && (
-                <div style={{ background: '#eff6ff', padding: '0.75rem 1rem', borderRadius: '6px', fontSize: '0.875rem', color: '#1d4ed8' }}>
-                  💡 <strong>Giải thích:</strong> {q.explanation}
-                </div>
-              )}
+        <div>
+          {loading ? (
+            <div style={{ padding: '60px 0', textAlign: 'center' }}>
+              <LoadingSpinner size="lg" text="Đang tải ngân hàng câu hỏi lý thuyết..." />
             </div>
-          ))}
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              {questions.map((q) => (
+                <div
+                  key={q.id}
+                  style={{
+                    backgroundColor: 'var(--color-surface)',
+                    borderRadius: 'var(--radius-xl)',
+                    border: '1px solid var(--color-border)',
+                    padding: 'var(--space-5)',
+                    boxShadow: 'var(--shadow-xs)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 'var(--space-3)',
+                    }}
+                  >
+                    <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
+                      Câu hỏi {q.questionNumber}:
+                    </span>
+                    {q.isParalysis && (
+                      <span
+                        style={{
+                          backgroundColor: 'var(--color-danger-bg)',
+                          color: 'var(--color-danger)',
+                          border: '1px solid var(--color-danger-border)',
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: 'var(--radius-full)',
+                          fontSize: 'var(--font-size-xs)',
+                          fontWeight: 700,
+                        }}
+                      >
+                        ⚠️ CÂU ĐIỂM LIỆT
+                      </span>
+                    )}
+                  </div>
+
+                  <h4 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-main)', marginBottom: 'var(--space-3)' }}>
+                    {q.content}
+                  </h4>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: 'var(--space-3)' }}>
+                    {q.answers.map((ans) => (
+                      <div
+                        key={ans.id}
+                        style={{
+                          padding: 'var(--space-2) var(--space-4)',
+                          borderRadius: 'var(--radius-md)',
+                          backgroundColor: 'var(--color-bg-app)',
+                          border: '1px solid var(--color-border)',
+                          fontSize: 'var(--font-size-sm)',
+                        }}
+                      >
+                        <strong>{ans.orderIndex}.</strong> {ans.answerText}
+                      </div>
+                    ))}
+                  </div>
+
+                  {q.explanation && (
+                    <div
+                      style={{
+                        backgroundColor: 'var(--color-primary-light)',
+                        padding: 'var(--space-3) var(--space-4)',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: 'var(--font-size-xs)',
+                        color: 'var(--color-primary-dark)',
+                      }}
+                    >
+                      💡 <strong>Giải thích đáp án:</strong> {q.explanation}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Tab Thi thử trực tuyến */}
       {activeTab === 'MOCK_EXAM' && (
-        <div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          {/* Header thi thử kèm đồng hồ đếm ngược */}
+          <div
+            style={{
+              backgroundColor: 'var(--color-surface)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--color-border)',
+              padding: 'var(--space-4) var(--space-6)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              boxShadow: 'var(--shadow-xs)',
+              position: 'sticky',
+              top: '64px',
+              zIndex: 10,
+            }}
+          >
+            <div>
+              <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>
+                Đề thi trắc nghiệm Hạng <strong>{category}</strong> ({mockQuestions.length} câu)
+              </span>
+              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                Đã trả lời: <strong>{Object.keys(userAnswers).length} / {mockQuestions.length}</strong> câu
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: timeLeft <= 180 ? 'var(--color-danger-bg)' : '#f1f5f9',
+                  color: timeLeft <= 180 ? 'var(--color-danger)' : 'var(--color-text-main)',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700,
+                  fontSize: '1.1rem',
+                  fontFamily: 'monospace',
+                }}
+              >
+                ⏱️ {formattedTimer}
+              </div>
+
+              <AppButton
+                variant="success"
+                onClick={handleSubmitExam}
+                loading={loading}
+                icon="📤"
+              >
+                Nộp bài thi
+              </AppButton>
+            </div>
+          </div>
+
+          {/* Quick Navigator Grid */}
+          <div
+            style={{
+              backgroundColor: 'var(--color-surface)',
+              padding: 'var(--space-3) var(--space-4)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border)',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '6px',
+              alignItems: 'center',
+            }}
+          >
+            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginRight: '6px' }}>
+              Chuyển nhanh:
+            </span>
+            {mockQuestions.map((q, idx) => {
+              const isAnswered = userAnswers[q.id] !== undefined;
+              return (
+                <a
+                  key={q.id}
+                  href={`#question-${q.id}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: 'var(--font-size-xs)',
+                    fontWeight: 600,
+                    backgroundColor: isAnswered ? 'var(--color-primary)' : '#f1f5f9',
+                    color: isAnswered ? 'white' : 'var(--color-text-main)',
+                    border: q.isParalysis ? '2px solid var(--color-danger)' : '1px solid var(--color-border)',
+                    textDecoration: 'none',
+                  }}
+                  title={q.isParalysis ? 'Câu hỏi điểm liệt' : `Câu ${idx + 1}`}
+                >
+                  {idx + 1}
+                </a>
+              );
+            })}
+          </div>
+
+          {/* Danh sách câu hỏi thi thử */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
             {mockQuestions.map((q, idx) => (
-              <div key={q.id} style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <span style={{ fontWeight: 700, color: '#1e40af' }}>Câu hỏi {idx + 1}:</span>
+              <div
+                key={q.id}
+                id={`question-${q.id}`}
+                style={{
+                  backgroundColor: 'var(--color-surface)',
+                  borderRadius: 'var(--radius-xl)',
+                  border: '1px solid var(--color-border)',
+                  padding: 'var(--space-5)',
+                  boxShadow: 'var(--shadow-xs)',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 'var(--space-3)',
+                  }}
+                >
+                  <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
+                    Câu hỏi {idx + 1}:
+                  </span>
                   {q.isParalysis && (
-                    <span style={{ background: '#fee2e2', color: '#dc2626', padding: '0.25rem 0.6rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 700 }}>
-                      ⚠️ CÂU ĐIỂM LIỆT
-                    </span>
+                    <StatusBadge variant="danger" label="⚠️ CÂU ĐIỂM LIỆT" />
                   )}
                 </div>
-                <h4 style={{ fontSize: '1.05rem', color: '#1f2937', marginBottom: '1rem', fontWeight: 600 }}>{q.content}</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+
+                <h4 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-main)', marginBottom: 'var(--space-4)' }}>
+                  {q.content}
+                </h4>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {q.answers.map((ans) => {
                     const isSelected = userAnswers[q.id] === ans.id;
                     return (
@@ -224,17 +460,35 @@ export default function TheoryExamPage() {
                         onClick={() => handleSelectAnswer(q.id, ans.id)}
                         style={{
                           textAlign: 'left',
-                          padding: '0.75rem 1rem',
-                          borderRadius: '8px',
-                          border: isSelected ? '2px solid #2563eb' : '1px solid #cbd5e1',
-                          background: isSelected ? '#eff6ff' : '#ffffff',
-                          color: isSelected ? '#1d4ed8' : '#334155',
+                          padding: 'var(--space-3) var(--space-4)',
+                          borderRadius: 'var(--radius-md)',
+                          border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                          backgroundColor: isSelected ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                          color: isSelected ? 'var(--color-primary-dark)' : 'var(--color-text-main)',
                           fontWeight: isSelected ? 600 : 400,
                           cursor: 'pointer',
-                          fontSize: '0.92rem',
+                          fontSize: 'var(--font-size-sm)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          transition: 'all var(--transition-fast)',
                         }}
                       >
-                        {ans.orderIndex}. {ans.answerText}
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            border: isSelected ? '6px solid var(--color-primary)' : '2px solid #cbd5e1',
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span>
+                          <strong>{ans.orderIndex}.</strong> {ans.answerText}
+                        </span>
                       </button>
                     );
                   })}
@@ -243,24 +497,16 @@ export default function TheoryExamPage() {
             ))}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <button
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--space-4)' }}>
+            <AppButton
+              variant="success"
+              size="lg"
               onClick={handleSubmitExam}
-              disabled={loading}
-              style={{
-                background: '#16a34a',
-                color: 'white',
-                border: 'none',
-                padding: '0.85rem 3rem',
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '1.1rem',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)',
-              }}
+              loading={loading}
+              icon="📤"
             >
-              {loading ? 'Đang chấm điểm...' : 'Nộp Bài Thi Thử'}
-            </button>
+              Nộp Bài Thi Thử Trực Tuyến
+            </AppButton>
           </div>
         </div>
       )}

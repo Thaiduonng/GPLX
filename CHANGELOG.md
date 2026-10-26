@@ -2,6 +2,42 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0] — 2026-10-26
+
+### Nâng Cấp Toàn Diện UI/UX & Xây Dựng Hệ Thống Design System Chuyên Nghiệp (Phase 9)
+- **Design Tokens & Foundation (`frontend/src/styles/`):**
+  - Khởi tạo `tokens.css` quy định toàn bộ biến CSS chuẩn hóa: bảng màu chủ đạo theo Rule 09 (`--color-primary`, `--color-secondary`, `--color-accent`), màu trạng thái chức năng (`--color-success`, `--color-warning`, `--color-danger`, `--color-info`), thang màu trung tính, kích thước chữ, khoảng cách (`--space-1` đến `--space-12`), bán kính bo tròn (`--radius-md` đến `--radius-xl`), độ đổ bóng và phân tầng z-index.
+  - Cập nhật `global.css` với typography hiện đại, custom thanh cuộn mượt mà và reset styles nhất quán.
+- **Thư viện Atomic UI Components Dùng Chung (`frontend/src/components/ui/`):**
+  - `AppButton`: Đầy đủ các biến thể (`primary`, `secondary`, `outline`, `danger`, `success`, `warning`, `ghost`), các cỡ (`sm`, `md`, `lg`), icon, hiệu ứng loading xoay tròn và chống double-click.
+  - `AppInput`, `AppSelect`, `AppTextarea`: Đi kèm nhãn tiếng Việt, ký hiệu bắt buộc (`*`), tin nhắn gợi ý, thông báo lỗi động trực quan.
+  - `StatusBadge`: Tự động ánh xạ trạng thái nghiệp vụ (Hồ sơ, Học phí, Thi sát hạch, Phương tiện) sang nhãn tiếng Việt và màu sắc tiêu chuẩn.
+  - `StatCard`: Thẻ chỉ số KPI với icon, số liệu nổi bật, phụ chú và màu sắc trực quan.
+  - `DataTable`: Bảng dữ liệu Generic `<T>` chuẩn hóa giao diện, hỗ trợ tùy biến cột, trạng thái đang tải (LoadingSpinner) và trạng thái rỗng (EmptyState).
+  - `Modal` & `ConfirmDialog`: Hộp thoại tương tác popup mượt mà, hỗ trợ đóng bằng phím ESC, overlay mờ và trường nhập lý do bắt buộc (ADM-002).
+  - `Alert`: Khung thông báo 4 cấp độ (`info`, `success`, `warning`, `danger`) có nút đóng.
+  - `PageHeader`: Tiêu đề trang tiêu chuẩn tích hợp mô tả và các nút hành động nhanh.
+  - `Tabs`: Thanh điều hướng tab mượt mà kèm badge đếm số lượng.
+- **Hệ thống Layout & Điều hướng Thông minh (`frontend/src/layouts/`):**
+  - Cải tiến `MainLayout`: Header nhận diện thương hiệu, nút mở menu di động (Responsive Hamburger Drawer).
+  - Tích hợp thanh Workspace Bar phân hệ thứ cấp tự động hiển thị theo vai trò người dùng (Học viên / Tuyển sinh / Sát hạch viên / Quản trị viên).
+  - Hiển thị thông tin người dùng đăng nhập kèm thẻ định danh vai trò tiếng Việt và nút đăng xuất an toàn.
+- **Nâng cấp Toàn diện các Màn hình Nghiệp vụ:**
+  - `HomePage`: Banner Hero hiện đại, 4 bước lộ trình đào tạo, thẻ KPI tổng quan, danh mục module và widget kiểm tra kết nối Backend thời gian thực.
+  - `TheoryExamPage`: Hỗ trợ ôn luyện 600 câu kèm giải thích chi tiết, đồng hồ đếm ngược 20 phút cho đề thi thử, lưới số câu chuyển nhanh, đánh dấu cảnh báo câu hỏi điểm liệt.
+  - `TrainingSchedulePage`: Thẻ theo dõi tiến độ thiết bị giám sát hành trình DAT (quãng đường km, thời gian giờ, số phiên lái xe, thanh phần trăm đạt chỉ tiêu).
+  - `EligibilityCheckPage`: Xét duyệt 3 tiêu chuẩn dự thi (Hồ sơ, Lý thuyết 100%, Thực hành DAT) kèm danh sách thiếu sót cần bổ sung trước khi thi.
+  - `ExamGradingPage`: Bảng chấm điểm 4 nội dung thi (Lý thuyết, Mô phỏng, Sa hình, Đường trường) theo chuẩn EXM-002, tự động kết luận Đạt/Không đạt.
+  - `TuitionPaymentPage`: Quản lý hóa đơn công nợ, nộp học phí với cơ chế sinh Idempotency Key tự động chống thanh toán trùng lặp (FIN-001) và tra cứu biên lai.
+  - `FleetManagementPage`: Giám sát hạn kiểm định an toàn kỹ thuật phương tiện (FLT-001), cảnh báo xe quá hạn và modal ghi nhận lịch sử bảo dưỡng.
+  - `ApplicationManagementPage`: Thẩm định hồ sơ tuyển sinh với checklist tài liệu số hóa, bắt buộc lý do khi từ chối/yêu cầu bổ sung theo ADM-002.
+  - `MyApplicationsPage` & `SubmitApplicationPage`: Form nộp hồ sơ chuẩn hóa kiểm tra độ tuổi theo hạng bằng, xem tài liệu đính kèm và lịch sử thẩm định.
+  - `DashboardPage` & `AuditLogPage`: Báo cáo biểu đồ KPI trực quan, bảng thống kê tỷ lệ đỗ theo hạng và tra cứu nhật ký kiểm toán với phân trang.
+- **Tuân thủ Tiêu chuẩn Kỹ thuật:**
+  - Loại bỏ hoàn toàn 100% các kiểu `any` trong toàn bộ source code frontend.
+  - Thêm file `.dockerignore` giúp tối ưu tốc độ build context Docker chỉ còn 386 kB.
+  - Kiểm thử `npm run build` đạt 0 lỗi TypeScript strict mode; container `gplx-frontend` phục vụ Nginx production tại cổng 3000.
+
 ## [1.1.0] — 2026-10-26
 
 ### Quản trị Tri Thức CSDL & Chuẩn Hóa Pháp Lý Toàn Diện (Phase 8 — Database & Legal Knowledge Base)

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "a11b2c68-6e7d-4d70-bba6-6bda3340d098",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "D:\\GPLX\\.archify\\workflow-quy-trinh-dao-tao-sat-hach-20261026-142500\\candidate.json",
+  "output": "D:\\GPLX\\.archify\\workflow-quy-trinh-dao-tao-sat-hach-20261026-142500\\quy-trinh-dao-tao-sat-hach.html",
+  "specification": {
+    "sha256": "571c8b74d0c6142ae3d671afeba76d29a8fff4644c204e091ba3caf0794a83fe",
+    "bytes": 9934
+  },
+  "artifact": {
+    "sha256": "e71f32a74e1fc3ef98f582024bcd2f2631de0437bb8c846843afffc7ba91318e",
+    "bytes": 882531
+  }
+}

@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { fleetService } from '../services/fleetService';
 import { admissionService } from '../services/admissionService';
-import { Vehicle, VehicleMaintenance, TransmissionType } from '../types/fleet';
-import { LicenseCategory } from '../types/admission';
+import type { Vehicle, VehicleMaintenance, TransmissionType } from '../types/fleet';
+import type { LicenseCategory } from '../types/admission';
 import { useAuth } from '../features/auth/AuthContext';
+import {
+  PageHeader,
+  AppButton,
+  AppInput,
+  AppSelect,
+  StatusBadge,
+  Modal,
+  Alert,
+  LoadingSpinner,
+  EmptyState,
+} from '../components/ui';
+import { formatCurrency, formatDate } from '../utils/formatters';
 
 export const FleetManagementPage: React.FC = () => {
   const { user } = useAuth();
@@ -13,6 +26,7 @@ export const FleetManagementPage: React.FC = () => {
   const [maintenances, setMaintenances] = useState<VehicleMaintenance[]>([]);
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -31,7 +45,7 @@ export const FleetManagementPage: React.FC = () => {
   const [maintCost, setMaintCost] = useState<number>(1000000);
   const [maintPerformer, setMaintPerformer] = useState<string>('Gara Trung Tâm');
 
-  const isAdminOrManager = user?.roles?.some(r => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
+  const isAdminOrManager = user?.roles?.some((r) => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
 
   const loadData = async () => {
     try {
@@ -39,13 +53,19 @@ export const FleetManagementPage: React.FC = () => {
       setError(null);
       const [vData, cData] = await Promise.all([
         fleetService.getAllVehicles(),
-        admissionService.getCategories()
+        admissionService.getCategories(),
       ]);
       setVehicles(vData);
       setCategories(cData);
       if (cData.length > 0 && cData[0]) setCategoryId(cData[0].id);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải danh sách phương tiện.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Không thể tải danh sách phương tiện.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi tải dữ liệu xe tập lái');
+      }
     } finally {
       setLoading(false);
     }
@@ -58,21 +78,30 @@ export const FleetManagementPage: React.FC = () => {
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setSubmitting(true);
       setError(null);
       const res = await fleetService.addVehicle({
-        plateNumber,
-        model,
+        plateNumber: plateNumber.trim(),
+        model: model.trim(),
         categoryId: Number(categoryId),
         transmission,
-        inspectionExpiryDate
+        inspectionExpiryDate,
       });
       setShowAddModal(false);
       setPlateNumber('');
       setModel('');
       setSuccessMsg(`Thêm xe ${res.plateNumber} vào đội xe thành công!`);
       loadData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Thêm phương tiện thất bại.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Thêm phương tiện thất bại.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi thêm xe mới');
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -94,313 +123,331 @@ export const FleetManagementPage: React.FC = () => {
     if (!selectedVehicle) return;
 
     try {
+      setSubmitting(true);
       setError(null);
       await fleetService.logMaintenance(selectedVehicle.id, {
         maintenanceDate: maintDate,
-        description: maintDesc,
+        description: maintDesc.trim(),
         cost: Number(maintCost),
-        performedBy: maintPerformer
+        performedBy: maintPerformer.trim(),
       });
       setShowMaintModal(false);
       setMaintDesc('');
-      setSuccessMsg(`Đã lưu bảo dưỡng cho xe ${selectedVehicle.plateNumber}!`);
+      setSuccessMsg(`Đã ghi nhận bảo dưỡng thành công cho xe ${selectedVehicle.plateNumber}!`);
       loadData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Lỗi khi lưu bảo dưỡng.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Lỗi khi lưu thông tin bảo dưỡng.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi ghi nhận bảo dưỡng');
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#1e293b' }}>
-            Quản lý đội xe tập lái & Bảo dưỡng (FLT-001)
-          </h1>
-          <p style={{ color: '#64748b', marginTop: '4px' }}>
-            Theo dõi hạn kiểm định an toàn kỹ thuật, trạng thái sẵn sàng đào tạo DAT và bảo dưỡng định kỳ
-          </p>
-        </div>
-        {isAdminOrManager && (
-          <button
-            onClick={() => setShowAddModal(true)}
-            style={{
-              padding: '10px 18px',
-              backgroundColor: '#2563eb',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            + Thêm xe mới
-          </button>
-        )}
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <PageHeader
+        title="Quản lý Đội Xe Tập Lái & Bảo Dưỡng (FLT-001)"
+        description="Theo dõi thời hạn đăng kiểm an toàn kỹ thuật, trạng thái sẵn sàng đào tạo DAT và bảo dưỡng định kỳ."
+        actions={
+          isAdminOrManager ? (
+            <AppButton variant="primary" onClick={() => setShowAddModal(true)} icon="➕">
+              Thêm xe mới
+            </AppButton>
+          ) : undefined
+        }
+      />
 
       {successMsg && (
-        <div style={{ padding: '14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#166534', marginBottom: '16px' }}>
-          {successMsg}
-        </div>
+        <Alert
+          type="success"
+          message={successMsg}
+          onClose={() => setSuccessMsg(null)}
+        />
       )}
 
       {error && (
-        <div style={{ padding: '14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', marginBottom: '16px' }}>
-          {error}
-        </div>
+        <Alert
+          type="danger"
+          message={error}
+          onClose={() => setError(null)}
+        />
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Đang tải danh sách xe...</div>
-      ) : vehicles.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '50px', background: '#f8fafc', borderRadius: '12px', color: '#94a3b8' }}>
-          Hiện chưa có xe tập lái nào trong hệ thống.
+        <div style={{ padding: '60px 0', textAlign: 'center' }}>
+          <LoadingSpinner size="lg" text="Đang tải danh sách đội xe tập lái..." />
         </div>
+      ) : vehicles.length === 0 ? (
+        <EmptyState
+          icon="🚗"
+          title="Chưa có xe tập lái"
+          description="Hiện chưa có phương tiện nào được đăng ký trong hệ thống."
+          action={
+            isAdminOrManager ? (
+              <AppButton variant="primary" onClick={() => setShowAddModal(true)}>
+                Thêm xe đầu tiên
+              </AppButton>
+            ) : undefined
+          }
+        />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-          {vehicles.map((v) => (
-            <div
-              key={v.id}
-              style={{
-                background: '#fff',
-                borderRadius: '12px',
-                border: v.isInspectionValid ? '1px solid #e2e8f0' : '2px solid #ef4444',
-                padding: '20px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between'
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b' }}>{v.plateNumber}</span>
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    padding: '3px 8px',
-                    borderRadius: '6px',
-                    background: v.status === 'AVAILABLE' && v.isInspectionValid ? '#dcfce7' : '#fee2e2',
-                    color: v.status === 'AVAILABLE' && v.isInspectionValid ? '#15803d' : '#b91c1c'
-                  }}>
-                    {v.status === 'AVAILABLE' && v.isInspectionValid ? 'SẴN SÀNG (AVAILABLE)' : v.status === 'MAINTENANCE' ? 'ĐANG BẢO DƯỠNG' : 'KHÔNG KHẢ DỤNG'}
-                  </span>
-                </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: 'var(--space-5)',
+          }}
+        >
+          {vehicles.map((v) => {
+            const isInspectionValid = v.isInspectionValid;
+            return (
+              <div
+                key={v.id}
+                style={{
+                  backgroundColor: 'var(--color-surface)',
+                  borderRadius: 'var(--radius-xl)',
+                  border: isInspectionValid
+                    ? '1px solid var(--color-border)'
+                    : '2px solid var(--color-danger)',
+                  padding: 'var(--space-5)',
+                  boxShadow: 'var(--shadow-xs)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: 'var(--space-4)',
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 'var(--space-3)',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>
+                      {v.plateNumber}
+                    </span>
+                    <StatusBadge
+                      type="vehicle"
+                      status={!isInspectionValid ? 'INSPECTION_OVERDUE' : v.status}
+                    />
+                  </div>
 
-                <div style={{ fontSize: '14px', color: '#334155', lineHeight: '1.6', marginBottom: '14px' }}>
-                  <div>Dòng xe: <strong>{v.model}</strong></div>
-                  <div>Hạng GPLX: <strong style={{ color: '#2563eb' }}>{v.categoryCode}</strong> | Hộp số: <strong>{v.transmission}</strong></div>
-                  <div>
-                    Hạn đăng kiểm: <strong style={{ color: v.isInspectionValid ? '#15803d' : '#dc2626' }}>{v.inspectionExpiryDate}</strong>
-                    {!v.isInspectionValid && <span style={{ fontSize: '11px', color: '#dc2626', marginLeft: '6px' }}>(Đã quá hạn FLT-001)</span>}
+                  <div
+                    style={{
+                      fontSize: 'var(--font-size-sm)',
+                      color: 'var(--color-text-secondary)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                    }}
+                  >
+                    <div>
+                      Dòng xe: <strong>{v.model}</strong>
+                    </div>
+                    <div>
+                      Hạng GPLX:{' '}
+                      <strong style={{ color: 'var(--color-primary)' }}>{v.categoryCode}</strong> | Hộp số:{' '}
+                      <strong>{v.transmission === 'AUTOMATIC' ? 'Tự động (AT)' : 'Số sàn (MT)'}</strong>
+                    </div>
+                    <div>
+                      Hạn đăng kiểm:{' '}
+                      <strong
+                        style={{
+                          color: isInspectionValid ? 'var(--color-success)' : 'var(--color-danger)',
+                        }}
+                      >
+                        {formatDate(v.inspectionExpiryDate)}
+                      </strong>
+                      {!isInspectionValid && (
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--color-danger)',
+                            fontWeight: 600,
+                            marginLeft: '6px',
+                          }}
+                        >
+                          (Quá hạn FLT-001)
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <button
+                <AppButton
+                  variant="outline"
+                  size="sm"
+                  fullWidth
                   onClick={() => handleOpenMaintenance(v)}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    background: '#f8fafc',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
+                  icon="🛠️"
                 >
-                  🛠️ Ghi nhận / Lịch sử bảo dưỡng
-                </button>
+                  Ghi nhận / Lịch sử bảo dưỡng
+                </AppButton>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {/* Modal thêm xe */}
-      {showAddModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-          <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '460px', maxWidth: '90%' }}>
-            <h2 style={{ fontSize: '19px', fontWeight: 'bold', marginBottom: '16px', color: '#1e293b' }}>
-              Thêm xe tập lái mới
-            </h2>
-            <form onSubmit={handleAddVehicle}>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Biển số xe:</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: 29A-888.12"
-                  value={plateNumber}
-                  onChange={(e) => setPlateNumber(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Thêm phương tiện tập lái mới"
+      >
+        <form onSubmit={handleAddVehicle} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          <AppInput
+            label="Biển số xe"
+            required
+            placeholder="Ví dụ: 29A-888.12"
+            value={plateNumber}
+            onChange={(e) => setPlateNumber(e.target.value)}
+          />
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Dòng xe / Model:</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: Toyota Vios 1.5G 2024"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+          <AppInput
+            label="Dòng xe / Mẫu xe"
+            required
+            placeholder="Ví dụ: Toyota Vios 1.5G 2024"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+          />
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Hạng GPLX:</label>
-                <select
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(Number(e.target.value))}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
-                  ))}
-                </select>
-              </div>
+          <AppSelect
+            label="Hạng đào tạo GPLX"
+            required
+            value={categoryId}
+            onChange={(e) => setCategoryId(Number(e.target.value))}
+            options={categories.map((c) => ({
+              value: c.id,
+              label: `${c.code} - ${c.name}`,
+            }))}
+          />
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Hộp số:</label>
-                <select
-                  value={transmission}
-                  onChange={(e) => setTransmission(e.target.value as TransmissionType)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                >
-                  <option value="MANUAL">Số sàn (MT)</option>
-                  <option value="AUTOMATIC">Số tự động (AT)</option>
-                </select>
-              </div>
+          <AppSelect
+            label="Loại hộp số"
+            required
+            value={transmission}
+            onChange={(e) => setTransmission(e.target.value as TransmissionType)}
+            options={[
+              { value: 'MANUAL', label: 'Số sàn (MT)' },
+              { value: 'AUTOMATIC', label: 'Số tự động (AT)' },
+            ]}
+          />
 
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Hạn đăng kiểm:</label>
-                <input
-                  type="date"
-                  required
-                  value={inspectionExpiryDate}
-                  onChange={(e) => setInspectionExpiryDate(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+          <AppInput
+            label="Hạn kiểm định an toàn (FLT-001)"
+            type="date"
+            required
+            value={inspectionExpiryDate}
+            onChange={(e) => setInspectionExpiryDate(e.target.value)}
+            helperText="Xe quá hạn đăng kiểm sẽ tự động bị khóa không được phân lớp thực hành"
+          />
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  style={{ padding: '8px 18px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  Lưu xe
-                </button>
-              </div>
-            </form>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: 'var(--space-3)' }}>
+            <AppButton variant="outline" type="button" onClick={() => setShowAddModal(false)}>
+              Hủy bỏ
+            </AppButton>
+            <AppButton variant="primary" type="submit" loading={submitting}>
+              Lưu phương tiện
+            </AppButton>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
 
       {/* Modal bảo dưỡng */}
-      {showMaintModal && selectedVehicle && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-          <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '550px', maxWidth: '90%' }}>
-            <h2 style={{ fontSize: '19px', fontWeight: 'bold', marginBottom: '14px', color: '#1e293b' }}>
-              Bảo dưỡng & Sửa chữa xe: {selectedVehicle.plateNumber}
-            </h2>
-            <form onSubmit={handleSaveMaintenance} style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Ngày bảo dưỡng:</label>
-                  <input
-                    type="date"
-                    required
-                    value={maintDate}
-                    onChange={(e) => setMaintDate(e.target.value)}
-                    style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Chi phí (VNĐ):</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={maintCost}
-                    onChange={(e) => setMaintCost(Number(e.target.value))}
-                    style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Đơn vị thực hiện:</label>
-                <input
-                  type="text"
+      {selectedVehicle && (
+        <Modal
+          isOpen={showMaintModal}
+          onClose={() => setShowMaintModal(false)}
+          title={`Bảo dưỡng xe: ${selectedVehicle.plateNumber}`}
+          size="lg"
+        >
+          <div>
+            <form onSubmit={handleSaveMaintenance} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }}>
+                <AppInput
+                  label="Ngày bảo dưỡng"
+                  type="date"
                   required
-                  placeholder="Gara Trung Tâm"
-                  value={maintPerformer}
-                  onChange={(e) => setMaintPerformer(e.target.value)}
-                  style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  value={maintDate}
+                  onChange={(e) => setMaintDate(e.target.value)}
+                />
+                <AppInput
+                  label="Chi phí bảo dưỡng (₫)"
+                  type="number"
+                  min="0"
+                  required
+                  value={maintCost}
+                  onChange={(e) => setMaintCost(Number(e.target.value))}
                 />
               </div>
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Nội dung sửa chữa / bảo dưỡng:</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: Thay dầu động cơ, thay má phanh, kiểm tra lốp"
-                  value={maintDesc}
-                  onChange={(e) => setMaintDesc(e.target.value)}
-                  style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+              <AppInput
+                label="Đơn vị / Gara thực hiện"
+                required
+                placeholder="Gara Trung Tâm hoặc tên đơn vị"
+                value={maintPerformer}
+                onChange={(e) => setMaintPerformer(e.target.value)}
+              />
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowMaintModal(false)}
-                  style={{ padding: '7px 14px', background: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-                >
+              <AppInput
+                label="Hạng mục bảo dưỡng / thay thế phụ tùng"
+                required
+                placeholder="Ví dụ: Thay dầu động cơ, thay má phanh, kiểm tra hệ thống lái"
+                value={maintDesc}
+                onChange={(e) => setMaintDesc(e.target.value)}
+              />
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <AppButton variant="outline" type="button" onClick={() => setShowMaintModal(false)}>
                   Đóng
-                </button>
-                <button
-                  type="submit"
-                  style={{ padding: '7px 16px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  Lưu bảo dưỡng
-                </button>
+                </AppButton>
+                <AppButton variant="success" type="submit" loading={submitting}>
+                  Ghi nhận bảo dưỡng
+                </AppButton>
               </div>
             </form>
 
+            {/* Lịch sử bảo dưỡng */}
             {maintenances.length > 0 && (
-              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '14px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Lịch sử bảo dưỡng gần đây:</h3>
-                <ul style={{ maxHeight: '150px', overflowY: 'auto', paddingLeft: '20px', fontSize: '13px', color: '#64748b' }}>
+              <div style={{ marginTop: 'var(--space-6)', borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-4)' }}>
+                <h4 style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600, marginBottom: 'var(--space-2)' }}>
+                  📋 Lịch sử bảo dưỡng gần đây:
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {maintenances.map((m) => (
-                    <li key={m.id} style={{ marginBottom: '6px' }}>
-                      <strong>{m.maintenanceDate}</strong>: {m.description} — <strong>{m.cost.toLocaleString('vi-VN')} đ</strong> ({m.performedBy})
-                    </li>
+                    <div
+                      key={m.id}
+                      style={{
+                        padding: 'var(--space-2) var(--space-3)',
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: 'var(--color-bg-app)',
+                        fontSize: 'var(--font-size-xs)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <span>
+                        <strong>{formatDate(m.maintenanceDate)}</strong>: {m.description} ({m.performedBy})
+                      </span>
+                      <strong style={{ color: 'var(--color-danger)' }}>{formatCurrency(m.cost)}</strong>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );
 };
+export default FleetManagementPage;

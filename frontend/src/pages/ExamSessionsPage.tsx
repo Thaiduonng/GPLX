@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { examinationService } from '../services/examinationService';
 import { admissionService } from '../services/admissionService';
-import { ExamSession, ExamType } from '../types/examination';
-import { LicenseCategory } from '../types/admission';
+import type { ExamSession, ExamType } from '../types/examination';
+import type { LicenseCategory } from '../types/admission';
 import { useAuth } from '../features/auth/AuthContext';
+import {
+  PageHeader,
+  Modal,
+  AppButton,
+  AppInput,
+  AppSelect,
+  StatusBadge,
+  Alert,
+  LoadingSpinner,
+  EmptyState,
+} from '../components/ui';
+import { formatDate } from '../utils/formatters';
 
 export const ExamSessionsPage: React.FC = () => {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<ExamSession[]>([]);
   const [categories, setCategories] = useState<LicenseCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [registeringId, setRegisteringId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
@@ -20,8 +34,9 @@ export const ExamSessionsPage: React.FC = () => {
   const [examDate, setExamDate] = useState<string>('');
   const [location, setLocation] = useState<string>('');
   const [examType, setExamType] = useState<ExamType>('CERTIFICATION');
+  const [submittingCreate, setSubmittingCreate] = useState<boolean>(false);
 
-  const isAdminOrManager = user?.roles?.some(r => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
+  const isAdminOrManager = user?.roles?.some((r) => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
 
   const loadData = async () => {
     try {
@@ -29,15 +44,21 @@ export const ExamSessionsPage: React.FC = () => {
       setError(null);
       const [sessionsData, catsData] = await Promise.all([
         examinationService.getExamSessions(),
-        admissionService.getCategories()
+        admissionService.getCategories(),
       ]);
       setSessions(sessionsData);
       setCategories(catsData);
       if (catsData.length > 0 && catsData[0]) {
         setCategoryId(catsData[0].id);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải danh sách kỳ thi.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Không thể tải danh sách kỳ thi.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi tải danh sách kỳ thi');
+      }
     } finally {
       setLoading(false);
     }
@@ -49,6 +70,7 @@ export const ExamSessionsPage: React.FC = () => {
 
   const handleRegister = async (sessionId: number) => {
     try {
+      setRegisteringId(sessionId);
       setActionMessage(null);
       setError(null);
       const response = await examinationService.registerCandidate(sessionId);
@@ -58,21 +80,30 @@ export const ExamSessionsPage: React.FC = () => {
         setError(`Bạn được ghi nhận vào danh sách nhưng CHƯA ĐỦ ĐIỀU KIỆN DỰ THI (${response.disqualificationReason})`);
       }
       loadData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Đăng ký dự thi thất bại.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Đăng ký dự thi thất bại.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi đăng ký dự thi');
+      }
+    } finally {
+      setRegisteringId(null);
     }
   };
 
   const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setSubmittingCreate(true);
       setError(null);
       await examinationService.createExamSession({
-        name,
+        name: name.trim(),
         categoryId: Number(categoryId),
         examDate,
-        location,
-        examType
+        location: location.trim(),
+        examType,
       });
       setShowCreateModal(false);
       setName('');
@@ -80,239 +111,197 @@ export const ExamSessionsPage: React.FC = () => {
       setLocation('');
       setActionMessage('Đã tạo kỳ thi sát hạch thành công!');
       loadData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Lỗi khi tạo kỳ thi.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Lỗi khi tạo kỳ thi.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi tạo kỳ thi');
+      }
+    } finally {
+      setSubmittingCreate(false);
     }
   };
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#1e293b' }}>
-            Kỳ thi sát hạch & Tốt nghiệp GPLX
-          </h1>
-          <p style={{ color: '#64748b', marginTop: '4px' }}>
-            Quản lý hội đồng thi, danh sách kỳ sát hạch chính thức và đăng ký thi cấp GPLX
-          </p>
-        </div>
-        {isAdminOrManager && (
-          <button
-            onClick={() => setShowCreateModal(true)}
-            style={{
-              padding: '10px 18px',
-              backgroundColor: '#2563eb',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            + Tạo kỳ thi mới
-          </button>
-        )}
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <PageHeader
+        title="Kỳ Thi Sát Hạch & Tốt Nghiệp GPLX"
+        description="Quản lý hội đồng thi, danh sách kỳ sát hạch chính thức và tiếp nhận đăng ký thi cấp GPLX."
+        actions={
+          isAdminOrManager ? (
+            <AppButton variant="primary" onClick={() => setShowCreateModal(true)} icon="➕">
+              Tạo kỳ thi mới
+            </AppButton>
+          ) : undefined
+        }
+      />
 
       {actionMessage && (
-        <div style={{ padding: '14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#166534', marginBottom: '16px' }}>
-          {actionMessage}
-        </div>
+        <Alert
+          type="success"
+          message={actionMessage}
+          onClose={() => setActionMessage(null)}
+        />
       )}
 
       {error && (
-        <div style={{ padding: '14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', marginBottom: '16px' }}>
-          {error}
-        </div>
+        <Alert
+          type="danger"
+          message={error}
+          onClose={() => setError(null)}
+        />
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Đang tải danh sách kỳ thi...</div>
-      ) : sessions.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '50px', background: '#f8fafc', borderRadius: '12px', color: '#94a3b8' }}>
-          Hiện chưa có kỳ thi nào được lên kế hoạch.
+        <div style={{ padding: '60px 0', textAlign: 'center' }}>
+          <LoadingSpinner size="lg" text="Đang tải danh sách các kỳ thi sát hạch..." />
         </div>
+      ) : sessions.length === 0 ? (
+        <EmptyState
+          icon="📋"
+          title="Chưa có kỳ thi nào"
+          description="Hiện chưa có kỳ thi sát hạch hoặc tốt nghiệp nào được lên kế hoạch."
+          action={
+            isAdminOrManager ? (
+              <AppButton variant="primary" onClick={() => setShowCreateModal(true)}>
+                Lên lịch kỳ thi đầu tiên
+              </AppButton>
+            ) : undefined
+          }
+        />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+            gap: 'var(--space-5)',
+          }}
+        >
           {sessions.map((session) => (
             <div
               key={session.id}
               style={{
-                background: '#fff',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                padding: '20px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                backgroundColor: 'var(--color-surface)',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--color-border)',
+                padding: 'var(--space-5)',
+                boxShadow: 'var(--shadow-xs)',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                gap: 'var(--space-4)',
               }}
             >
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    padding: '3px 8px',
-                    borderRadius: '4px',
-                    background: session.examType === 'CERTIFICATION' ? '#fef3c7' : '#e0e7ff',
-                    color: session.examType === 'CERTIFICATION' ? '#92400e' : '#3730a3'
-                  }}>
-                    {session.examType === 'CERTIFICATION' ? 'Sát hạch Sở GTVT' : 'Thi tốt nghiệp'}
-                  </span>
-                  <span style={{
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    padding: '2px 8px',
-                    borderRadius: '6px',
-                    background: session.status === 'PLANNED' ? '#dbeafe' : '#f1f5f9',
-                    color: session.status === 'PLANNED' ? '#1d4ed8' : '#475569'
-                  }}>
-                    {session.status}
-                  </span>
-                </div>
-
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e293b', marginBottom: '6px' }}>
-                  {session.name}
-                </h3>
-                <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>
-                  Mã kỳ thi: <strong>{session.examCode}</strong> | Hạng: <strong style={{ color: '#2563eb' }}>{session.categoryCode}</strong>
-                </div>
-
-                <div style={{ fontSize: '14px', color: '#334155', lineHeight: '1.6', marginBottom: '16px' }}>
-                  <div>📅 Ngày thi: <strong>{session.examDate}</strong></div>
-                  <div>📍 Địa điểm: <strong>{session.location}</strong></div>
-                  <div>👥 Thí sinh đăng ký: <strong>{session.candidateCount} người</strong></div>
-                </div>
-              </div>
-
-              <div>
-                <button
-                  onClick={() => handleRegister(session.id)}
+                <div
                   style={{
-                    width: '100%',
-                    padding: '10px',
-                    background: '#10b981',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: 'var(--space-3)',
                   }}
                 >
-                  Đăng ký dự thi
-                </button>
+                  <StatusBadge
+                    variant={session.examType === 'CERTIFICATION' ? 'warning' : 'info'}
+                    label={session.examType === 'CERTIFICATION' ? 'Sát hạch Sở GTVT' : 'Thi tốt nghiệp'}
+                  />
+                  <StatusBadge type="exam" status={session.status} />
+                </div>
+
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '4px' }}>
+                  {session.name}
+                </h3>
+                <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-3)' }}>
+                  Mã kỳ thi: <strong>{session.examCode}</strong> | Hạng: <strong style={{ color: 'var(--color-primary)' }}>{session.categoryCode}</strong>
+                </div>
+
+                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div>📅 Ngày thi: <strong>{formatDate(session.examDate)}</strong></div>
+                  <div>📍 Địa điểm: <strong>{session.location}</strong></div>
+                  <div>👥 Số thí sinh đã đăng ký: <strong>{session.candidateCount} thí sinh</strong></div>
+                </div>
               </div>
+
+              <AppButton
+                variant="success"
+                onClick={() => handleRegister(session.id)}
+                loading={registeringId === session.id}
+                fullWidth
+                icon="✍️"
+              >
+                Đăng ký dự thi
+              </AppButton>
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal tạo kỳ thi mới */}
-      {showCreateModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-          <div style={{ background: '#fff', padding: '28px', borderRadius: '12px', width: '500px', maxWidth: '90%' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px', color: '#1e293b' }}>
-              Tạo kỳ thi sát hạch / tốt nghiệp mới
-            </h2>
-            <form onSubmit={handleCreateSession}>
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px' }}>
-                  Tên kỳ thi:
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ví dụ: Kỳ Sát Hạch GPLX Hạng B1 Đợt 2"
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+      {/* Modal tạo kỳ thi */}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Tạo kỳ thi sát hạch / tốt nghiệp mới"
+      >
+        <form onSubmit={handleCreateSession} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          <AppInput
+            label="Tên kỳ thi"
+            required
+            placeholder="Ví dụ: Kỳ sát hạch GPLX Khóa 12/2026"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px' }}>
-                  Hạng GPLX:
-                </label>
-                <select
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(Number(e.target.value))}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.code} - {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <AppSelect
+            label="Hạng đào tạo & sát hạch"
+            required
+            value={categoryId}
+            onChange={(e) => setCategoryId(Number(e.target.value))}
+            options={categories.map((c) => ({
+              value: c.id,
+              label: `${c.code} — ${c.name}`,
+            }))}
+          />
 
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px' }}>
-                  Loại kỳ thi:
-                </label>
-                <select
-                  value={examType}
-                  onChange={(e) => setExamType(e.target.value as ExamType)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                >
-                  <option value="CERTIFICATION">Sát hạch chính thức (Sở GTVT cấp bằng)</option>
-                  <option value="GRADUATION">Thi tốt nghiệp (Cấp chứng chỉ nghề cơ sở)</option>
-                </select>
-              </div>
+          <AppSelect
+            label="Hình thức kỳ thi"
+            required
+            value={examType}
+            onChange={(e) => setExamType(e.target.value as ExamType)}
+            options={[
+              { value: 'CERTIFICATION', label: 'Sát hạch cấp GPLX (Hội đồng Sở GTVT)' },
+              { value: 'GRADUATION', label: 'Thi kiểm tra tốt nghiệp cấp chứng chỉ nghề' },
+            ]}
+          />
 
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px' }}>
-                  Ngày tổ chức thi:
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={examDate}
-                  onChange={(e) => setExamDate(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+          <AppInput
+            label="Ngày tổ chức thi"
+            type="date"
+            required
+            value={examDate}
+            onChange={(e) => setExamDate(e.target.value)}
+          />
 
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px' }}>
-                  Địa điểm tổ chức:
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Ví dụ: Trung tâm Sát hạch Lái xe Quốc gia"
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+          <AppInput
+            label="Địa điểm / Trung tâm sát hạch"
+            required
+            placeholder="Ví dụ: Trung tâm Sát hạch Lái xe Thành Đô"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  style={{ padding: '8px 18px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  Lưu kỳ thi
-                </button>
-              </div>
-            </form>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: 'var(--space-2)' }}>
+            <AppButton variant="outline" type="button" onClick={() => setShowCreateModal(false)}>
+              Hủy bỏ
+            </AppButton>
+            <AppButton variant="primary" type="submit" loading={submittingCreate}>
+              Lưu kỳ thi
+            </AppButton>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </div>
   );
 };
+export default ExamSessionsPage;

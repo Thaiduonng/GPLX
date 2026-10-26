@@ -1,7 +1,18 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { trainingService } from '../services/trainingService';
-import { DatSummary, TrainingClass, TrainingSchedule } from '../types/training';
+import type { DatSummary, TrainingClass, TrainingSchedule } from '../types/training';
 import { useAuth } from '../features/auth/AuthContext';
+import {
+  PageHeader,
+  StatCard,
+  StatusBadge,
+  AppSelect,
+  Alert,
+  LoadingSpinner,
+  EmptyState,
+} from '../components/ui';
+import { formatDate, formatDistanceKm, formatDurationHours } from '../utils/formatters';
 
 export default function TrainingSchedulePage() {
   const { isAuthenticated } = useAuth();
@@ -10,8 +21,8 @@ export default function TrainingSchedulePage() {
   const [schedules, setSchedules] = useState<TrainingSchedule[]>([]);
   const [datSummary, setDatSummary] = useState<DatSummary | null>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   useEffect(() => {
     loadClasses();
@@ -28,8 +39,14 @@ export default function TrainingSchedulePage() {
         setSelectedClassId(data[0].id);
         loadSchedules(data[0].id);
       }
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || err.message || 'Lỗi tải danh sách lớp học.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || 'Lỗi tải danh sách lớp học.');
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg('Lỗi không xác định khi tải danh sách lớp.');
+      }
     } finally {
       setLoading(false);
     }
@@ -39,8 +56,14 @@ export default function TrainingSchedulePage() {
     try {
       const data = await trainingService.getSchedulesByClass(classId);
       setSchedules(data);
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || err.message || 'Lỗi tải lịch học.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || 'Lỗi tải lịch học.');
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg('Lỗi không xác định khi tải lịch học.');
+      }
     }
   };
 
@@ -49,7 +72,7 @@ export default function TrainingSchedulePage() {
       const data = await trainingService.getMyDatSummary();
       setDatSummary(data);
     } catch {
-      // Học viên chưa có phiên thực hành
+      // Học viên chưa có phiên thực hành DAT
     }
   };
 
@@ -61,121 +84,194 @@ export default function TrainingSchedulePage() {
   const getScheduleTypeLabel = (type: string) => {
     switch (type) {
       case 'THEORY':
-        return { label: 'Lý thuyết trên lớp', bg: '#eff6ff', color: '#1d4ed8' };
+        return { label: 'Lý thuyết trên lớp', variant: 'info' as const };
       case 'PRACTICE_YARD':
-        return { label: 'Thực hành Sa hình', bg: '#fef3c7', color: '#b45309' };
+        return { label: 'Thực hành Sa hình', variant: 'warning' as const };
       case 'PRACTICE_ROAD':
-        return { label: 'Thực hành Đường trường (DAT)', bg: '#dcfce7', color: '#15803d' };
+        return { label: 'Thực hành Đường trường (DAT)', variant: 'success' as const };
       case 'CABIN_SIMULATION':
-        return { label: 'Mô phỏng Cabin điện tử', bg: '#f3e8ff', color: '#7e22ce' };
+        return { label: 'Mô phỏng Cabin điện tử', variant: 'default' as const };
       default:
-        return { label: type, bg: '#f1f5f9', color: '#475569' };
+        return { label: type, variant: 'default' as const };
     }
   };
 
-  const distancePercent = datSummary && datSummary.targetDistanceKm > 0
-    ? Math.min(100, Math.round((Number(datSummary.totalDistanceKm) / Number(datSummary.targetDistanceKm)) * 100))
-    : 0;
+  const distancePercent =
+    datSummary && datSummary.targetDistanceKm > 0
+      ? Math.min(
+          100,
+          Math.round((Number(datSummary.totalDistanceKm) / Number(datSummary.targetDistanceKm)) * 100)
+        )
+      : 0;
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.6rem', color: '#1e3a8a', fontWeight: 700, margin: 0 }}>
-          🚗 Kế Hoạch Đào Tạo, Lịch Học & Tiến Độ DAT
-        </h2>
-        <p style={{ color: '#6b7280', fontSize: '0.95rem', margin: '0.25rem 0 0 0' }}>
-          Theo dõi lịch học tập trung, thực hành sa hình, thực hành đường trường và thiết bị giám sát DAT
-        </p>
-      </div>
-
-      {loading && (
-        <div style={{ textAlign: 'center', padding: '1.5rem', color: '#64748b' }}>
-          Đang tải dữ liệu đào tạo...
-        </div>
-      )}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <PageHeader
+        title="Kế Hoạch Đào Tạo, Lịch Học & Tiến Độ DAT"
+        description="Theo dõi lịch học tập trung, thực hành sa hình, thực hành đường trường và thiết bị giám sát hành trình DAT."
+      />
 
       {errorMsg && (
-        <div style={{ background: '#fef2f2', borderLeft: '4px solid #ef4444', padding: '1rem', color: '#991b1b', marginBottom: '1.5rem', borderRadius: '4px' }}>
-          ⚠️ {errorMsg}
-        </div>
+        <Alert
+          type="danger"
+          message={errorMsg}
+          onClose={() => setErrorMsg('')}
+        />
       )}
 
       {/* Tiến độ DAT (Nếu đăng nhập) */}
       {isAuthenticated && datSummary && (
-        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ fontSize: '1.2rem', color: '#1e3a8a', margin: 0, fontWeight: 700 }}>
-              📊 Tiến Độ Thực Hành Lái Xe Đường Trường DAT (Thiết bị giám sát hành trình)
-            </h3>
-            <span style={{ background: datSummary.isCompleted ? '#dcfce7' : '#fef3c7', color: datSummary.isCompleted ? '#166534' : '#b45309', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 700 }}>
-              {datSummary.isCompleted ? '✓ ĐỦ ĐIỀU KIỆN DỰ THI' : 'CHƯA ĐỦ ĐIỀU KIỆN DỰ THI'}
-            </span>
+        <section
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            borderRadius: 'var(--radius-xl)',
+            padding: 'var(--space-6)',
+            boxShadow: 'var(--shadow-xs)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 'var(--space-4)',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}
+          >
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)', margin: '0 0 4px 0' }}>
+                🛰️ Tiến Độ Thực Hành Lái Xe Đường Trường DAT
+              </h3>
+              <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', margin: 0 }}>
+                Dữ liệu đồng bộ trực tiếp từ thiết bị giám sát thời gian & quãng đường học thực hành lái xe
+              </p>
+            </div>
+            <StatusBadge
+              variant={datSummary.isCompleted ? 'success' : 'warning'}
+              label={datSummary.isCompleted ? '✓ ĐỦ ĐIỀU KIỆN DỰ THI' : 'CHƯA ĐỦ ĐIỀU KIỆN DỰ THI'}
+            />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Quãng đường tích lũy</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e40af' }}>
-                {datSummary.totalDistanceKm} / {datSummary.targetDistanceKm} km
-              </div>
-            </div>
-            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Thời gian thực hành</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e40af' }}>
-                {(datSummary.totalDurationMinutes / 60).toFixed(1)} / {(datSummary.targetDurationMinutes / 60).toFixed(0)} giờ
-              </div>
-            </div>
-            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Số phiên thực hành</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e40af' }}>
-                {datSummary.totalSessions} phiên
-              </div>
-            </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 'var(--space-4)',
+              marginBottom: 'var(--space-5)',
+            }}
+          >
+            <StatCard
+              title="Quãng đường tích lũy"
+              value={`${formatDistanceKm(datSummary.totalDistanceKm)}`}
+              subtitle={`Mục tiêu quy định: ${formatDistanceKm(datSummary.targetDistanceKm)}`}
+              icon="🛣️"
+              variant="primary"
+            />
+            <StatCard
+              title="Thời gian thực hành"
+              value={formatDurationHours(datSummary.totalDurationMinutes / 60)}
+              subtitle={`Mục tiêu quy định: ${formatDurationHours(datSummary.targetDurationMinutes / 60)}`}
+              icon="⏱️"
+              variant="primary"
+            />
+            <StatCard
+              title="Số phiên thực hành"
+              value={`${datSummary.totalSessions} phiên`}
+              subtitle="Đã xác thực khuôn mặt học viên"
+              icon="🚗"
+              variant="success"
+            />
           </div>
 
           {/* Thanh tiến trình */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: 'var(--font-size-xs)',
+                fontWeight: 600,
+                color: 'var(--color-text-secondary)',
+                marginBottom: '6px',
+              }}
+            >
               <span>Tiến độ hoàn thành quãng đường DAT:</span>
               <span>{distancePercent}%</span>
             </div>
-            <div style={{ width: '100%', height: '10px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
-              <div style={{ width: `${distancePercent}%`, height: '100%', background: '#2563eb', transition: 'width 0.4s ease' }} />
+            <div
+              style={{
+                width: '100%',
+                height: '10px',
+                backgroundColor: '#e2e8f0',
+                borderRadius: 'var(--radius-full)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  width: `${distancePercent}%`,
+                  height: '100%',
+                  backgroundColor: distancePercent >= 100 ? 'var(--color-success)' : 'var(--color-primary)',
+                  transition: 'width 0.4s ease',
+                }}
+              />
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Chọn lớp học để xem lịch */}
-      <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <h3 style={{ fontSize: '1.2rem', color: '#1f2937', margin: 0, fontWeight: 700 }}>
+      {/* Chọn lớp học & Danh sách lịch */}
+      <section
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderRadius: 'var(--radius-xl)',
+          padding: 'var(--space-6)',
+          boxShadow: 'var(--shadow-xs)',
+          border: '1px solid var(--color-border)',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 'var(--space-5)',
+            flexWrap: 'wrap',
+            gap: 'var(--space-4)',
+          }}
+        >
+          <h3 style={{ fontSize: '1.2rem', color: 'var(--color-text-main)', margin: 0, fontWeight: 700 }}>
             📅 Lịch Học Tập & Lịch Thực Hành Theo Khóa
           </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <label style={{ fontSize: '0.9rem', fontWeight: 600, color: '#475569' }}>Lớp đào tạo:</label>
-            <select
+          <div style={{ width: '280px' }}>
+            <AppSelect
+              label="Lớp đào tạo"
               value={selectedClassId}
               onChange={(e) => handleClassChange(Number(e.target.value))}
-              style={{ padding: '0.45rem 0.85rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.9rem' }}
-            >
-              {classes.map((cls) => (
-                <option key={cls.id} value={cls.id}>
-                  {cls.name} ({cls.classCode})
-                </option>
-              ))}
-            </select>
+              options={classes.map((cls) => ({
+                value: cls.id,
+                label: `${cls.name} (${cls.classCode})`,
+              }))}
+            />
           </div>
         </div>
 
-        {schedules.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
-            Chưa có lịch học nào được sắp xếp cho lớp này.
+        {loading ? (
+          <div style={{ padding: '40px 0', textAlign: 'center' }}>
+            <LoadingSpinner size="md" text="Đang tải lịch học của lớp..." />
           </div>
+        ) : schedules.length === 0 ? (
+          <EmptyState
+            icon="📅"
+            title="Chưa có lịch học"
+            description="Hiện chưa có buổi học lý thuyết hoặc thực hành nào được phân bổ cho lớp này."
+          />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             {schedules.map((s) => {
-              const badge = getScheduleTypeLabel(s.scheduleType);
+              const meta = getScheduleTypeLabel(s.scheduleType);
               const start = new Date(s.startTime);
               const end = new Date(s.endTime);
               return (
@@ -185,31 +281,32 @@ export default function TrainingSchedulePage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: '1rem 1.25rem',
-                    background: '#f8fafc',
-                    borderRadius: '8px',
-                    border: '1px solid #e2e8f0',
+                    padding: 'var(--space-4) var(--space-5)',
+                    backgroundColor: 'var(--color-bg-app)',
+                    borderRadius: 'var(--radius-lg)',
+                    border: '1px solid var(--color-border)',
                     flexWrap: 'wrap',
-                    gap: '0.75rem',
+                    gap: 'var(--space-3)',
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                      <span style={{ fontWeight: 700, color: '#1e3a8a', fontSize: '1.05rem' }}>{s.title}</span>
-                      <span style={{ background: badge.bg, color: badge.color, padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
-                        {badge.label}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '1rem' }}>
+                        {s.title}
                       </span>
+                      <StatusBadge variant={meta.variant} label={meta.label} />
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                      📍 Địa điểm: <strong>{s.location}</strong>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                      📍 Địa điểm học: <strong>{s.location}</strong>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 600, color: '#1f2937', fontSize: '0.95rem' }}>
-                      {start.toLocaleDateString('vi-VN')}
+                    <div style={{ fontWeight: 600, color: 'var(--color-text-main)', fontSize: 'var(--font-size-sm)' }}>
+                      {formatDate(s.startTime)}
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                      {start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} — {end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                      {start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} —{' '}
+                      {end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 </div>
@@ -217,7 +314,7 @@ export default function TrainingSchedulePage() {
             })}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

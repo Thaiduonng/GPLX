@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { learningService } from '../services/learningService';
-import { Course, Lesson } from '../types/learning';
+import type { Course, Lesson } from '../types/learning';
 import { useAuth } from '../features/auth/AuthContext';
+import {
+  PageHeader,
+  StatusBadge,
+  AppButton,
+  Alert,
+  LoadingSpinner,
+} from '../components/ui';
 
 export default function CoursesPage() {
   const { isAuthenticated } = useAuth();
@@ -9,12 +17,12 @@ export default function CoursesPage() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [successMsg, setSuccessMsg] = useState<string>('');
 
-  // Bộ đếm thời gian học bài
-  const [studyTimerSeconds, setStudyTimerSeconds] = useState(0);
+  // Bộ đếm thời gian học bài (giây)
+  const [studyTimerSeconds, setStudyTimerSeconds] = useState<number>(0);
 
   useEffect(() => {
     learningService
@@ -26,13 +34,17 @@ export default function CoursesPage() {
         }
       })
       .catch((err) => {
-        setErrorMsg('Không thể tải danh sách khóa học: ' + (err.response?.data?.message || err.message));
+        if (axios.isAxiosError(err)) {
+          setErrorMsg('Không thể tải danh sách khóa học: ' + (err.response?.data?.message || err.message));
+        } else if (err instanceof Error) {
+          setErrorMsg(err.message);
+        }
       })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval>;
     if (activeLesson) {
       setStudyTimerSeconds(0);
       interval = setInterval(() => {
@@ -51,8 +63,12 @@ export default function CoursesPage() {
       if (lessonList.length > 0 && lessonList[0]) {
         setActiveLesson(lessonList[0]);
       }
-    } catch (err: any) {
-      setErrorMsg('Không thể tải bài học: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg('Không thể tải bài học: ' + (err.response?.data?.message || err.message));
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      }
     }
   };
 
@@ -73,158 +89,231 @@ export default function CoursesPage() {
       });
 
       setSuccessMsg(`Chúc mừng! Bạn đã hoàn thành: "${activeLesson.title}".`);
-      // Cập nhật lại trạng thái bài giảng
       setLessons((prev) =>
         prev.map((l) => (l.id === activeLesson.id ? { ...l, completed: true } : l))
       );
       setActiveLesson((prev) => (prev ? { ...prev, completed: true } : null));
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || err.message || 'Lỗi cập nhật tiến độ.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || 'Lỗi cập nhật tiến độ bài học.');
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      }
     }
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.6rem', color: '#1e3a8a', fontWeight: 700, margin: 0 }}>
-          📚 Khóa Học & Đào Tạo Trực Tuyến (E-Learning)
-        </h2>
-        <p style={{ color: '#6b7280', fontSize: '0.95rem', margin: '0.25rem 0 0 0' }}>
-          Học lý thuyết Luật Giao thông đường bộ, kỹ thuật lái xe và đạo đức người lái xe
-        </p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <PageHeader
+        title="Khóa Học & Đào Tạo Trực Tuyến (E-Learning)"
+        description="Học lý thuyết Luật Giao thông đường bộ, kỹ thuật lái xe và văn hóa đạo đức người lái xe theo chuẩn Cục Đường bộ."
+      />
 
       {errorMsg && (
-        <div style={{ background: '#fef2f2', borderLeft: '4px solid #ef4444', padding: '1rem', color: '#991b1b', marginBottom: '1.5rem', borderRadius: '4px' }}>
-          ⚠️ {errorMsg}
-        </div>
+        <Alert
+          type="danger"
+          message={errorMsg}
+          onClose={() => setErrorMsg('')}
+        />
       )}
 
       {successMsg && (
-        <div style={{ background: '#f0fdf4', borderLeft: '4px solid #22c55e', padding: '1rem', color: '#166534', marginBottom: '1.5rem', borderRadius: '4px' }}>
-          ✅ {successMsg}
-        </div>
+        <Alert
+          type="success"
+          message={successMsg}
+          onClose={() => setSuccessMsg('')}
+        />
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>⏳ Đang tải khóa học...</div>
+        <div style={{ padding: '60px 0', textAlign: 'center' }}>
+          <LoadingSpinner size="lg" text="Đang tải danh sách khóa học và bài giảng..." />
+        </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '1.5rem' }}>
-          {/* Cột trái: Danh mục khóa học & Bài học */}
-          <div>
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1f2937', marginBottom: '0.75rem' }}>Khóa học đào tạo</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {courses.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => handleSelectCourse(c)}
-                    style={{
-                      textAlign: 'left',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '8px',
-                      border: selectedCourse?.id === c.id ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                      background: selectedCourse?.id === c.id ? '#eff6ff' : '#ffffff',
-                      color: selectedCourse?.id === c.id ? '#1d4ed8' : '#374151',
-                      fontWeight: selectedCourse?.id === c.id ? 600 : 400,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div>{c.title}</div>
-                    <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Hạng: {c.category?.code} | {c.totalHours} giờ đào tạo</span>
-                  </button>
-                ))}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(280px, 340px) 1fr',
+            gap: 'var(--space-6)',
+            alignItems: 'start',
+          }}
+        >
+          {/* Cột trái: Khóa học & Bài học */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+            <div
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                borderRadius: 'var(--radius-xl)',
+                padding: 'var(--space-5)',
+                border: '1px solid var(--color-border)',
+                boxShadow: 'var(--shadow-xs)',
+              }}
+            >
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: 'var(--space-3)' }}>
+                Khóa học đào tạo
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {courses.map((c) => {
+                  const isSelected = selectedCourse?.id === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => handleSelectCourse(c)}
+                      style={{
+                        textAlign: 'left',
+                        padding: 'var(--space-3) var(--space-4)',
+                        borderRadius: 'var(--radius-md)',
+                        border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                        backgroundColor: isSelected ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                        color: isSelected ? 'var(--color-primary-dark)' : 'var(--color-text-main)',
+                        fontWeight: isSelected ? 600 : 400,
+                        cursor: 'pointer',
+                        transition: 'all var(--transition-fast)',
+                      }}
+                    >
+                      <div style={{ fontWeight: 600 }}>{c.title}</div>
+                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                        Hạng {c.category?.code} | {c.totalHours} giờ đào tạo
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Danh sách bài giảng */}
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1f2937', marginBottom: '0.75rem' }}>Danh sách bài giảng</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {lessons.map((lesson) => (
-                  <button
-                    key={lesson.id}
-                    onClick={() => setActiveLesson(lesson)}
-                    style={{
-                      textAlign: 'left',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '6px',
-                      border: '1px solid #e2e8f0',
-                      background: activeLesson?.id === lesson.id ? '#f1f5f9' : '#ffffff',
-                      color: '#334155',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span style={{ fontSize: '0.9rem', fontWeight: activeLesson?.id === lesson.id ? 600 : 400 }}>
-                      {lesson.title}
-                    </span>
-                    {lesson.completed ? (
-                      <span style={{ color: '#16a34a', fontSize: '0.8rem', fontWeight: 600 }}>✓ Đã học</span>
-                    ) : (
-                      <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{lesson.durationMinutes}p</span>
-                    )}
-                  </button>
-                ))}
+            <div
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                borderRadius: 'var(--radius-xl)',
+                padding: 'var(--space-5)',
+                border: '1px solid var(--color-border)',
+                boxShadow: 'var(--shadow-xs)',
+              }}
+            >
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: 'var(--space-3)' }}>
+                Danh sách chuyên đề ({lessons.length})
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {lessons.map((lesson) => {
+                  const isCurrent = activeLesson?.id === lesson.id;
+                  return (
+                    <button
+                      key={lesson.id}
+                      onClick={() => setActiveLesson(lesson)}
+                      style={{
+                        textAlign: 'left',
+                        padding: 'var(--space-3) var(--space-4)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--color-border)',
+                        backgroundColor: isCurrent ? '#f1f5f9' : 'var(--color-surface)',
+                        color: 'var(--color-text-main)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        transition: 'all var(--transition-fast)',
+                      }}
+                    >
+                      <span style={{ fontSize: 'var(--font-size-xs)', fontWeight: isCurrent ? 600 : 400 }}>
+                        {lesson.title}
+                      </span>
+                      {lesson.completed ? (
+                        <StatusBadge variant="success" label="✓ Đã học" />
+                      ) : (
+                        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                          {lesson.durationMinutes}p
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* Cột phải: Trình đọc nội dung bài học */}
-          <div style={{ background: '#ffffff', borderRadius: '12px', padding: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
+          {/* Cột phải: Khung bài giảng */}
+          <div
+            style={{
+              backgroundColor: 'var(--color-surface)',
+              borderRadius: 'var(--radius-xl)',
+              padding: 'var(--space-6)',
+              boxShadow: 'var(--shadow-xs)',
+              border: '1px solid var(--color-border)',
+            }}
+          >
             {activeLesson ? (
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottom: '1px solid var(--color-border)',
+                    paddingBottom: 'var(--space-4)',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                  }}
+                >
                   <div>
-                    <h3 style={{ fontSize: '1.4rem', color: '#1e3a8a', fontWeight: 700, margin: 0 }}>
+                    <h3 style={{ fontSize: '1.25rem', color: 'var(--color-text-main)', fontWeight: 700, margin: '0 0 4px 0' }}>
                       {activeLesson.title}
                     </h3>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
-                      Thời lượng tiêu chuẩn: {activeLesson.durationMinutes} phút | Thời gian đang xem: <strong>{studyTimerSeconds} giây</strong>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)', margin: 0 }}>
+                      Thời lượng tiêu chuẩn: {activeLesson.durationMinutes} phút | Thời gian đang xem:{' '}
+                      <strong style={{ color: 'var(--color-primary)' }}>{studyTimerSeconds} giây</strong>
                     </p>
                   </div>
+
                   <div>
                     {activeLesson.completed ? (
-                      <span style={{ background: '#dcfce7', color: '#166534', padding: '0.4rem 0.8rem', borderRadius: '9999px', fontSize: '0.85rem', fontWeight: 600 }}>
-                        Đã hoàn thành ✓
-                      </span>
+                      <StatusBadge variant="success" label="Đã hoàn thành bài học ✓" />
                     ) : (
-                      <button
+                      <AppButton
+                        variant={studyTimerSeconds >= 30 ? 'success' : 'outline'}
+                        size="sm"
                         onClick={handleCompleteLesson}
-                        disabled={!isAuthenticated}
-                        style={{
-                          background: studyTimerSeconds >= 30 ? '#16a34a' : '#94a3b8',
-                          color: 'white',
-                          border: 'none',
-                          padding: '0.5rem 1.25rem',
-                          borderRadius: '6px',
-                          fontWeight: 600,
-                          cursor: studyTimerSeconds >= 30 ? 'pointer' : 'not-allowed',
-                        }}
+                        disabled={!isAuthenticated || studyTimerSeconds < 30}
+                        icon={studyTimerSeconds >= 30 ? '✓' : '⏱️'}
                       >
-                        {studyTimerSeconds >= 30 ? 'Đánh dấu hoàn thành bài' : `Xem thêm ${30 - studyTimerSeconds}s để hoàn thành`}
-                      </button>
+                        {studyTimerSeconds >= 30
+                          ? 'Đánh dấu hoàn thành bài'
+                          : `Xem thêm ${30 - studyTimerSeconds}s để hoàn thành`}
+                      </AppButton>
                     )}
                   </div>
                 </div>
 
                 {/* Khung mô phỏng video bài giảng */}
-                <div style={{ background: '#0f172a', borderRadius: '8px', height: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#ffffff', marginBottom: '1.5rem' }}>
-                  <span style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🎬</span>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>Video bài giảng trực tuyến GPLX</div>
-                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>Đang phát: {activeLesson.title}</div>
+                <div
+                  style={{
+                    backgroundColor: '#0f172a',
+                    borderRadius: 'var(--radius-lg)',
+                    height: '320px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                  }}
+                >
+                  <span style={{ fontSize: '3rem', marginBottom: '8px' }}>🎬</span>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>Video bài giảng điện tử GPLX</div>
+                  <div style={{ fontSize: 'var(--font-size-xs)', color: '#94a3b8', marginTop: '4px' }}>
+                    Đang phát chuyên đề: {activeLesson.title}
+                  </div>
                 </div>
 
-                <div style={{ lineHeight: 1.7, color: '#334155' }}>
-                  <h4 style={{ color: '#1e3a8a', marginBottom: '0.5rem' }}>Nội dung trọng tâm bài học:</h4>
+                <div style={{ lineHeight: 1.7, color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                  <h4 style={{ color: 'var(--color-text-main)', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
+                    Nội dung trọng tâm bài học:
+                  </h4>
                   <p>{activeLesson.content}</p>
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                Vui lòng chọn bài giảng để bắt đầu học trực tuyến.
+              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--color-text-muted)' }}>
+                Vui lòng chọn bài giảng từ danh sách bên trái để bắt đầu học trực tuyến.
               </div>
             )}
           </div>
