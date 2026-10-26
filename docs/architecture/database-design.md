@@ -29,6 +29,7 @@
 | `name` | VARCHAR(50) | UNIQUE, NOT NULL | Tên vai trò (ROLE_ADMIN, ROLE_STUDENT,...) |
 | `description` | VARCHAR(255) | NULL | Mô tả quyền hạn của vai trò |
 | `created_at` | DATETIME | NOT NULL | Thời điểm tạo |
+| `updated_at` | DATETIME | NOT NULL | Thời điểm cập nhật (Bổ sung tại V8) |
 | `updated_at` | DATETIME | NOT NULL | Thời điểm cập nhật |
 
 ### Bảng `permissions` (Quyền hạn chi tiết)
@@ -39,6 +40,7 @@
 | `description` | VARCHAR(255) | NULL | Diễn giải quyền |
 | `module` | VARCHAR(50) | NOT NULL | Module sở hữu quyền |
 | `created_at` | DATETIME | NOT NULL | Thời điểm tạo |
+| `updated_at` | DATETIME | NOT NULL | Thời điểm cập nhật (Bổ sung tại V8) |
 
 ### Bảng liên kết `user_roles` và `role_permissions`
 - `user_roles`: Khóa chính kết hợp `(user_id, role_id)`, Foreign Key đến `users(id)` và `roles(id)` với hành vi `ON DELETE CASCADE`.
@@ -275,7 +277,7 @@
 | `inspection_expiry_date`| DATE | NOT NULL | Hạn đăng kiểm xe (`FLT-001`) |
 
 ### Bảng `vehicle_maintenances` (Lịch sử bảo dưỡng & Sửa chữa xe)
-- Lưu `vehicle_id`, `maintenance_date`, `description`, `cost`, `performed_by`.
+- Lưu `vehicle_id`, `maintenance_date`, `description`, `cost`, `performed_by`, `created_at`, `updated_at` (Bổ sung tại V8).
 
 ### Bảng `notifications` (Thông báo & Nhắc lịch - NTF-001)
 - Lưu `user_id`, `title`, `content`, `type`, `is_read`, `deduplication_key` (chống gửi trùng `NTF-001`).
