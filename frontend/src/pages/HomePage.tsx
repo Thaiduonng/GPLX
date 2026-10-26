@@ -68,6 +68,11 @@ export default function HomePage() {
                     Khóa học
                   </AppButton>
                 </Link>
+                <Link to="/student/review">
+                  <AppButton variant="primary" size="sm" icon={<Icons.RefreshCw size={16} />}>
+                    Ôn tập thông minh
+                  </AppButton>
+                </Link>
               </div>
             </div>
           ) : (
@@ -202,6 +207,16 @@ export default function HomePage() {
             <div className={styles.moduleInfo}>
               <h4>Đào tạo Lý thuyết (Learning)</h4>
               <p>Khóa học lý thuyết, bài giảng điện tử và ngân hàng 600 câu hỏi trắc nghiệm Cục Đường bộ.</p>
+            </div>
+          </Link>
+
+          <Link to="/student/review" className={styles.moduleCard}>
+            <div className={styles.moduleIcon}>
+              <Icons.RefreshCw size={24} />
+            </div>
+            <div className={styles.moduleInfo}>
+              <h4>Ôn tập Thông minh (Spaced Repetition)</h4>
+              <p>Củng cố câu sai, 60 câu điểm liệt, thuật toán lặp lại ngắt quãng Leitner 5 hộp tăng phản xạ.</p>
             </div>
           </Link>
 
