@@ -244,3 +244,29 @@ export interface ExamSubmitRequest {
   categoryCode: string;
   userAnswers: Record<number, number>;
 }
+
+export interface AnswerUpsertItem {
+  id?: number;
+  answerText: string;
+  isCorrect: boolean;
+  orderIndex: number;
+}
+
+export interface QuestionUpsertRequest {
+  categoryCode: string;
+  topicId?: number | null;
+  questionNumber: number;
+  content: string;
+  imageUrl?: string | null;
+  explanation?: string | null;
+  isParalysis: boolean;
+  legalReference?: string | null;
+  answers: AnswerUpsertItem[];
+}
+
+export interface QuestionImportResult {
+  totalReceived: number;
+  successCount: number;
+  failureCount: number;
+  errors: string[];
+}

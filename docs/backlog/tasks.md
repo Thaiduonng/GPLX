@@ -164,3 +164,29 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P12-03`** | Nâng Cấp Giao Diện Rèn Luyện 8 Chế Độ Chuyên Sâu | TSK-P12-01 | `DONE` | Nâng cấp `TheoryPracticeTab.tsx` với bảng lưới câu hỏi trực quan hiển thị màu sắc đúng (xanh)/sai (đỏ), hỗ trợ phím tắt chọn đáp án và Enter chuyển câu; tổng kết buổi rèn luyện chi tiết. |
 | **`TSK-P12-04`** | Phân Hệ Ôn Tập Câu Sai, Đánh Dấu & Lịch Sử Phiên Học | TSK-P12-02 | `DONE` | Nâng cấp `TheoryReviewTab.tsx` với 3 phân khu: Danh sách câu từng làm sai, Danh sách câu đã bookmark, Lịch sử các phiên rèn luyện phân trang; nút phím tắt "Rèn luyện ngay tập hợp này". |
 | **`TSK-P12-05`** | Đóng Gói Docker Frontend & Kiểm Thử Runtime UI/UX | TSK-P12-03..04| `DONE` | Rebuild Vite bundle 0 lỗi TypeScript strict (`npm run build`); Nginx container hoạt động mượt mà tại `http://localhost:3000`. |
+
+
+---
+
+## Danh mục Tasks — Phase 13: Giao Diện Thi Thử Lý Thuyết Sát Hạch Chuyên Sâu (Giai đoạn 4)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **TSK-P13-01** | Phòng Thi Trực Tuyến & Đồng Hồ Đếm Ngược Countdown | TSK-P12-05 | DONE | Xây dựng phòng thi độc lập trên TheoryMockExamTab.tsx, đồng hồ đếm ngược chính xác, cảnh báo đổi màu dưới 2 phút, tự động nộp bài khi hết giờ (handleAutoSubmit). |
+| **TSK-P13-02** | Lưới Điều Hướng Câu Hỏi & Tính Năng Cắm Cờ Xem Lại (Flag) | TSK-P13-01 | DONE | Bảng ma trận câu hỏi Question Grid hiển thị màu sắc: Đã làm (xanh), Chưa làm (xám), Đang xem (viền đậm), Điểm liệt (chấm đỏ), Cắm cờ xem lại (icon 🚩). Phím tắt F để cắm/gỡ cờ. |
+| **TSK-P13-03** | Tự Động Lưu Tiến Độ Ngầm Thời Gian Thực (Auto-save) | TSK-P13-01 | DONE | Gọi ngầm saveExamProgress mỗi khi người học chọn hoặc thay đổi đáp án; hiển thị trạng thái lưu đám mây thời gian thực, phòng chống mất điện hoặc tải lại trang. |
+| **TSK-P13-04** | Hệ Thống Phím Tắt Phòng Thi & Modal Xác Nhận Nộp Bài | TSK-P13-02 | DONE | Phím 1..4 chọn đáp án A..D, Mũi tên Trái/Phải chuyển câu; Modal nộp bài kiểm soát thống kê câu làm / câu chưa làm / câu cắm cờ, chống bấm nhầm và chống nộp lặp. |
+| **TSK-P13-05** | Bảng Điểm Sát Hạch Chi Tiết & Tra Cứu Lịch Sử Thi Đã Lưu | TSK-P13-04 | DONE | Màn hình kết quả thông báo ĐẠT / KHÔNG ĐẠT, cảnh báo trượt điểm liệt; bộ lọc xem lại câu sai / điểm liệt; sub-tab tra cứu lịch sử các lượt thi cũ (getMockExamHistory). |
+| **TSK-P13-06** | Đóng Gói Docker Frontend & Kiểm Thử Runtime | TSK-P13-05 | DONE | Biên dịch TypeScript strict 0 lỗi, đóng gói Docker Compose frontend v1.6.0 hoạt động mượt mà. |
+
+---
+
+## Danh mục Tasks — Phase 14: Quản Trị Dữ Liệu Ngân Hàng Câu Hỏi & Cấu Hình Đề Thi (Giai đoạn 5)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **TSK-P14-01** | Bảng Điều Khiển Cấu Hình Đề Thi Theo Hạng GPLX | TSK-P13-06 | DONE | Quản lý thông số đề thi cho các hạng A1, A2, B1, B, C (số câu hỏi, thời gian, điểm sàn đạt, phiên bản quy chế, căn cứ pháp lý); modal chỉnh sửa lưu trữ trên backend. |
+| **TSK-P14-02** | Quản Lý Ngân Hàng Câu Hỏi: Tìm Kiếm, Lọc Đa Tiêu Chí & CRUD | TSK-P14-01 | DONE | Bảng quản trị câu hỏi phân trang; lọc theo 7 chương lý thuyết, theo hạng GPLX, lọc riêng câu hỏi điểm liệt ⚠️; modal xem chi tiết đáp án đúng và căn cứ pháp lý; chức năng thêm mới, sửa và xóa câu hỏi an toàn. |
+| **TSK-P14-03** | Nhập Hàng Loạt Câu Hỏi Từ JSON (Bulk Import) | TSK-P14-01 | DONE | Chức năng nhập hàng loạt với tiền kiểm tra cú pháp JSON, kiểm tra tính toàn vẹn (tối thiểu 2 đáp án, duy nhất 1 đáp án đúng theo quy định GPLX); hiển thị báo cáo thành công/thất bại chi tiết. |
+| **TSK-P14-04** | Xuất Dữ Liệu Ngân Hàng Câu Hỏi (Export JSON) & Xác Minh Pháp Lý | TSK-P14-02 | DONE | Xuất dữ liệu câu hỏi ra file JSON tiêu chuẩn theo chương hoặc hạng; quản lý thông tin phiên bản Bộ 600 câu hỏi Cục ĐBVN và 60 câu điểm liệt ở trạng thái VERIFIED (Thông tư 12 & Thông tư 04). |
+| **TSK-P14-05** | Kiểm Thử Tự Động Backend & Đóng Gói Docker Toàn Diện | TSK-P14-02..04 | DONE | Mở rộng bộ unit tests QuestionAdminServiceTest đạt 5/5 PASS (tổng 7/7 tests module lý thuyết); đóng gói Docker frontend v1.7.0 phục vụ tại cổng 3000. |
