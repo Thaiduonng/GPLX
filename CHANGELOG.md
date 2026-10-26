@@ -2,6 +2,27 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.4.0] — 2026-10-26
+
+### Chuyên Sâu Database & Backend Phân Hệ Lý Thuyết GPLX (Giai đoạn 2 — Phase 11)
+- **Cấu trúc Đề thi & Database Migration (V11):**
+  - Khởi tạo migration `V11__seed_exam_structure_and_import_helpers.sql` cấu hình phân bổ số lượng câu theo từng chương (`structure_json`) cho các hạng bằng A1, A2, B1, B, C theo quy chuẩn của Thông tư 12 & Thông tư 04.
+  - Bổ sung chỉ mục tối ưu hóa cho tra cứu câu hỏi theo số thứ tự và phân loại điểm liệt.
+- **Bảo mật & Trải nghiệm Thi Thử Nâng Cao:**
+  - Bổ sung API `POST /api/v1/theory/mock-exam/{sessionCode}/progress` lưu tiến độ làm bài thời gian thực của học viên, ngăn ngừa rủi ro mất điện hoặc tải lại trang.
+  - Tự động đánh dấu `EXPIRED` khi thời gian làm bài vượt quá thời lượng cho phép cộng với thời gian ân hạn mạng (Grace Period 30 giây).
+  - Đảm bảo tính Idempotency: Nộp bài nhiều lần trả về cùng một kết quả đã chấm thay vì ghi đè điểm số.
+  - Phân bổ đề thi bắt buộc có câu điểm liệt và bám sát tỷ lệ các chương lý thuyết.
+- **Quản trị Ngân Hàng Câu Hỏi Nâng Cao (Admin):**
+  - Cung cấp API `POST /api/v1/admin/theory/questions/import` cho phép nạp hàng loạt câu hỏi kèm validation nghiêm ngặt: kiểm tra số lượng đáp án tối thiểu (>= 2), ràng buộc duy nhất 1 đáp án đúng chuẩn trắc nghiệm GPLX Việt Nam, tự động map theo 7 chương.
+  - Cung cấp API `GET /api/v1/admin/theory/questions/export` hỗ trợ trích xuất câu hỏi theo chủ đề hoặc hạng bằng.
+- **Tìm kiếm & Phân trang Nâng Cao:**
+  - Bổ sung tìm kiếm câu hỏi có phân trang `Pageable` theo từ khóa và lọc câu điểm liệt.
+  - Phân trang lịch sử rèn luyện (`GET /api/v1/theory/practice/history`) và lịch sử thi thử (`GET /api/v1/theory/mock-exam/history`).
+- **Kiểm thử Tự động & Đóng gói:**
+  - Mở rộng `TheoryExamSecureWorkflowTest` và thêm `QuestionAdminServiceTest` (10/10 tests PASS 100%).
+  - Đóng gói container Docker backend và kiểm chứng toàn bộ kịch bản thực tế thành công.
+
 ## [1.3.0] — 2026-10-26
 
 ### Phân Hệ Học Tập, Rèn Luyện & Thi Thử Lý Thuyết GPLX Việt Nam (Phase 10 — Theory Learning & Exam System)

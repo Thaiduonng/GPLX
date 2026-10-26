@@ -10,6 +10,7 @@ import vn.edu.gplx.modules.learning.domain.TheoryQuestion;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TheoryQuestionRepository extends JpaRepository<TheoryQuestion, Long> {
@@ -20,6 +21,8 @@ public interface TheoryQuestionRepository extends JpaRepository<TheoryQuestion, 
 
     List<TheoryQuestion> findByIsParalysisTrueOrderByQuestionNumberAsc();
 
+    Optional<TheoryQuestion> findByQuestionNumber(int questionNumber);
+
     @Query("SELECT q FROM TheoryQuestion q WHERE (:categoryCode = 'ALL' OR q.categoryCode = 'ALL' OR q.categoryCode = :categoryCode) ORDER BY q.questionNumber ASC")
     List<TheoryQuestion> findForLicenseCategory(@Param("categoryCode") String categoryCode);
 
@@ -29,12 +32,30 @@ public interface TheoryQuestionRepository extends JpaRepository<TheoryQuestion, 
     @Query("SELECT q FROM TheoryQuestion q WHERE q.id IN :ids")
     List<TheoryQuestion> findByIdsIn(@Param("ids") Collection<Long> ids);
 
+    @Query("SELECT q FROM TheoryQuestion q WHERE (:topicId IS NULL OR q.topic.id = :topicId) " +
+            "AND (:categoryCode IS NULL OR q.categoryCode = :categoryCode OR q.categoryCode = 'ALL') " +
+            "AND (:isParalysis IS NULL OR q.isParalysis = :isParalysis) " +
+            "AND (:keyword IS NULL OR LOWER(q.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<TheoryQuestion> searchQuestionsAdvanced(
+            @Param("topicId") Long topicId,
+            @Param("categoryCode") String categoryCode,
+            @Param("isParalysis") Boolean isParalysis,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
     @Query("SELECT q FROM TheoryQuestion q WHERE (:topicId IS NULL OR q.topic.id = :topicId) AND (:categoryCode IS NULL OR q.categoryCode = :categoryCode OR q.categoryCode = 'ALL') AND (:isParalysis IS NULL OR q.isParalysis = :isParalysis)")
     Page<TheoryQuestion> searchQuestions(
             @Param("topicId") Long topicId,
             @Param("categoryCode") String categoryCode,
             @Param("isParalysis") Boolean isParalysis,
             Pageable pageable
+    );
+
+    @Query("SELECT q FROM TheoryQuestion q WHERE q.topic.code = :topicCode AND (:isParalysis IS NULL OR q.isParalysis = :isParalysis)")
+    List<TheoryQuestion> findByTopicCodeAndParalysis(
+            @Param("topicCode") String topicCode,
+            @Param("isParalysis") Boolean isParalysis
     );
 
     long countByTopicId(Long topicId);

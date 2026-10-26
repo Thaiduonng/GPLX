@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.gplx.modules.learning.api.dto.ExamConfigurationDto;
 import vn.edu.gplx.modules.learning.api.dto.QuestionDetailResponse;
+import vn.edu.gplx.modules.learning.api.dto.QuestionImportResultResponse;
 import vn.edu.gplx.modules.learning.api.dto.QuestionUpsertRequest;
 import vn.edu.gplx.modules.learning.application.ExamConfigService;
 import vn.edu.gplx.modules.learning.application.QuestionAdminService;
@@ -107,5 +108,22 @@ public class TheoryAdminController {
     public ResponseEntity<ApiResponse<Void>> deleteQuestion(@PathVariable Long id) {
         questionAdminService.deleteQuestion(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa câu hỏi thành công", null));
+    }
+
+    @Operation(summary = "Nhập hàng loạt câu hỏi vào ngân hàng (Bulk Import)")
+    @PostMapping("/questions/import")
+    public ResponseEntity<ApiResponse<QuestionImportResultResponse>> importQuestions(
+            @Valid @RequestBody List<QuestionUpsertRequest> requests) {
+        QuestionImportResultResponse result = questionAdminService.importQuestions(requests);
+        return ResponseEntity.ok(ApiResponse.success("Đã hoàn tất nhập danh sách câu hỏi", result));
+    }
+
+    @Operation(summary = "Xuất danh sách câu hỏi theo chủ đề hoặc hạng GPLX (Export)")
+    @GetMapping("/questions/export")
+    public ResponseEntity<ApiResponse<List<QuestionDetailResponse>>> exportQuestions(
+            @RequestParam(required = false) Long topicId,
+            @RequestParam(required = false) String categoryCode) {
+        List<QuestionDetailResponse> result = questionAdminService.exportQuestions(topicId, categoryCode);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

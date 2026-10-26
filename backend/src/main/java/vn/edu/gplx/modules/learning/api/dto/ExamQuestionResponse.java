@@ -9,6 +9,7 @@ public record ExamQuestionResponse(
         String content,
         String imageUrl,
         boolean isParalysis,
+        Long selectedAnswerId,
         List<ExamQuestionOptionResponse> options
 ) {
 }

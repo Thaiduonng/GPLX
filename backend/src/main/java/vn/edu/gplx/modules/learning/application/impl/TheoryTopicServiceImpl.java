@@ -1,5 +1,7 @@
 package vn.edu.gplx.modules.learning.application.impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.gplx.modules.learning.api.dto.QuestionDetailResponse;
@@ -91,6 +93,19 @@ public class TheoryTopicServiceImpl implements TheoryTopicService {
                 : Collections.emptySet();
 
         return questions.stream().map(q -> toDetailResponse(q, topic.getName(), bookmarkedIds.contains(q.getId()))).toList();
+    }
+
+    @Override
+    public Page<QuestionDetailResponse> getQuestionsByTopic(Long topicId, Long userId, String categoryCode, Boolean isParalysis, String keyword, Pageable pageable) {
+        TheoryTopic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new ResourceNotFoundException("TheoryTopic", "id", topicId));
+
+        Set<Long> bookmarkedIds = (userId != null)
+                ? new HashSet<>(bookmarkRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(b -> b.getQuestion().getId()).toList())
+                : Collections.emptySet();
+
+        Page<TheoryQuestion> page = questionRepository.searchQuestionsAdvanced(topicId, categoryCode, isParalysis, keyword, pageable);
+        return page.map(q -> toDetailResponse(q, topic.getName(), bookmarkedIds.contains(q.getId())));
     }
 
     private QuestionDetailResponse toDetailResponse(TheoryQuestion q, String topicName, boolean isBookmarked) {
