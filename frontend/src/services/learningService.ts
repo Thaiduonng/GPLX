@@ -17,6 +17,8 @@ import {
   TheoryStatistics,
   TheoryTopic,
   UpdateProgressRequest,
+  QuestionUpsertRequest,
+  QuestionImportResult,
 } from '../types/learning';
 
 export const learningService = {
@@ -205,8 +207,50 @@ export const learningService = {
     return response.data.data;
   },
 
-  async importQuestions(questions: any[]): Promise<any> {
-    const response = await apiClient.post<ApiResponse<any>>('/admin/theory/questions/import', questions);
+
+  async searchAdminQuestions(params: {
+    topicId?: number;
+    categoryCode?: string;
+    isParalysis?: boolean;
+    page?: number;
+    size?: number;
+  }): Promise<{ content: QuestionDetail[]; totalElements: number; totalPages: number }> {
+    const query = new URLSearchParams();
+    if (params.topicId) query.set('topicId', String(params.topicId));
+    if (params.categoryCode) query.set('categoryCode', params.categoryCode);
+    if (params.isParalysis !== undefined) query.set('isParalysis', String(params.isParalysis));
+    if (params.page !== undefined) query.set('page', String(params.page));
+    if (params.size !== undefined) query.set('size', String(params.size));
+    const response = await apiClient.get<ApiResponse<any>>(`/admin/theory/questions?${query.toString()}`);
+    const data = response.data.data;
+    return {
+      content: data?.content || [],
+      totalElements: data?.totalElements || 0,
+      totalPages: data?.totalPages || 0,
+    };
+  },
+
+  async getAdminQuestionById(id: number): Promise<QuestionDetail> {
+    const response = await apiClient.get<ApiResponse<QuestionDetail>>(`/admin/theory/questions/${id}`);
+    return response.data.data;
+  },
+
+  async createAdminQuestion(data: QuestionUpsertRequest): Promise<QuestionDetail> {
+    const response = await apiClient.post<ApiResponse<QuestionDetail>>('/admin/theory/questions', data);
+    return response.data.data;
+  },
+
+  async updateAdminQuestion(id: number, data: QuestionUpsertRequest): Promise<QuestionDetail> {
+    const response = await apiClient.put<ApiResponse<QuestionDetail>>(`/admin/theory/questions/${id}`, data);
+    return response.data.data;
+  },
+
+  async deleteAdminQuestion(id: number): Promise<void> {
+    await apiClient.delete<ApiResponse<void>>(`/admin/theory/questions/${id}`);
+  },
+
+  async importQuestions(questions: any[]): Promise<QuestionImportResult> {
+    const response = await apiClient.post<ApiResponse<QuestionImportResult>>('/admin/theory/questions/import', questions);
     return response.data.data;
   },
 

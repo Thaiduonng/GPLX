@@ -54,7 +54,7 @@ export default function TheoryExamPage() {
     { id: 'PRACTICE', label: '🎯 Rèn luyện 8 chế độ' },
     { id: 'MOCK_EXAM', label: '🚗 Thi thử theo hạng' },
     { id: 'REVIEW', label: '🔄 Ôn tập câu sai & Đánh dấu' },
-    ...(isStaffOrAdmin ? [{ id: 'ADMIN', label: '⚙️ Cấu hình đề thi' }] : []),
+    ...(isStaffOrAdmin ? [{ id: 'ADMIN', label: '🛠️ Quản trị dữ liệu & Đề thi' }] : []),
   ];
 
   return (

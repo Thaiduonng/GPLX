@@ -96,4 +96,31 @@ class QuestionAdminServiceTest {
         assertThat(result.errors()).hasSize(1);
         assertThat(result.errors().get(0)).contains("duy nhất 1 đáp án đúng");
     }
+    @Test
+    @DisplayName("Tạo câu hỏi thành công khi dữ liệu hợp lệ")
+    void should_createQuestion_successfully_when_valid() {
+        QuestionUpsertRequest request = new QuestionUpsertRequest(
+                "B1", 1L, 100, "Nội dung câu hỏi số 100?", "/img/q100.png", "Giải thích q100", false, "TT04",
+                List.of(
+                        new QuestionUpsertRequest.AnswerUpsertItem(null, "Đáp án 1", true, 1),
+                        new QuestionUpsertRequest.AnswerUpsertItem(null, "Đáp án 2", false, 2)
+                )
+        );
+        TheoryTopic topic = new TheoryTopic("CH1_RULES", "Khái niệm", "Mô tả", 1, 166, 1);
+        when(topicRepository.findById(1L)).thenReturn(Optional.of(topic));
+        when(questionRepository.save(any(TheoryQuestion.class))).thenAnswer(i -> i.getArgument(0));
+        var response = questionAdminService.createQuestion(request);
+        assertThat(response).isNotNull();
+        assertThat(response.questionNumber()).isEqualTo(100);
+        assertThat(response.categoryCode()).isEqualTo("B1");
+    }
+
+    @Test
+    @DisplayName("Xóa câu hỏi thành công")
+    void should_deleteQuestion_successfully() {
+        TheoryQuestion q = new TheoryQuestion("B1", 50, "Nội dung", null, "GT", false);
+        when(questionRepository.existsById(50L)).thenReturn(true);
+        questionAdminService.deleteQuestion(50L);
+        org.mockito.Mockito.verify(questionRepository).deleteById(50L);
+    }
 }
