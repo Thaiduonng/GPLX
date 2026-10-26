@@ -10,6 +10,7 @@ import MyApplicationsPage from '../pages/MyApplicationsPage';
 import ApplicationManagementPage from '../pages/ApplicationManagementPage';
 import CoursesPage from '../pages/CoursesPage';
 import TheoryExamPage from '../pages/TheoryExamPage';
+import TheoryReviewPage from '../pages/TheoryReviewPage';
 import TrainingSchedulePage from '../pages/TrainingSchedulePage';
 import { EligibilityCheckPage } from '../pages/EligibilityCheckPage';
 import { ExamSessionsPage } from '../pages/ExamSessionsPage';
@@ -33,6 +34,8 @@ export default function App() {
           <Route path="/admin/admissions" element={<ApplicationManagementPage />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/theory-exam" element={<TheoryExamPage />} />
+          <Route path="/theory-review" element={<TheoryReviewPage />} />
+          <Route path="/student/review" element={<TheoryReviewPage />} />
           <Route path="/training/schedules" element={<TrainingSchedulePage />} />
           <Route path="/examination/eligibility" element={<EligibilityCheckPage />} />
           <Route path="/examination/sessions" element={<ExamSessionsPage />} />
