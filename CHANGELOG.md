@@ -2,6 +2,25 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.5.0] — 2026-10-26
+
+### Giao Diện Học Tập, Rèn Luyện & Ôn Tập Chuyên Sâu (Giai đoạn 3 — Phase 12)
+- **Học tập 7 Chương Tương tác Đa Chế độ (`TheoryTopicStudyTab.tsx`):**
+  - Chuyển đổi linh hoạt giữa hai chế độ: 🎴 **Học tương tác từng câu (Flashcard/Quiz)** và 📜 **Xem danh sách đầy đủ**.
+  - Tích hợp **Lưới chuyển nhanh câu hỏi (Question Grid Navigator 1..N)** hiển thị màu sắc trạng thái câu điểm liệt ⚠️ và câu đang học.
+  - Hỗ trợ phím tắt bàn phím: Mũi tên trái/phải để chuyển câu, phím 1–4 để chọn nhanh đáp án, phím B để đánh dấu bookmark.
+  - Thanh tìm kiếm câu hỏi tức thì theo từ khóa nội dung hoặc số câu hỏi chuẩn 1–600.
+- **Rèn luyện 8 Chế độ Tương tác Cao (`TheoryPracticeTab.tsx`):**
+  - Tích hợp bảng lưới câu hỏi theo dõi trạng thái làm bài thời gian thực: xanh lá (trả lời đúng ✓), đỏ (trả lời sai ✗), xanh dương (câu hiện tại).
+  - Phím tắt bàn phím: Chọn đáp án bằng phím số, Enter để kiểm tra hoặc qua câu tiếp theo.
+  - Báo cáo tổng kết buổi rèn luyện chi tiết, hiển thị danh sách các câu làm sai để người học xem lại ngay lập tức.
+- **Ôn tập Câu sai, Đánh dấu & Lịch sử Học tập (`TheoryReviewTab.tsx`):**
+  - Bổ sung phân khu tra cứu lịch sử các phiên rèn luyện (`GET /api/v1/theory/practice/history`).
+  - Nút phím tắt "Rèn luyện ngay danh sách này" chuyển thẳng từ danh sách câu sai hoặc câu đã bookmark sang phiên luyện tập mới.
+- **Tối ưu hóa và Đóng gói Production:**
+  - Nâng cấp `learningService.ts` đồng bộ đầy đủ các API phân trang, tìm kiếm, lưu tiến độ và lịch sử.
+  - Biên dịch Vite bundle TypeScript strict 0 lỗi, container Nginx Alpine phục vụ mượt mà tại cổng 3000.
+
 ## [1.4.0] — 2026-10-26
 
 ### Chuyên Sâu Database & Backend Phân Hệ Lý Thuyết GPLX (Giai đoạn 2 — Phase 11)

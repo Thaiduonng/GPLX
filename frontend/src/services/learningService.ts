@@ -52,8 +52,32 @@ export const learningService = {
   },
 
   async getQuestionsByTopic(topicId: number): Promise<QuestionDetail[]> {
-    const response = await apiClient.get<ApiResponse<QuestionDetail[]>>(`/theory/topics/${topicId}/questions`);
-    return response.data.data;
+    const response = await apiClient.get<ApiResponse<any>>(`/theory/topics/${topicId}/questions`);
+    const data = response.data.data;
+    // Hỗ trợ cả Page hoặc Array
+    return Array.isArray(data) ? data : (data?.content || []);
+  },
+
+  async searchTopicQuestions(
+    topicId: number,
+    params?: { isParalysis?: boolean; keyword?: string; page?: number; size?: number }
+  ): Promise<{ content: QuestionDetail[]; totalElements: number; totalPages: number }> {
+    const query = new URLSearchParams();
+    if (params?.isParalysis !== undefined) query.set('isParalysis', String(params.isParalysis));
+    if (params?.keyword) query.set('keyword', params.keyword);
+    if (params?.page !== undefined) query.set('page', String(params.page));
+    if (params?.size !== undefined) query.set('size', String(params.size));
+
+    const response = await apiClient.get<ApiResponse<any>>(`/theory/topics/${topicId}/questions?${query.toString()}`);
+    const data = response.data.data;
+    if (Array.isArray(data)) {
+      return { content: data, totalElements: data.length, totalPages: 1 };
+    }
+    return {
+      content: data?.content || [],
+      totalElements: data?.totalElements || 0,
+      totalPages: data?.totalPages || 1,
+    };
   },
 
   async toggleBookmark(questionId: number): Promise<boolean> {
@@ -101,9 +125,13 @@ export const learningService = {
     return response.data.data;
   },
 
-  async getPracticeHistory(): Promise<PracticeSessionSummary[]> {
-    const response = await apiClient.get<ApiResponse<PracticeSessionSummary[]>>('/theory/practice/history');
-    return response.data.data;
+  async getPracticeHistory(page = 0, size = 10): Promise<{ content: PracticeSessionSummary[]; totalElements: number }> {
+    const response = await apiClient.get<ApiResponse<any>>(`/theory/practice/history?page=${page}&size=${size}`);
+    const data = response.data.data;
+    if (Array.isArray(data)) {
+      return { content: data, totalElements: data.length };
+    }
+    return { content: data?.content || [], totalElements: data?.totalElements || 0 };
   },
 
   // ---------------------------------------------------------------------------
@@ -116,6 +144,14 @@ export const learningService = {
 
   async getMockExamSession(sessionCode: string): Promise<MockExamSession> {
     const response = await apiClient.get<ApiResponse<MockExamSession>>(`/theory/mock-exam/${sessionCode}`);
+    return response.data.data;
+  },
+
+  async saveExamProgress(sessionCode: string, questionId: number, selectedAnswerId: number | null): Promise<any> {
+    const response = await apiClient.post<ApiResponse<any>>(`/theory/mock-exam/${sessionCode}/progress`, {
+      questionId,
+      selectedAnswerId,
+    });
     return response.data.data;
   },
 
@@ -134,9 +170,13 @@ export const learningService = {
     return response.data.data;
   },
 
-  async getMockExamHistory(): Promise<MockExamSummary[]> {
-    const response = await apiClient.get<ApiResponse<MockExamSummary[]>>('/theory/mock-exam/history');
-    return response.data.data;
+  async getMockExamHistory(page = 0, size = 10): Promise<{ content: MockExamSummary[]; totalElements: number }> {
+    const response = await apiClient.get<ApiResponse<any>>(`/theory/mock-exam/history?page=${page}&size=${size}`);
+    const data = response.data.data;
+    if (Array.isArray(data)) {
+      return { content: data, totalElements: data.length };
+    }
+    return { content: data?.content || [], totalElements: data?.totalElements || 0 };
   },
 
   // ---------------------------------------------------------------------------
@@ -162,6 +202,19 @@ export const learningService = {
 
   async updateExamConfig(id: number, config: Partial<ExamConfiguration>): Promise<ExamConfiguration> {
     const response = await apiClient.put<ApiResponse<ExamConfiguration>>(`/admin/theory/exam-configs/${id}`, config);
+    return response.data.data;
+  },
+
+  async importQuestions(questions: any[]): Promise<any> {
+    const response = await apiClient.post<ApiResponse<any>>('/admin/theory/questions/import', questions);
+    return response.data.data;
+  },
+
+  async exportQuestions(topicId?: number, categoryCode?: string): Promise<QuestionDetail[]> {
+    const query = new URLSearchParams();
+    if (topicId) query.set('topicId', String(topicId));
+    if (categoryCode) query.set('categoryCode', categoryCode);
+    const response = await apiClient.get<ApiResponse<QuestionDetail[]>>(`/admin/theory/questions/export?${query.toString()}`);
     return response.data.data;
   },
 
