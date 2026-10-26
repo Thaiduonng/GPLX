@@ -202,3 +202,17 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P15-02`** | Xác Thực Bảo Mật Phân Quyền RBAC Phía Server | TSK-P15-01 | `DONE` | Kiểm chứng kịch bản thực tế: Học viên `ROLE_STUDENT` bị chặn truy cập API Admin bằng HTTP 403; Quản trị viên `ROLE_ADMIN` truy cập đầy đủ API cấu hình và ngân hàng câu hỏi bằng HTTP 200. |
 | **`TSK-P15-03`** | Đóng Gói Docker Compose & Xác Thực Container Healthy | TSK-P15-02 | `DONE` | Đóng gói production bundle cho `gplx-frontend` (Nginx Alpine) và `gplx-backend` (Eclipse Temurin 21 JRE); cả 3 containers (Frontend, Backend, MySQL) đạt trạng thái Up (healthy). |
 | **`TSK-P15-04`** | Tài Liệu Hướng Dẫn Sử Dụng & Báo Cáo Nghiệm Thu | TSK-P15-03 | `DONE` | Khởi tạo `docs/guides/theory-learning-and-exam-system-guide.md` hướng dẫn 6 phân khu chức năng và đối soát toàn diện 14 tiêu chí nghiệm thu theo Master Prompt (ĐẠT 14/14). |
+
+
+---
+
+## Danh mục Tasks — Phase 16: Nâng Cấp Hệ Thống Giao Diện UI/UX Pro Max (Enterprise Government Portal & LMS)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P16-01`** | Tích Hợp Skill & Khởi Tạo Master Design System | TSK-P15-04 | `DONE` | Khởi tạo Source of Truth thiết kế tại `design-system/gplx-enterprise-portal/MASTER.md` theo preset `Accessible & Ethical` kết hợp `Enterprise Gateway`, chuẩn hóa bảng màu, typography và spacing. |
+| **`TSK-P16-02`** | Nâng Cấp Bộ Tokens CSS & Base Accessibility Global | TSK-P16-01 | `DONE` | Cập nhật `tokens.css` và `global.css`: Nhúng font `Be Vietnam Pro` & `Atkinson Hyperlegible`, vòng nét `:focus-visible` 3px, `@media (prefers-reduced-motion)` và link `.skip-to-content`. |
+| **`TSK-P16-03`** | Thay Thế Toàn Bộ Emojis Bằng Bộ SVG Icons Độc Lập | TSK-P16-02 | `DONE` | Khởi tạo thư viện `frontend/src/components/ui/Icons.tsx` với 20+ SVG icons nhẹ và sắc nét; loại bỏ toàn bộ emoji trên navigation và trang chủ theo quy tắc `AGENTS.md`. |
+| **`TSK-P16-04`** | Nâng Cấp Shared UI Components Chuẩn WCAG 2.1 AA | TSK-P16-02 | `DONE` | Hoàn thiện `AppButton` (micro-interactions, touch target 44px), `AppInput`, `AppSelect`, `AppTextarea` (liên kết label `htmlFor`, focus ring phát sáng), `StatusBadge`, `StatCard`, `Modal`, `DataTable`. |
+| **`TSK-P16-05`** | Tái Cấu Trúc MainLayout & Giao Diện Trang Chủ HomePage | TSK-P16-03..04 | `DONE` | Tái thiết kế Header phong cách Cổng thông tin Quốc gia, thanh Workspace Bar phân chia 4 phân hệ, Hero Banner uy tín, lộ trình 4 bước và lưới các phân hệ Modular Monolith. |
+| **`TSK-P16-06`** | Đóng Gói Docker Frontend & Kiểm Thử Runtime | TSK-P16-05 | `DONE` | Biên dịch `tsc -b && vite build` 0 lỗi; đóng gói container Nginx `gplx-frontend` v1.9.0; phản hồi HTTP 200 OK tại cổng 3000 kết nối backend 8088. |

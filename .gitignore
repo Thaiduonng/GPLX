@@ -55,3 +55,8 @@ docker-compose.override.yml
 
 # Temporary scripts
 generate_*.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
