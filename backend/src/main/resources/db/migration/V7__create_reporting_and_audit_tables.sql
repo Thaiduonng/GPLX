@@ -24,6 +24,6 @@ CREATE TABLE audit_logs (
 -- Seed dữ liệu kiểm toán mẫu
 INSERT INTO audit_logs (user_id, username, action, resource_type, resource_id, details, ip_address)
 VALUES
-    (1, 'admin', 'SYSTEM_INITIALIZE', 'SYSTEM', '0', 'Khởi tạo hệ thống đào tạo GPLX Modular Monolith', '127.0.0.1'),
-    (1, 'admin', 'APPROVE_APPLICATION', 'ADMISSION', 'HS-B1-202610-0001', 'Phê duyệt hồ sơ điện tử đủ điều kiện sức khỏe', '192.168.1.10'),
-    (1, 'admin', 'PUBLISH_EXAM', 'EXAMINATION', 'EXAM-B1-20261101-001', 'Mở kỳ sát hạch chính thức Sở GTVT', '192.168.1.10');
+    (NULL, 'admin', 'SYSTEM_INITIALIZE', 'SYSTEM', '0', 'Khởi tạo hệ thống đào tạo GPLX Modular Monolith', '127.0.0.1'),
+    (NULL, 'admin', 'APPROVE_APPLICATION', 'ADMISSION', 'HS-B1-202610-0001', 'Phê duyệt hồ sơ điện tử đủ điều kiện sức khỏe', '192.168.1.10'),
+    (NULL, 'admin', 'PUBLISH_EXAM', 'EXAMINATION', 'EXAM-B1-20261101-001', 'Mở kỳ sát hạch chính thức Sở GTVT', '192.168.1.10');
