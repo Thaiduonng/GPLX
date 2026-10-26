@@ -151,3 +151,16 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P11-04`** | Tìm Kiếm & Phân Trang Nâng Cao Cho Câu Hỏi & Lịch Sử | TSK-P10-03 | `DONE` | Bổ sung query `searchQuestionsAdvanced` trong `TheoryQuestionRepository`; nâng cấp phân trang `Pageable` cho câu hỏi theo chủ đề, lọc câu điểm liệt, phân trang lịch sử rèn luyện và lịch sử thi thử. |
 | **`TSK-P11-05`** | Bộ Kiểm Thử Tự Động Backend Chuyên Sâu | TSK-P11-02..04 | `DONE` | Mở rộng `TheoryExamSecureWorkflowTest` và khởi tạo `QuestionAdminServiceTest` kiểm thử toàn diện: lưu tiến độ, xử lý quá giờ, chống nộp đúp, validation import (10/10 tests PASS 100%). |
 | **`TSK-P11-06`** | Đóng Gói Docker Container & Kiểm Thử Runtime Thực Tế | TSK-P11-05 | `DONE` | Multi-stage build lại `gplx-backend` container; kiểm thử trực tiếp trên container với chuỗi kịch bản: Topics -> Questions Pagination -> Start Exam -> Realtime Progress Save -> Submit Exam -> Paginated History. Tất cả phản hồi HTTP 200 OK. |
+
+
+---
+
+## Danh mục Tasks — Phase 12: Giao Diện Học Tập, Rèn Luyện & Ôn Tập Chuyên Sâu (Giai đoạn 3)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P12-01`** | Giao diện Học tập 7 Chương Tương tác Đa Chế độ | TSK-P11-06 | `DONE` | Nâng cấp `TheoryTopicStudyTab.tsx` với 2 chế độ hiển thị: 🎴 Học tương tác từng câu (Flashcard/Quiz) và 📜 Xem danh sách đầy đủ; hỗ trợ phím tắt bàn phím (ArrowLeft, ArrowRight, phím 1-4, phím B). |
+| **`TSK-P12-02`** | Lưới Chuyển Nhanh Câu Hỏi & Tìm Kiếm Thông Minh | TSK-P12-01 | `DONE` | Xây dựng Question Grid Navigator 1..N hiển thị trực quan trạng thái câu điểm liệt và câu đang học; thanh tìm kiếm từ khóa nội dung hoặc số câu hỏi chuẩn 1-600. |
+| **`TSK-P12-03`** | Nâng Cấp Giao Diện Rèn Luyện 8 Chế Độ Chuyên Sâu | TSK-P12-01 | `DONE` | Nâng cấp `TheoryPracticeTab.tsx` với bảng lưới câu hỏi trực quan hiển thị màu sắc đúng (xanh)/sai (đỏ), hỗ trợ phím tắt chọn đáp án và Enter chuyển câu; tổng kết buổi rèn luyện chi tiết. |
+| **`TSK-P12-04`** | Phân Hệ Ôn Tập Câu Sai, Đánh Dấu & Lịch Sử Phiên Học | TSK-P12-02 | `DONE` | Nâng cấp `TheoryReviewTab.tsx` với 3 phân khu: Danh sách câu từng làm sai, Danh sách câu đã bookmark, Lịch sử các phiên rèn luyện phân trang; nút phím tắt "Rèn luyện ngay tập hợp này". |
+| **`TSK-P12-05`** | Đóng Gói Docker Frontend & Kiểm Thử Runtime UI/UX | TSK-P12-03..04| `DONE` | Rebuild Vite bundle 0 lỗi TypeScript strict (`npm run build`); Nginx container hoạt động mượt mà tại `http://localhost:3000`. |
