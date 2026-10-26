@@ -1,0 +1,327 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Sơ Đồ Luồng Nghiệp Vụ Đào Tạo & Sát Hạch Giấy Phép Lái Xe (GPLX)",
+    "subtitle": "Quy trình tổng thể từ tiếp nhận hồ sơ, thu phí, đào tạo DAT đến sát hạch cấp bằng",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "output": ".archify/workflow-quy-trinh-dao-tao-sat-hach-20261026-142500/quy-trinh-dao-tao-sat-hach.html"
+  },
+  "lanes": [
+    { "id": "learner", "label": "Học Viên (Người học lái xe)" },
+    { "id": "operations", "label": "Đào Tạo & Tuyển Sinh" },
+    { "id": "exceptions", "label": "Rẽ Nhánh Ngoại Lệ & Loại Trừ", "variant": "exception" },
+    { "id": "examination", "label": "Hội Đồng Sát Hạch Sở GTVT" }
+  ],
+  "phases": [
+    { "id": "phase_admission", "label": "GĐ 1: Tuyển sinh", "fromCol": 0, "toCol": 0 },
+    { "id": "phase_finance", "label": "GĐ 2: Học phí & Xếp lớp", "fromCol": 1, "toCol": 1 },
+    { "id": "phase_theory", "label": "GĐ 3: Lý thuyết & Xe", "fromCol": 2, "toCol": 2 },
+    { "id": "phase_practice", "label": "GĐ 4: Thực hành DAT", "fromCol": 3, "toCol": 3 },
+    { "id": "phase_exam", "label": "GĐ 5: Sát hạch & Cấp GPLX", "fromCol": 4, "toCol": 4 }
+  ],
+  "groups": [
+    { "id": "grp_dossier", "label": "Kiểm soát hồ sơ (ADM-004)", "lane": "exceptions", "fromCol": 0, "toCol": 0, "variant": "security" },
+    { "id": "grp_finance", "label": "Kiểm soát nợ phí", "lane": "exceptions", "fromCol": 1, "toCol": 1, "variant": "security" },
+    { "id": "grp_fleet", "label": "Kiểm định xe (FLT-001)", "lane": "exceptions", "fromCol": 2, "toCol": 2, "variant": "security" },
+    { "id": "grp_exam", "label": "Sát hạch & Loại trừ", "lane": "exceptions", "fromCol": 3, "toCol": 4, "variant": "security" }
+  ],
+  "mainPath": [
+    "nop_ho_so",
+    "tham_dinh",
+    "dong_hoc_phi",
+    "hoc_ly_thuyet_video",
+    "phan_bo_xe_dat",
+    "lai_xe_duong_truong",
+    "tham_dinh_dieu_kien",
+    "sat_hach_4_mon",
+    "cap_gplx_thanh_cong"
+  ],
+  "nodes": [
+    {
+      "id": "nop_ho_so",
+      "lane": "learner",
+      "col": 0,
+      "type": "frontend",
+      "label": "Nộp hồ sơ trực tuyến",
+      "sublabel": "CCCD & Giấy KSK",
+      "tag": "Cổng tuyển sinh",
+      "width": 144
+    },
+    {
+      "id": "tham_dinh",
+      "lane": "operations",
+      "col": 0,
+      "type": "backend",
+      "label": "Thẩm định hồ sơ",
+      "sublabel": "Kiểm tra tuổi min_age",
+      "tag": "ADM-001 & ADM-004",
+      "width": 144
+    },
+    {
+      "id": "ho_so_khong_hop_le",
+      "lane": "exceptions",
+      "col": 0,
+      "type": "security",
+      "label": "Từ chối / Bổ sung",
+      "sublabel": "Dưới 18t hoặc thiếu KSK",
+      "tag": "REJECTED",
+      "width": 144
+    },
+    {
+      "id": "dong_hoc_phi",
+      "lane": "learner",
+      "col": 1,
+      "type": "frontend",
+      "label": "Thanh toán học phí",
+      "sublabel": "Biên lai Idempotency",
+      "tag": "FIN-001 Chống trùng",
+      "width": 144
+    },
+    {
+      "id": "xep_lop_thoi_khoa_bieu",
+      "lane": "operations",
+      "col": 1,
+      "type": "backend",
+      "label": "Xếp lớp đào tạo",
+      "sublabel": "Thời khóa biểu chuẩn",
+      "tag": "TRN-001 Tránh trùng",
+      "width": 144
+    },
+    {
+      "id": "chua_tat_toan",
+      "lane": "exceptions",
+      "col": 1,
+      "type": "security",
+      "label": "Treo hồ sơ nợ phí",
+      "sublabel": "Chặn xếp lớp học",
+      "tag": "PENDING",
+      "width": 144
+    },
+    {
+      "id": "hoc_ly_thuyet_video",
+      "lane": "learner",
+      "col": 2,
+      "type": "frontend",
+      "label": "Học lý thuyết online",
+      "sublabel": "Đạt 100% bài giảng",
+      "tag": "LRN-001 E-Learning",
+      "width": 144
+    },
+    {
+      "id": "phan_bo_xe_dat",
+      "lane": "operations",
+      "col": 2,
+      "type": "backend",
+      "label": "Phân bổ xe & Cabin",
+      "sublabel": "Kiểm tra đăng kiểm FLT",
+      "tag": "FLT-001 Đội xe",
+      "width": 144
+    },
+    {
+      "id": "xe_qua_han_kiem_dinh",
+      "lane": "exceptions",
+      "col": 2,
+      "type": "security",
+      "label": "Khóa xe hết kiểm định",
+      "sublabel": "Đưa vào bảo dưỡng",
+      "tag": "FLT-001 Khóa xe",
+      "width": 144
+    },
+    {
+      "id": "lai_xe_duong_truong",
+      "lane": "learner",
+      "col": 3,
+      "type": "frontend",
+      "label": "Lái xe đường trường",
+      "sublabel": "Tích lũy 810km / 20h",
+      "tag": "TRN-003 Thiết bị DAT",
+      "width": 144
+    },
+    {
+      "id": "tham_dinh_dieu_kien",
+      "lane": "examination",
+      "col": 3,
+      "type": "backend",
+      "label": "Thẩm định dự thi",
+      "sublabel": "Hồ sơ, Học phí & DAT",
+      "tag": "EXM-001 Tự động",
+      "width": 144
+    },
+    {
+      "id": "loai_chua_du_chuan",
+      "lane": "exceptions",
+      "col": 3,
+      "type": "security",
+      "label": "Không đủ điều kiện",
+      "sublabel": "Thiếu km DAT hoặc phí",
+      "tag": "DISQUALIFIED",
+      "width": 144
+    },
+    {
+      "id": "sat_hach_4_mon",
+      "lane": "examination",
+      "col": 4,
+      "type": "backend",
+      "label": "Kỳ sát hạch 4 phần",
+      "sublabel": "Lý thuyết & Thực hành",
+      "tag": "Hội đồng sát hạch",
+      "width": 144
+    },
+    {
+      "id": "truot_mon_thi",
+      "lane": "exceptions",
+      "col": 4,
+      "type": "security",
+      "label": "Trượt sát hạch",
+      "sublabel": "Sai điểm liệt / Dưới 80đ",
+      "tag": "FAILED Thi lại",
+      "width": 144
+    },
+    {
+      "id": "cap_gplx_thanh_cong",
+      "lane": "learner",
+      "col": 4,
+      "type": "frontend",
+      "label": "Cấp bằng lái xe",
+      "sublabel": "Khóa sổ điểm PASSED",
+      "tag": "EXM-002 Hoàn tất",
+      "width": 144
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_nop_sang_tham_dinh",
+      "from": "nop_ho_so",
+      "to": "tham_dinh",
+      "label": "Gửi hồ sơ",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_tham_dinh_tu_choi",
+      "from": "tham_dinh",
+      "to": "ho_so_khong_hop_le",
+      "label": "Chưa đủ chuẩn",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_tham_dinh_sang_dong_phi",
+      "from": "tham_dinh",
+      "to": "dong_hoc_phi",
+      "label": "Duyệt hồ sơ",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_dong_phi_sang_xep_lop",
+      "from": "dong_hoc_phi",
+      "to": "xep_lop_thoi_khoa_bieu",
+      "label": "Ghi danh lớp",
+      "variant": "default"
+    },
+    {
+      "id": "e_no_hoc_phi",
+      "from": "xep_lop_thoi_khoa_bieu",
+      "to": "chua_tat_toan",
+      "label": "Chặn nếu còn nợ",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_vao_hoc_ly_thuyet",
+      "from": "dong_hoc_phi",
+      "to": "hoc_ly_thuyet_video",
+      "label": "Vào học lý thuyết",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_hoc_sang_xe",
+      "from": "hoc_ly_thuyet_video",
+      "to": "phan_bo_xe_dat",
+      "label": "Đạt 100% video",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_xe_het_dang_kiem",
+      "from": "phan_bo_xe_dat",
+      "to": "xe_qua_han_kiem_dinh",
+      "label": "Quá hạn kiểm định",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_xe_sang_lai_xe",
+      "from": "phan_bo_xe_dat",
+      "to": "lai_xe_duong_truong",
+      "label": "Xe đạt chuẩn",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_lai_xe_sang_tham_dinh",
+      "from": "lai_xe_duong_truong",
+      "to": "tham_dinh_dieu_kien",
+      "label": "Đạt 810km & 20h",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_khong_du_dieu_kien_thi",
+      "from": "tham_dinh_dieu_kien",
+      "to": "loai_chua_du_chuan",
+      "label": "Thiếu chỉ tiêu DAT",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_du_dieu_kien_vao_thi",
+      "from": "tham_dinh_dieu_kien",
+      "to": "sat_hach_4_mon",
+      "label": "Cấp SBD dự thi",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_thi_khong_dat",
+      "from": "sat_hach_4_mon",
+      "to": "truot_mon_thi",
+      "label": "Sai điểm liệt / <80đ",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_thi_dat_tot_nghiep",
+      "from": "sat_hach_4_mon",
+      "to": "cap_gplx_thanh_cong",
+      "label": "Đạt 4/4 phần thi",
+      "variant": "emphasis",
+      "role": "main"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Nguyên Tắc Pháp Lý Bắt Buộc",
+      "items": [
+        "Độ tuổi tối thiểu: Đủ 18 tuổi (hạng A1, A, B1, B, C1) hoặc đủ 21 tuổi (hạng C) theo Luật số 36/2024/QH15",
+        "Giám sát thực hành DAT: Tích lũy đủ km và giờ thực hành trên đường công cộng theo Thông tư 04/2022/TT-BGTVT",
+        "Thi sát hạch 600 câu: Sai câu hỏi điểm liệt (mất ATGT nghiêm trọng) sẽ trượt bài thi lý thuyết ngay lập tức"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Quy Chuẩn Chống Gian Lận & An Toàn",
+      "items": [
+        "Thanh toán học phí an toàn: Idempotency Key duy nhất chống thu trùng lặp khi nộp học phí (FIN-001)",
+        "Kiểm định an toàn phương tiện: Tự động loại bỏ xe hết hạn đăng kiểm khỏi lịch thực hành (FLT-001)",
+        "Bảo toàn kết quả: Bảng điểm và biên bản sát hạch sau khi ký được khóa sổ vĩnh viễn (EXM-002)"
+      ]
+    }
+  ]
+}

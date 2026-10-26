@@ -110,3 +110,17 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P8-03`** | Kiểm tra đối soát tính nhất quán MySQL Runtime & Tài liệu | TSK-P8-01..02| `DONE` | Truy vấn `INFORMATION_SCHEMA` trên MySQL 8.4 LTS; chuẩn hóa 100% tên bảng, tên cột, khóa ngoại và ràng buộc toàn vẹn giữa Entity, Migration và ERD |
 | **`TSK-P8-04`** | Động hóa cấu hình định mức thực hành DAT (`LEG-TRAINING-003`) | TSK-P8-03 | `TODO` | Chuyển định mức km/giờ từ hằng số hard-code trong `DatPracticeServiceImpl.java` thành các thuộc tính động cấu hình theo từng hạng GPLX trong bảng `license_categories` (`min_dat_distance_km`, `min_dat_duration_hours`) |
 | **`TSK-P8-05`** | Quản lý quy định chuyển đổi hạng GPLX theo Điều 89 Luật 36/2024 | TSK-P8-03 | `TODO` | Chuẩn bị lược đồ bảng lưu lịch sử chuyển đổi hoặc cấp đổi GPLX theo lộ trình Thông tư hướng dẫn mới của Bộ Công an / Bộ GTVT |
+
+---
+
+## Danh mục Tasks — Phase 9: Toàn Diện UI/UX & Design System Chuẩn Hóa
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P9-01`** | Thiết lập Design Tokens & Hệ thống Biến Giao diện Chuẩn | TSK-P7-02 | `DONE` | Khởi tạo `tokens.css` và chuẩn hóa `global.css` theo bảng màu Rule 09 (`--color-primary`, `--color-success`, `--color-warning`, `--color-danger`, neutral, spacing, shadows, radii, z-index). |
+| **`TSK-P9-02`** | Xây dựng Bộ Shared UI Atomic Components dùng chung | TSK-P9-01 | `DONE` | Hoàn thiện 14 component chuẩn React 19 + TypeScript strict: `AppButton`, `AppInput`, `AppSelect`, `AppTextarea`, `StatusBadge`, `StatCard`, `Modal`, `ConfirmDialog`, `EmptyState`, `LoadingSpinner`, `Alert`, `PageHeader`, `DataTable`, `Tabs`. |
+| **`TSK-P9-03`** | Tái cấu trúc Layout Phân quyền & Điều hướng Responsive | TSK-P9-02 | `DONE` | `MainLayout` tích hợp Header nhận diện vai trò, Workspace Bar thích ứng theo vai trò (Học viên / Tuyển sinh / Sát hạch / Quản trị), Mobile menu drawer mượt mà, liên kết Swagger OpenAPI. |
+| **`TSK-P9-04`** | Nâng cấp toàn diện Phân hệ Học viên (Student Portal) | TSK-P9-03 | `DONE` | `HomePage` hero roadmap 4 bước; `TheoryExamPage` đếm ngược 20p + lưới chuyển nhanh câu hỏi + cảnh báo câu điểm liệt; `TrainingSchedulePage` tiến độ DAT trực quan; `SubmitApplicationPage` và `MyApplicationsPage` lịch sử thẩm định chi tiết; `CoursesPage` đếm thời gian học; `TuitionPaymentPage` chống duplicate submit. |
+| **`TSK-P9-05`** | Nâng cấp toàn diện Phân hệ Nghiệp vụ Cán bộ & Quản trị | TSK-P9-03 | `DONE` | `ApplicationManagementPage` thẩm định hồ sơ chuẩn ADM-002; `ExamGradingPage` chấm điểm 4 môn sát hạch EXM-002; `FleetManagementPage` cảnh báo hạn kiểm định FLT-001 & modal bảo dưỡng; `DashboardPage` KPI charts; `AuditLogPage` tra cứu nhật ký kiểm toán. |
+| **`TSK-P9-06`** | Loại bỏ 100% kiểu `any`, Format Chuẩn Tiếng Việt & Đóng gói Docker | TSK-P9-04..05 | `DONE` | Loại bỏ toàn bộ `any`, định dạng tiền tệ VND / ngày giờ tiếng Việt (`formatters.ts`), bổ sung `.dockerignore`, biên dịch Vite `npm run build` 0 lỗi và Nginx container hoạt động mượt mà tại `http://localhost:3000`. |
+

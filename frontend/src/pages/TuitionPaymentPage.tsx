@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { financeService } from '../services/financeService';
-import { FeeInvoice, PaymentReceipt, PaymentMethod } from '../types/finance';
+import type { FeeInvoice, PaymentReceipt, PaymentMethod } from '../types/finance';
 import { useAuth } from '../features/auth/AuthContext';
+import {
+  PageHeader,
+  StatusBadge,
+  Modal,
+  AppButton,
+  AppInput,
+  AppSelect,
+  Alert,
+  EmptyState,
+  LoadingSpinner,
+  DataTable,
+  Column,
+} from '../components/ui';
+import { formatCurrency, formatDateTime } from '../utils/formatters';
 
 export const TuitionPaymentPage: React.FC = () => {
   const { user } = useAuth();
@@ -9,6 +24,7 @@ export const TuitionPaymentPage: React.FC = () => {
   const [selectedInvoice, setSelectedInvoice] = useState<FeeInvoice | null>(null);
   const [receipts, setReceipts] = useState<PaymentReceipt[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingReceipts, setLoadingReceipts] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -19,7 +35,8 @@ export const TuitionPaymentPage: React.FC = () => {
   const [payNote, setPayNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const isStaffOrAdmin = user?.roles.some(r => r === 'ROLE_ADMIN' || r === 'ROLE_STAFF' || r === 'ROLE_MANAGER');
+  const isStaffOrAdmin =
+    user?.roles.some((r) => r === 'ROLE_ADMIN' || r === 'ROLE_STAFF' || r === 'ROLE_MANAGER') ?? false;
 
   const loadInvoices = async () => {
     try {
@@ -29,8 +46,14 @@ export const TuitionPaymentPage: React.FC = () => {
         ? await financeService.getAllInvoices()
         : await financeService.getMyInvoices();
       setInvoices(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải danh sách hóa đơn học phí.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Không thể tải danh sách hóa đơn học phí.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi tải danh sách hóa đơn');
+      }
     } finally {
       setLoading(false);
     }
@@ -52,10 +75,13 @@ export const TuitionPaymentPage: React.FC = () => {
   const handleViewReceipts = async (inv: FeeInvoice) => {
     setSelectedInvoice(inv);
     try {
+      setLoadingReceipts(true);
       const data = await financeService.getReceiptsByInvoice(inv.id);
       setReceipts(data);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoadingReceipts(false);
     }
   };
 
@@ -68,141 +94,225 @@ export const TuitionPaymentPage: React.FC = () => {
       setError(null);
       setSuccessMsg(null);
 
-      // FIN-001: Sinh Idempotency Key duy nhất theo thời gian và ngẫu nhiên
+      // FIN-001: Sinh Idempotency Key duy nhất theo thời gian và chuỗi ngẫu nhiên
       const idempotencyKey = `PAY-${selectedInvoice.id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
       const receipt = await financeService.payInvoice(selectedInvoice.id, {
         amount: Number(payAmount),
         paymentMethod,
         idempotencyKey,
-        note: payNote
+        note: payNote,
       });
 
       setShowPayModal(false);
-      setSuccessMsg(`Thanh toán thành công! Mã biên lai: ${receipt.receiptCode} - Số tiền: ${receipt.amount.toLocaleString('vi-VN')} VNĐ`);
+      setSuccessMsg(
+        `Thanh toán thành công! Mã biên lai: ${receipt.receiptCode} — Số tiền: ${formatCurrency(receipt.amount)}`
+      );
       loadInvoices();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Thanh toán thất bại.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Thanh toán thất bại.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định trong quá trình thanh toán');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const receiptColumns: Column<PaymentReceipt>[] = [
+    {
+      key: 'receiptCode',
+      header: 'Mã biên lai',
+      render: (r) => <strong style={{ color: 'var(--color-primary)' }}>{r.receiptCode}</strong>,
+    },
+    {
+      key: 'paidAt',
+      header: 'Thời điểm thanh toán',
+      render: (r) => formatDateTime(r.paidAt),
+    },
+    {
+      key: 'amount',
+      header: 'Số tiền nộp',
+      align: 'right',
+      render: (r) => (
+        <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>
+          {formatCurrency(r.amount)}
+        </span>
+      ),
+    },
+    {
+      key: 'paymentMethod',
+      header: 'Phương thức',
+      render: (r) => (
+        <span style={{ fontSize: '0.85rem' }}>
+          {r.paymentMethod === 'BANK_TRANSFER'
+            ? 'Chuyển khoản'
+            : r.paymentMethod === 'CASH'
+            ? 'Tiền mặt'
+            : 'Thẻ tín dụng / Ví'}
+        </span>
+      ),
+    },
+    {
+      key: 'note',
+      header: 'Ghi chú',
+      render: (r) => r.note || '—',
+    },
+  ];
+
   return (
-    <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#1e293b' }}>
-          Quản lý học phí & Biên lai nộp tiền (FIN-001, FIN-002)
-        </h1>
-        <p style={{ color: '#64748b', marginTop: '4px' }}>
-          Tra cứu biểu phí trọn gói, theo dõi tiến độ nộp học phí và chống ghi nhận trùng lặp chứng từ
-        </p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <PageHeader
+        title="Quản Lý Học Phí & Biên Lai Nộp Tiền (FIN-001, FIN-002)"
+        description="Tra cứu biểu phí trọn gói, theo dõi tiến độ đóng học phí và bảo vệ thanh toán an toàn chống trùng lặp."
+      />
 
       {successMsg && (
-        <div style={{ padding: '14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#166534', marginBottom: '16px' }}>
-          {successMsg}
-        </div>
+        <Alert
+          type="success"
+          message={successMsg}
+          onClose={() => setSuccessMsg(null)}
+        />
       )}
 
       {error && (
-        <div style={{ padding: '14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', marginBottom: '16px' }}>
-          {error}
-        </div>
+        <Alert
+          type="danger"
+          message={error}
+          onClose={() => setError(null)}
+        />
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Đang tải hóa đơn học phí...</div>
-      ) : invoices.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '50px', background: '#f8fafc', borderRadius: '12px', color: '#94a3b8' }}>
-          Chưa có hóa đơn học phí nào được phát hành.
+        <div style={{ padding: '60px 0', textAlign: 'center' }}>
+          <LoadingSpinner size="lg" text="Đang tải dữ liệu hóa đơn học phí..." />
         </div>
+      ) : invoices.length === 0 ? (
+        <EmptyState
+          icon="💰"
+          title="Chưa có hóa đơn học phí"
+          description={
+            isStaffOrAdmin
+              ? 'Hiện chưa có hồ sơ nào được tạo hóa đơn học phí.'
+              : 'Hồ sơ của bạn chưa phát sinh hóa đơn học phí hoặc đang chờ phê duyệt.'
+          }
+        />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+            gap: 'var(--space-5)',
+          }}
+        >
           {invoices.map((inv) => (
             <div
               key={inv.id}
               style={{
-                background: '#fff',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                padding: '20px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                backgroundColor: 'var(--color-surface)',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--color-border)',
+                padding: 'var(--space-5)',
+                boxShadow: 'var(--shadow-xs)',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                gap: 'var(--space-4)',
               }}
             >
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#2563eb' }}>{inv.invoiceCode}</span>
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    padding: '3px 8px',
-                    borderRadius: '6px',
-                    background: inv.status === 'PAID' ? '#dcfce7' : inv.status === 'PARTIALLY_PAID' ? '#fef3c7' : '#fee2e2',
-                    color: inv.status === 'PAID' ? '#15803d' : inv.status === 'PARTIALLY_PAID' ? '#92400e' : '#b91c1c'
-                  }}>
-                    {inv.status === 'PAID' ? 'ĐÃ HOÀN TẤT' : inv.status === 'PARTIALLY_PAID' ? 'TRẢ GÓP' : 'CHƯA NỘP'}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 'var(--space-3)',
+                  }}
+                >
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--color-primary)' }}>
+                    {inv.invoiceCode}
                   </span>
+                  <StatusBadge type="payment" status={inv.status} />
                 </div>
 
-                <div style={{ fontSize: '14px', color: '#334155', lineHeight: '1.6', marginBottom: '14px' }}>
-                  <div>Học viên: <strong>{inv.studentName}</strong></div>
-                  <div>Khóa đào tạo: <strong>Hạng {inv.categoryCode}</strong></div>
-                  <div>Hạn nộp: <strong>{inv.dueDate || 'Không giới hạn'}</strong></div>
+                <div
+                  style={{
+                    fontSize: 'var(--font-size-sm)',
+                    color: 'var(--color-text-secondary)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                    marginBottom: 'var(--space-4)',
+                  }}
+                >
+                  <div>
+                    Học viên: <strong>{inv.studentName}</strong>
+                  </div>
+                  <div>
+                    Khóa đào tạo: <strong style={{ color: 'var(--color-primary)' }}>Hạng {inv.categoryCode}</strong>
+                  </div>
+                  <div>
+                    Hạn nộp: <strong>{inv.dueDate || 'Không giới hạn'}</strong>
+                  </div>
                 </div>
 
-                <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#64748b' }}>
-                    <span>Tổng học phí:</span>
-                    <strong style={{ color: '#1e293b' }}>{inv.totalAmount.toLocaleString('vi-VN')} đ</strong>
+                {/* Amount breakdown */}
+                <div
+                  style={{
+                    backgroundColor: 'var(--color-bg-app)',
+                    padding: 'var(--space-3) var(--space-4)',
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--font-size-xs)' }}>
+                    <span style={{ color: 'var(--color-text-muted)' }}>Tổng học phí:</span>
+                    <strong>{formatCurrency(inv.totalAmount)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#16a34a', marginTop: '4px' }}>
-                    <span>Đã thanh toán:</span>
-                    <strong>{inv.paidAmount.toLocaleString('vi-VN')} đ</strong>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--font-size-xs)' }}>
+                    <span style={{ color: 'var(--color-success)' }}>Đã thanh toán:</span>
+                    <strong style={{ color: 'var(--color-success)' }}>{formatCurrency(inv.paidAmount)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#dc2626', marginTop: '4px', borderTop: '1px dashed #cbd5e1', paddingTop: '4px' }}>
-                    <span>Còn nợ:</span>
-                    <strong>{inv.remainingAmount.toLocaleString('vi-VN')} đ</strong>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: 'var(--font-size-sm)',
+                      borderTop: '1px dashed var(--color-border)',
+                      paddingTop: '4px',
+                    }}
+                  >
+                    <span style={{ color: 'var(--color-danger)', fontWeight: 600 }}>Còn nợ:</span>
+                    <strong style={{ color: 'var(--color-danger)' }}>{formatCurrency(inv.remainingAmount)}</strong>
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <AppButton
+                  variant="outline"
+                  size="sm"
+                  fullWidth
                   onClick={() => handleViewReceipts(inv)}
-                  style={{
-                    flex: 1,
-                    padding: '8px',
-                    background: '#f1f5f9',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
+                  icon="🧾"
                 >
                   Xem biên lai
-                </button>
+                </AppButton>
                 {inv.status !== 'PAID' && (
-                  <button
+                  <AppButton
+                    variant="success"
+                    size="sm"
+                    fullWidth
                     onClick={() => handleOpenPay(inv)}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      background: '#16a34a',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
+                    icon="💳"
                   >
-                    Nộp học phí
-                  </button>
+                    Nộp tiền
+                  </AppButton>
                 )}
               </div>
             </div>
@@ -210,126 +320,109 @@ export const TuitionPaymentPage: React.FC = () => {
         </div>
       )}
 
-      {/* Lịch sử biên lai đã xem */}
-      {selectedInvoice && receipts.length > 0 && (
-        <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '14px', color: '#1e293b' }}>
-            Lịch sử chứng từ thu tiền — Hóa đơn {selectedInvoice.invoiceCode} ({receipts.length} biên lai)
-          </h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
-                  <th style={{ padding: '10px' }}>Mã biên lai</th>
-                  <th style={{ padding: '10px' }}>Thời gian thu</th>
-                  <th style={{ padding: '10px' }}>Số tiền</th>
-                  <th style={{ padding: '10px' }}>Hình thức</th>
-                  <th style={{ padding: '10px' }}>Người thu</th>
-                  <th style={{ padding: '10px' }}>Ghi chú</th>
-                </tr>
-              </thead>
-              <tbody>
-                {receipts.map((r) => (
-                  <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '10px', fontWeight: 'bold', color: '#2563eb' }}>{r.receiptCode}</td>
-                    <td style={{ padding: '10px' }}>{new Date(r.paidAt).toLocaleString('vi-VN')}</td>
-                    <td style={{ padding: '10px', fontWeight: 'bold', color: '#16a34a' }}>{r.amount.toLocaleString('vi-VN')} đ</td>
-                    <td style={{ padding: '10px' }}>{r.paymentMethod}</td>
-                    <td style={{ padding: '10px' }}>{r.cashierName}</td>
-                    <td style={{ padding: '10px', color: '#64748b' }}>{r.note || '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Receipts list section */}
+      {selectedInvoice && (
+        <section
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--color-border)',
+            padding: 'var(--space-5)',
+            boxShadow: 'var(--shadow-xs)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+            <div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
+                🧾 Lịch sử chứng từ thu tiền — Hóa đơn {selectedInvoice.invoiceCode}
+              </h3>
+              <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', margin: 0 }}>
+                Học viên: {selectedInvoice.studentName} | Khóa: Hạng {selectedInvoice.categoryCode}
+              </p>
+            </div>
+            <AppButton variant="ghost" size="sm" onClick={() => setSelectedInvoice(null)}>
+              Đóng xem lại
+            </AppButton>
           </div>
-        </div>
+
+          <DataTable
+            columns={receiptColumns}
+            data={receipts}
+            keyExtractor={(item) => String(item.id)}
+            loading={loadingReceipts}
+            emptyMessage="Chưa có biên lai thanh toán nào được ghi nhận cho hóa đơn này."
+          />
+        </section>
       )}
 
-      {/* Modal nộp học phí */}
-      {showPayModal && selectedInvoice && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-          <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '480px', maxWidth: '90%' }}>
-            <h2 style={{ fontSize: '19px', fontWeight: 'bold', marginBottom: '14px', color: '#1e293b' }}>
-              Xác nhận nộp học phí
-            </h2>
-            <form onSubmit={handlePaySubmit}>
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                  Hóa đơn thanh toán:
-                </label>
-                <div style={{ padding: '8px', background: '#f8fafc', borderRadius: '6px', fontSize: '14px', color: '#334155' }}>
-                  {selectedInvoice.invoiceCode} — Học viên: {selectedInvoice.studentName}
-                </div>
-              </div>
+      {/* Modal nộp tiền */}
+      {selectedInvoice && (
+        <Modal
+          isOpen={showPayModal}
+          onClose={() => setShowPayModal(false)}
+          title={`Nộp học phí — ${selectedInvoice.invoiceCode}`}
+        >
+          <form onSubmit={handlePaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <div
+              style={{
+                backgroundColor: 'var(--color-primary-light)',
+                padding: 'var(--space-3) var(--space-4)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 'var(--font-size-sm)',
+                color: 'var(--color-primary-dark)',
+              }}
+            >
+              <div>Khóa học: <strong>Hạng {selectedInvoice.categoryCode}</strong></div>
+              <div>Số tiền còn phải nộp: <strong>{formatCurrency(selectedInvoice.remainingAmount)}</strong></div>
+            </div>
 
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                  Số tiền nộp (VNĐ):
-                </label>
-                <input
-                  type="number"
-                  min="1000"
-                  max={selectedInvoice.remainingAmount}
-                  value={payAmount}
-                  onChange={(e) => setPayAmount(Number(e.target.value))}
-                  required
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
-                  Tối đa: {selectedInvoice.remainingAmount.toLocaleString('vi-VN')} đ
-                </span>
-              </div>
+            <AppInput
+              label="Số tiền nộp (₫)"
+              type="number"
+              min="1000"
+              max={selectedInvoice.remainingAmount}
+              required
+              value={payAmount}
+              onChange={(e) => setPayAmount(Number(e.target.value))}
+              helperText="Có thể nộp toàn bộ hoặc nộp từng phần"
+            />
 
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                  Phương thức thanh toán:
-                </label>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                >
-                  <option value="BANK_TRANSFER">Chuyển khoản Ngân hàng / Quét mã QR</option>
-                  <option value="CASH">Tiền mặt tại quầy thu ngân</option>
-                  <option value="INTERNAL_WALLET">Ví điện tử nội bộ</option>
-                </select>
-              </div>
+            <AppSelect
+              label="Phương thức thanh toán"
+              required
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+              options={[
+                { value: 'BANK_TRANSFER', label: 'Chuyển khoản ngân hàng (QR Code / Internet Banking)' },
+                { value: 'CASH', label: 'Nộp tiền mặt trực tiếp tại quầy tuyển sinh' },
+                { value: 'CREDIT_CARD', label: 'Thẻ tín dụng / Thẻ ghi nợ quốc tế' },
+              ]}
+            />
 
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                  Nội dung / Ghi chú thanh toán:
-                </label>
-                <input
-                  type="text"
-                  value={payNote}
-                  onChange={(e) => setPayNote(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+            <AppInput
+              label="Nội dung nộp tiền"
+              placeholder="VD: Nguyễn Văn A nộp học phí B2 đợt 1"
+              value={payNote}
+              onChange={(e) => setPayNote(e.target.value)}
+            />
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowPayModal(false)}
-                  style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-                >
-                  Đóng
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  style={{ padding: '8px 18px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  {isSubmitting ? 'Đang xác nhận...' : 'Xác nhận nộp tiền'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <Alert
+              type="info"
+              message="Giao dịch được bảo vệ bằng Idempotency Key tự động (FIN-001) để ngăn chặn trừ tiền 2 lần."
+            />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: 'var(--space-2)' }}>
+              <AppButton variant="outline" type="button" onClick={() => setShowPayModal(false)}>
+                Hủy
+              </AppButton>
+              <AppButton variant="success" type="submit" loading={isSubmitting} icon="✅">
+                Xác nhận nộp tiền
+              </AppButton>
+            </div>
+          </form>
+        </Modal>
       )}
     </div>
   );
 };
+export default TuitionPaymentPage;

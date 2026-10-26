@@ -1,8 +1,17 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../features/auth/AuthContext';
 import { admissionService } from '../services/admissionService';
-import { DocumentUploadItem, Gender, LicenseCategory } from '../types/admission';
+import type { DocumentUploadItem, Gender, LicenseCategory } from '../types/admission';
+import {
+  PageHeader,
+  AppInput,
+  AppSelect,
+  AppButton,
+  Alert,
+} from '../components/ui';
+import { formatCurrency } from '../utils/formatters';
 
 export default function SubmitApplicationPage() {
   const { user } = useAuth();
@@ -50,7 +59,11 @@ export default function SubmitApplicationPage() {
         }
       })
       .catch((err) => {
-        setErrorMsg('Không thể tải danh mục hạng GPLX: ' + (err.response?.data?.message || err.message));
+        if (axios.isAxiosError(err)) {
+          setErrorMsg('Không thể tải danh mục hạng GPLX: ' + (err.response?.data?.message || err.message));
+        } else if (err instanceof Error) {
+          setErrorMsg(err.message);
+        }
       });
   }, []);
 
@@ -80,7 +93,7 @@ export default function SubmitApplicationPage() {
 
     if (isUnderAge && selectedCategory) {
       setErrorMsg(
-        `Quy định: Hạng ${selectedCategory.code} yêu cầu tối thiểu ${selectedCategory.minAge} tuổi (hiện tại bạn ${currentAge} tuổi).`
+        `Quy định độ tuổi: Hạng ${selectedCategory.code} yêu cầu tối thiểu ${selectedCategory.minAge} tuổi (hiện tại bạn ${currentAge} tuổi).`
       );
       return;
     }
@@ -102,216 +115,211 @@ export default function SubmitApplicationPage() {
       setSuccessMsg(`Nộp hồ sơ thành công! Mã hồ sơ của bạn là: ${response.applicationCode}`);
       setTimeout(() => {
         navigate('/my-applications');
-      }, 1800);
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || 'Lỗi nộp hồ sơ. Vui lòng kiểm tra lại.';
-      setErrorMsg(msg);
+      }, 1500);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || 'Lỗi nộp hồ sơ. Vui lòng kiểm tra lại.');
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg('Lỗi không xác định khi nộp hồ sơ.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}>
-      <div style={{ background: '#ffffff', borderRadius: '12px', padding: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
-        <h2 style={{ fontSize: '1.6rem', color: '#1e3a8a', marginBottom: '0.5rem', fontWeight: 700 }}>
-          📝 Nộp Hồ Sơ Đăng Ký Đào Tạo GPLX
-        </h2>
-        <p style={{ color: '#4b5563', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-          Tiếp nhận hồ sơ điện tử chính quy theo quy chế đào tạo sát hạch lái xe.
-        </p>
+    <div style={{ maxWidth: '860px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <PageHeader
+        title="Nộp Hồ Sơ Đăng Ký Đào Tạo GPLX"
+        description="Tiếp nhận hồ sơ điện tử chính quy theo quy chế đào tạo sát hạch lái xe của Bộ Giao thông Vận tải."
+      />
 
+      <div
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderRadius: 'var(--radius-xl)',
+          padding: 'var(--space-8)',
+          boxShadow: 'var(--shadow-xs)',
+          border: '1px solid var(--color-border)',
+        }}
+      >
         {errorMsg && (
-          <div style={{ background: '#fef2f2', borderLeft: '4px solid #ef4444', padding: '1rem', color: '#991b1b', marginBottom: '1.5rem', borderRadius: '4px' }}>
-            ⚠️ {errorMsg}
+          <div style={{ marginBottom: 'var(--space-4)' }}>
+            <Alert
+              type="danger"
+              message={errorMsg}
+              onClose={() => setErrorMsg('')}
+            />
           </div>
         )}
 
         {successMsg && (
-          <div style={{ background: '#f0fdf4', borderLeft: '4px solid #22c55e', padding: '1rem', color: '#166534', marginBottom: '1.5rem', borderRadius: '4px' }}>
-            ✅ {successMsg}
+          <div style={{ marginBottom: 'var(--space-4)' }}>
+            <Alert
+              type="success"
+              message={successMsg}
+              onClose={() => setSuccessMsg('')}
+            />
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
           {/* Hạng bằng lái */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
-              Chọn hạng Giấy phép lái xe <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <select
+          <div>
+            <AppSelect
+              label="Chọn hạng Giấy phép lái xe"
+              required
               value={selectedCategoryId}
               onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
-              required
-            >
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.code} — {cat.name} (Tuổi tối thiểu: {cat.minAge} | Học phí: {cat.tuitionFee?.toLocaleString('vi-VN')} VNĐ)
-                </option>
-              ))}
-            </select>
+              options={categories.map((cat) => ({
+                value: cat.id,
+                label: `${cat.code} — ${cat.name} (Tuổi tối thiểu: ${cat.minAge} | Học phí: ${formatCurrency(cat.tuitionFee)})`,
+              }))}
+            />
             {selectedCategory && (
-              <div style={{ background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '6px', marginTop: '0.5rem', fontSize: '0.875rem', color: '#475569' }}>
+              <div
+                style={{
+                  backgroundColor: 'var(--color-bg-app)',
+                  padding: 'var(--space-3) var(--space-4)',
+                  borderRadius: 'var(--radius-md)',
+                  marginTop: 'var(--space-2)',
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
                 💡 {selectedCategory.description}
               </div>
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-            {/* Họ và tên */}
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
-                Họ và tên <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Nguyễn Văn A"
-                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
-                required
-              />
-            </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: 'var(--space-4)',
+            }}
+          >
+            <AppInput
+              label="Họ và tên"
+              required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Nguyễn Văn A"
+            />
 
-            {/* Số CCCD */}
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
-                Số CCCD / CMND (9-12 chữ số) <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
-                type="text"
-                value={nationalId}
-                onChange={(e) => setNationalId(e.target.value)}
-                placeholder="001200001234"
-                pattern="^[0-9]{9,12}$"
-                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
-                required
-              />
-            </div>
+            <AppInput
+              label="Số CCCD / CMND (9-12 chữ số)"
+              required
+              value={nationalId}
+              onChange={(e) => setNationalId(e.target.value)}
+              placeholder="001200001234"
+              pattern="^[0-9]{9,12}$"
+            />
 
-            {/* Ngày sinh */}
             <div>
-              <label style={{ display: 'block', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
-                Ngày sinh <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
+              <AppInput
+                label="Ngày sinh"
                 type="date"
+                required
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
-                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: isUnderAge ? '1px solid #ef4444' : '1px solid #d1d5db' }}
-                required
-              />
-              {isUnderAge && (
-                <span style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '0.25rem', display: 'block' }}>
-                  ⚠️ Bạn hiện {currentAge} tuổi, chưa đủ điều kiện {selectedCategory?.minAge} tuổi của hạng này.
-                </span>
-              )}
-            </div>
-
-            {/* Giới tính */}
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
-                Giới tính <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <select
-                value={gender}
-                onChange={(e) => setGender(e.target.value as Gender)}
-                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
-              >
-                <option value="MALE">Nam</option>
-                <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
-              </select>
-            </div>
-
-            {/* Điện thoại */}
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
-                Số điện thoại liên hệ <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="0912345678"
-                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
-                required
+                error={isUnderAge ? `Bạn hiện ${currentAge} tuổi, chưa đủ điều kiện ${selectedCategory?.minAge} tuổi.` : undefined}
               />
             </div>
 
-            {/* Email */}
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
-                Email nhận thông báo <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="hocvien@gmail.com"
-                style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Địa chỉ */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
-              Địa chỉ thường trú / tạm trú <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Số nhà, đường/phố, phường/xã, quận/huyện, tỉnh/thành phố"
-              style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            <AppSelect
+              label="Giới tính"
               required
+              value={gender}
+              onChange={(e) => setGender(e.target.value as Gender)}
+              options={[
+                { value: 'MALE', label: 'Nam' },
+                { value: 'FEMALE', label: 'Nữ' },
+                { value: 'OTHER', label: 'Khác' },
+              ]}
+            />
+
+            <AppInput
+              label="Số điện thoại liên hệ"
+              type="tel"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="0912345678"
+            />
+
+            <AppInput
+              label="Email nhận thông báo"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="hocvien@gmail.com"
             />
           </div>
 
-          {/* Danh mục tài liệu đính kèm */}
-          <div style={{ marginBottom: '2rem', background: '#f8fafc', padding: '1.25rem', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
-            <h4 style={{ fontWeight: 600, color: '#1e3a8a', marginBottom: '0.75rem' }}>
-              📎 Tài liệu số hóa đính kèm (Quy chuẩn tiếp nhận hồ sơ)
+          <AppInput
+            label="Địa chỉ thường trú / tạm trú"
+            required
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"
+          />
+
+          {/* Danh mục tài liệu số hóa */}
+          <div
+            style={{
+              backgroundColor: 'var(--color-bg-app)',
+              padding: 'var(--space-4) var(--space-5)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px dashed var(--color-border)',
+            }}
+          >
+            <h4 style={{ fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--color-primary)', marginBottom: '4px' }}>
+              📎 Tài liệu số hóa đính kèm (Tiêu chuẩn thẩm định ADM-002)
             </h4>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem' }}>
-              Hệ thống tự động liên kết các tài liệu mẫu đạt chuẩn bảo mật để phục vụ công tác thẩm định.
+            <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-3)' }}>
+              Hệ thống tự động liên kết các tài liệu mẫu bảo mật phục vụ công tác đối soát CCCD & Giấy KSK.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {documents.map((doc, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '0.6rem 1rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.9rem' }}>
-                  <span>📄 <strong>{doc.documentType}</strong>: {doc.fileName} ({(doc.fileSize / 1024).toFixed(0)} KB)</span>
-                  <span style={{ color: '#16a34a', fontSize: '0.8rem', fontWeight: 600 }}>✓ Sẵn sàng nộp</span>
+                <div
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    backgroundColor: 'var(--color-surface)',
+                    padding: 'var(--space-2) var(--space-3)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-border)',
+                    fontSize: 'var(--font-size-xs)',
+                  }}
+                >
+                  <span>
+                    📄 <strong>{doc.documentType}</strong>: {doc.fileName} ({(doc.fileSize / 1024).toFixed(0)} KB)
+                  </span>
+                  <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>✓ Đã đính kèm</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              style={{ padding: '0.75rem 1.5rem', background: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
-            >
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
+            <AppButton variant="outline" type="button" onClick={() => navigate('/')}>
               Hủy bỏ
-            </button>
-            <button
+            </AppButton>
+            <AppButton
+              variant="primary"
               type="submit"
-              disabled={loading || isUnderAge}
-              style={{
-                padding: '0.75rem 2rem',
-                background: isUnderAge ? '#9ca3af' : '#2563eb',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 600,
-                cursor: isUnderAge ? 'not-allowed' : 'pointer',
-              }}
+              loading={loading}
+              disabled={isUnderAge}
+              icon="📤"
             >
-              {loading ? 'Đang gửi hồ sơ...' : 'Nộp Hồ Sơ Ngay'}
-            </button>
+              Nộp Hồ Sơ Đăng Ký
+            </AppButton>
           </div>
         </form>
       </div>

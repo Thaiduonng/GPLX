@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "workflow",
+  "quality": "showcase",
+  "specification": {
+    "path": "D:\\GPLX\\.archify\\workflow-quy-trinh-dao-tao-sat-hach-20261026-142500\\candidate.json",
+    "sha256": "571c8b74d0c6142ae3d671afeba76d29a8fff4644c204e091ba3caf0794a83fe",
+    "bytes": 9934
+  },
+  "artifact": {
+    "path": "D:\\GPLX\\.archify\\workflow-quy-trinh-dao-tao-sat-hach-20261026-142500\\quy-trinh-dao-tao-sat-hach.html",
+    "sha256": "e71f32a74e1fc3ef98f582024bcd2f2631de0437bb8c846843afffc7ba91318e",
+    "bytes": 882531
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "D:\\GPLX\\.archify\\workflow-quy-trinh-dao-tao-sat-hach-20261026-142500\\quy-trinh-dao-tao-sat-hach.finalize.json",
+    "summaryReceipt": "D:\\GPLX\\.archify\\workflow-quy-trinh-dao-tao-sat-hach-20261026-142500\\quy-trinh-dao-tao-sat-hach.finalize-summary.json",
+    "browserCheckReceipt": "D:\\GPLX\\.archify\\workflow-quy-trinh-dao-tao-sat-hach-20261026-142500\\quy-trinh-dao-tao-sat-hach.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-26T07:24:52.589Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 5774,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}

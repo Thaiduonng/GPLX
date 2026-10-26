@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { examinationService } from '../services/examinationService';
-import { ExamSession, CandidateResponse, ExamResultDetail, RecordExamScoreRequest } from '../types/examination';
+import type { ExamSession, CandidateResponse, ExamResultDetail, RecordExamScoreRequest } from '../types/examination';
+import {
+  PageHeader,
+  AppSelect,
+  AppInput,
+  AppTextarea,
+  AppButton,
+  StatusBadge,
+  Alert,
+  LoadingSpinner,
+  EmptyState,
+} from '../components/ui';
 
 export const ExamGradingPage: React.FC = () => {
   const [sessions, setSessions] = useState<ExamSession[]>([]);
@@ -28,8 +40,14 @@ export const ExamGradingPage: React.FC = () => {
         if (data.length > 0 && data[0]) {
           setSelectedSessionId(data[0].id);
         }
-      } catch (err: any) {
-        setError('Không thể tải danh sách kỳ thi');
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.message || 'Không thể tải danh sách kỳ thi');
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Lỗi không xác định khi tải danh sách kỳ thi');
+        }
       }
     };
     fetchSessions();
@@ -43,8 +61,14 @@ export const ExamGradingPage: React.FC = () => {
       setCandidateResult(null);
       const data = await examinationService.getCandidatesBySession(sessionId);
       setCandidates(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải danh sách thí sinh.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Không thể tải danh sách thí sinh.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi tải danh sách thí sinh');
+      }
     } finally {
       setLoading(false);
     }
@@ -68,7 +92,7 @@ export const ExamGradingPage: React.FC = () => {
       if (res.yardScore !== undefined && res.yardScore !== null) setYardScore(res.yardScore);
       if (res.roadScore !== undefined && res.roadScore !== null) setRoadScore(res.roadScore);
       if (res.examinerNote) setExaminerNote(res.examinerNote);
-    } catch (err) {
+    } catch {
       setCandidateResult(null);
     }
   };
@@ -87,264 +111,323 @@ export const ExamGradingPage: React.FC = () => {
         simulationScore: Number(simulationScore),
         yardScore: Number(yardScore),
         roadScore: Number(roadScore),
-        examinerNote
+        examinerNote: examinerNote.trim(),
       };
 
       const result = await examinationService.recordScore(selectedCandidate.id, request);
       setCandidateResult(result);
-      setSuccessMsg(`Đã ghi nhận điểm thành công cho SBD ${selectedCandidate.candidateNumber}! Kết quả: ${result.finalResult === 'PASSED' ? 'ĐẠT (PASSED)' : 'KHÔNG ĐẠT (FAILED)'}`);
+      setSuccessMsg(
+        `Đã ghi nhận điểm thành công cho SBD ${selectedCandidate.candidateNumber}! Kết quả chung: ${
+          result.finalResult === 'PASSED' ? 'ĐẠT (PASSED)' : 'KHÔNG ĐẠT (FAILED)'
+        }`
+      );
 
       // Reload candidates list
       fetchCandidates(selectedSessionId);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Có lỗi xảy ra khi lưu bảng điểm.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Có lỗi xảy ra khi lưu bảng điểm.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Lỗi không xác định khi lưu bảng điểm');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#1e293b' }}>
-          Bảng chấm điểm sát hạch & Nhập kết quả thi (EXM-002)
-        </h1>
-        <p style={{ color: '#64748b', marginTop: '4px' }}>
-          Dành cho Giám thị / Sát hạch viên — Kết quả thi được lưu vĩnh viễn và không được xóa bản ghi
-        </p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <PageHeader
+        title="Bảng Chấm Điểm Sát Hạch & Nhập Kết Quả Thi (EXM-002)"
+        description="Dành cho Giám thị / Sát hạch viên — Nhập điểm 4 môn sát hạch: Lý thuyết, Mô phỏng tình huống, Sa hình và Đường trường."
+      />
 
       {/* Chọn Kỳ thi */}
-      <div style={{ background: '#fff', padding: '16px 20px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
-        <label style={{ display: 'block', fontWeight: 600, color: '#334155', marginBottom: '8px' }}>
-          Chọn kỳ thi sát hạch:
-        </label>
-        <select
+      <div
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          padding: 'var(--space-4) var(--space-5)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--color-border)',
+          boxShadow: 'var(--shadow-xs)',
+        }}
+      >
+        <AppSelect
+          label="Chọn kỳ thi sát hạch"
           value={selectedSessionId}
           onChange={(e) => setSelectedSessionId(Number(e.target.value))}
-          style={{ width: '100%', maxWidth: '500px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-        >
-          {sessions.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name} ({s.examCode}) - Hạng {s.categoryCode} - Ngày {s.examDate}
-            </option>
-          ))}
-        </select>
+          options={sessions.map((s) => ({
+            value: s.id,
+            label: `${s.name} (${s.examCode}) — Hạng ${s.categoryCode} — Ngày thi: ${s.examDate}`,
+          }))}
+        />
       </div>
 
       {successMsg && (
-        <div style={{ padding: '14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#166534', marginBottom: '16px' }}>
-          {successMsg}
-        </div>
+        <Alert
+          type="success"
+          message={successMsg}
+          onClose={() => setSuccessMsg(null)}
+        />
       )}
 
       {error && (
-        <div style={{ padding: '14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', marginBottom: '16px' }}>
-          {error}
-        </div>
+        <Alert
+          type="danger"
+          message={error}
+          onClose={() => setError(null)}
+        />
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '24px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(300px, 1fr) minmax(400px, 1.4fr)',
+          gap: 'var(--space-6)',
+          alignItems: 'start',
+        }}
+      >
         {/* Cột trái: Danh sách thí sinh */}
-        <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e293b', marginBottom: '14px' }}>
+        <div
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            padding: 'var(--space-5)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--color-border)',
+            boxShadow: 'var(--shadow-xs)',
+          }}
+        >
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: 'var(--space-4)' }}>
             Danh sách thí sinh ({candidates.length})
-          </h2>
+          </h3>
 
-          {loading && <div style={{ color: '#64748b' }}>Đang tải danh sách...</div>}
-
-          {!loading && candidates.length === 0 ? (
-            <div style={{ color: '#94a3b8', textAlign: 'center', padding: '30px' }}>Chưa có thí sinh đăng ký trong kỳ thi này.</div>
+          {loading ? (
+            <div style={{ padding: '20px 0', textAlign: 'center' }}>
+              <LoadingSpinner size="sm" text="Đang tải danh sách..." />
+            </div>
+          ) : candidates.length === 0 ? (
+            <EmptyState
+              icon="👥"
+              title="Không có thí sinh"
+              description="Chưa có thí sinh nào đăng ký trong kỳ thi này."
+            />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {candidates.map((c) => (
-                <div
-                  key={c.id}
-                  onClick={() => handleSelectCandidate(c)}
-                  style={{
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: selectedCandidate?.id === c.id ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                    background: selectedCandidate?.id === c.id ? '#eff6ff' : '#f8fafc',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 'bold', color: '#1e293b' }}>{c.candidateNumber}</div>
-                    <div style={{ fontSize: '12px', color: '#64748b' }}>User ID: {c.userId}</div>
-                    {c.eligibilityStatus === 'DISQUALIFIED' && (
-                      <div style={{ fontSize: '11px', color: '#b91c1c' }}>⚠️ Không đủ điều kiện: {c.disqualificationReason}</div>
-                    )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {candidates.map((c) => {
+                const isSelected = selectedCandidate?.id === c.id;
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => handleSelectCandidate(c)}
+                    style={{
+                      padding: 'var(--space-3) var(--space-4)',
+                      borderRadius: 'var(--radius-md)',
+                      border: isSelected
+                        ? '2px solid var(--color-primary)'
+                        : '1px solid var(--color-border)',
+                      backgroundColor: isSelected ? 'var(--color-primary-light)' : 'var(--color-bg-app)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      transition: 'all var(--transition-fast)',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, color: 'var(--color-text-main)', fontSize: '0.95rem' }}>
+                        {c.candidateNumber}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                        Thí sinh #{c.userId}
+                      </div>
+                      {c.eligibilityStatus === 'DISQUALIFIED' && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-danger)', marginTop: '2px' }}>
+                          ⚠️ Bị truất quyền: {c.disqualificationReason}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <StatusBadge type="exam" status={c.finalResult} />
+                    </div>
                   </div>
-                  <div>
-                    <span style={{
-                      fontSize: '11px',
-                      padding: '3px 8px',
-                      borderRadius: '4px',
-                      fontWeight: 600,
-                      background: c.finalResult === 'PASSED' ? '#dcfce7' : c.finalResult === 'FAILED' ? '#fee2e2' : '#f1f5f9',
-                      color: c.finalResult === 'PASSED' ? '#15803d' : c.finalResult === 'FAILED' ? '#b91c1c' : '#475569'
-                    }}>
-                      {c.finalResult}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
         {/* Cột phải: Form chấm điểm 4 môn */}
-        <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e293b', marginBottom: '16px' }}>
-            {selectedCandidate ? `Bảng điểm: ${selectedCandidate.candidateNumber}` : 'Chọn thí sinh để chấm điểm'}
-          </h2>
+        <div
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            padding: 'var(--space-6)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--color-border)',
+            boxShadow: 'var(--shadow-xs)',
+          }}
+        >
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: 'var(--space-4)' }}>
+            {selectedCandidate
+              ? `Bảng điểm chi tiết: ${selectedCandidate.candidateNumber}`
+              : 'Chọn thí sinh từ danh sách để chấm điểm'}
+          </h3>
 
           {selectedCandidate ? (
-            <form onSubmit={handleGradeSubmit}>
+            <form onSubmit={handleGradeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
               {selectedCandidate.eligibilityStatus === 'DISQUALIFIED' && (
-                <div style={{ padding: '12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', marginBottom: '16px', fontSize: '13px' }}>
-                  Thí sinh bị loại khỏi danh sách thi do không đáp ứng điều kiện dự thi tự động.
-                </div>
+                <Alert
+                  type="danger"
+                  message="Thí sinh bị loại khỏi danh sách thi do không đáp ứng điều kiện dự thi bắt buộc."
+                />
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
                 <div>
-                  <label style={{ display: 'block', fontWeight: 600, fontSize: '13px', marginBottom: '6px' }}>
-                    1. Lý thuyết (Thang 30 / Đạt ≥ 27):
-                  </label>
-                  <input
+                  <AppInput
+                    label="1. Lý thuyết (Thang 30/35, Đạt ≥ 27)"
                     type="number"
                     min="0"
                     max="35"
                     value={theoryScore}
                     onChange={(e) => setTheoryScore(Number(e.target.value))}
                     disabled={selectedCandidate.eligibilityStatus === 'DISQUALIFIED'}
-                    style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                   {candidateResult?.theoryPassed !== undefined && (
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: candidateResult.theoryPassed ? '#16a34a' : '#dc2626' }}>
-                      {candidateResult.theoryPassed ? '✓ Đạt' : '✗ Trượt'}
-                    </span>
+                    <div style={{ marginTop: '4px', fontSize: '0.75rem' }}>
+                      <StatusBadge
+                        variant={candidateResult.theoryPassed ? 'success' : 'danger'}
+                        label={candidateResult.theoryPassed ? '✓ Đạt lý thuyết' : '✗ Trượt lý thuyết'}
+                      />
+                    </div>
                   )}
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontWeight: 600, fontSize: '13px', marginBottom: '6px' }}>
-                    2. Mô phỏng tình huống (Thang 50 / Đạt ≥ 35):
-                  </label>
-                  <input
+                  <AppInput
+                    label="2. Mô phỏng tình huống (Thang 50, Đạt ≥ 35)"
                     type="number"
                     min="0"
                     max="50"
                     value={simulationScore}
                     onChange={(e) => setSimulationScore(Number(e.target.value))}
                     disabled={selectedCandidate.eligibilityStatus === 'DISQUALIFIED'}
-                    style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                   {candidateResult?.simulationPassed !== undefined && (
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: candidateResult.simulationPassed ? '#16a34a' : '#dc2626' }}>
-                      {candidateResult.simulationPassed ? '✓ Đạt' : '✗ Trượt'}
-                    </span>
+                    <div style={{ marginTop: '4px', fontSize: '0.75rem' }}>
+                      <StatusBadge
+                        variant={candidateResult.simulationPassed ? 'success' : 'danger'}
+                        label={candidateResult.simulationPassed ? '✓ Đạt mô phỏng' : '✗ Trượt mô phỏng'}
+                      />
+                    </div>
                   )}
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontWeight: 600, fontSize: '13px', marginBottom: '6px' }}>
-                    3. Thực hành Sa hình (Thang 100 / Đạt ≥ 80):
-                  </label>
-                  <input
+                  <AppInput
+                    label="3. Thực hành Sa hình (Thang 100, Đạt ≥ 80)"
                     type="number"
                     min="0"
                     max="100"
                     value={yardScore}
                     onChange={(e) => setYardScore(Number(e.target.value))}
                     disabled={selectedCandidate.eligibilityStatus === 'DISQUALIFIED'}
-                    style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                   {candidateResult?.yardPassed !== undefined && (
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: candidateResult.yardPassed ? '#16a34a' : '#dc2626' }}>
-                      {candidateResult.yardPassed ? '✓ Đạt' : '✗ Trượt'}
-                    </span>
+                    <div style={{ marginTop: '4px', fontSize: '0.75rem' }}>
+                      <StatusBadge
+                        variant={candidateResult.yardPassed ? 'success' : 'danger'}
+                        label={candidateResult.yardPassed ? '✓ Đạt sa hình' : '✗ Trượt sa hình'}
+                      />
+                    </div>
                   )}
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontWeight: 600, fontSize: '13px', marginBottom: '6px' }}>
-                    4. Thực hành Đường trường (Thang 100 / Đạt ≥ 80):
-                  </label>
-                  <input
+                  <AppInput
+                    label="4. Đường trường (Thang 100, Đạt ≥ 80)"
                     type="number"
                     min="0"
                     max="100"
                     value={roadScore}
                     onChange={(e) => setRoadScore(Number(e.target.value))}
                     disabled={selectedCandidate.eligibilityStatus === 'DISQUALIFIED'}
-                    style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                   {candidateResult?.roadPassed !== undefined && (
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: candidateResult.roadPassed ? '#16a34a' : '#dc2626' }}>
-                      {candidateResult.roadPassed ? '✓ Đạt' : '✗ Trượt'}
-                    </span>
+                    <div style={{ marginTop: '4px', fontSize: '0.75rem' }}>
+                      <StatusBadge
+                        variant={candidateResult.roadPassed ? 'success' : 'danger'}
+                        label={candidateResult.roadPassed ? '✓ Đạt đường trường' : '✗ Trượt đường trường'}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '13px', marginBottom: '6px' }}>
-                  Nhận xét của Giám thị / Sát hạch viên:
-                </label>
-                <textarea
-                  rows={3}
-                  value={examinerNote}
-                  onChange={(e) => setExaminerNote(e.target.value)}
-                  placeholder="Ghi chú tác phong, lỗi vi phạm thao tác hoặc lý do truất quyền thi..."
-                  disabled={selectedCandidate.eligibilityStatus === 'DISQUALIFIED'}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+              <AppTextarea
+                label="Nhận xét của Sát hạch viên"
+                placeholder="Ghi chú thao tác, lỗi chạm vạch sa hình, tốc độ hoặc lý do trừ điểm..."
+                value={examinerNote}
+                onChange={(e) => setExaminerNote(e.target.value)}
+                disabled={selectedCandidate.eligibilityStatus === 'DISQUALIFIED'}
+              />
 
               {candidateResult && (
-                <div style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  marginBottom: '16px',
-                  background: candidateResult.finalResult === 'PASSED' ? '#f0fdf4' : candidateResult.finalResult === 'FAILED' ? '#fef2f2' : '#f8fafc',
-                  border: candidateResult.finalResult === 'PASSED' ? '1px solid #bbf7d0' : candidateResult.finalResult === 'FAILED' ? '1px solid #fecaca' : '1px solid #e2e8f0',
-                  fontWeight: 'bold',
-                  textAlign: 'center'
-                }}>
-                  KẾT QUẢ CHUNG: {candidateResult.finalResult === 'PASSED' ? '🏆 ĐẠT SÁT HẠCH' : candidateResult.finalResult === 'FAILED' ? '❌ KHÔNG ĐẠT' : '⏳ ĐANG CHỜ CHẤM ĐIỂM'}
+                <div
+                  style={{
+                    padding: 'var(--space-3) var(--space-4)',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor:
+                      candidateResult.finalResult === 'PASSED'
+                        ? 'var(--color-success-bg)'
+                        : candidateResult.finalResult === 'FAILED'
+                        ? 'var(--color-danger-bg)'
+                        : 'var(--color-bg-app)',
+                    border: `1px solid ${
+                      candidateResult.finalResult === 'PASSED'
+                        ? 'var(--color-success-border)'
+                        : candidateResult.finalResult === 'FAILED'
+                        ? 'var(--color-danger-border)'
+                        : 'var(--color-border)'
+                    }`,
+                    fontWeight: 700,
+                    textAlign: 'center',
+                    fontSize: '1rem',
+                    color:
+                      candidateResult.finalResult === 'PASSED'
+                        ? 'var(--color-success)'
+                        : candidateResult.finalResult === 'FAILED'
+                        ? 'var(--color-danger)'
+                        : 'var(--color-text-main)',
+                  }}
+                >
+                  KẾT LUẬN SÁT HẠCH: {candidateResult.finalResult === 'PASSED' ? '🏆 ĐẠT YÊU CẦU CẤP BẰNG' : candidateResult.finalResult === 'FAILED' ? '❌ KHÔNG ĐẠT SÁT HẠCH' : '⏳ ĐANG CHỜ CHẤM ĐIỂM'}
                 </div>
               )}
 
-              <button
+              <AppButton
                 type="submit"
-                disabled={selectedCandidate.eligibilityStatus === 'DISQUALIFIED' || loading}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  background: selectedCandidate.eligibilityStatus === 'DISQUALIFIED' ? '#94a3b8' : '#2563eb',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  cursor: selectedCandidate.eligibilityStatus === 'DISQUALIFIED' ? 'not-allowed' : 'pointer'
-                }}
+                variant="primary"
+                size="lg"
+                loading={loading}
+                disabled={selectedCandidate.eligibilityStatus === 'DISQUALIFIED'}
+                fullWidth
+                icon="💾"
               >
-                {loading ? 'Đang lưu kết quả...' : 'Xác nhận & Lưu bảng điểm vĩnh viễn'}
-              </button>
+                Xác nhận & Lưu Bảng Điểm Sát Hạch
+              </AppButton>
             </form>
           ) : (
-            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8' }}>
-              Vui lòng nhấp chọn một thí sinh từ danh sách bên trái để nhập bảng điểm và kết luận kết quả sát hạch.
-            </div>
+            <EmptyState
+              icon="✍️"
+              title="Chưa chọn thí sinh"
+              description="Vui lòng bấm chọn một thí sinh từ danh sách bên trái để nhập điểm và kết luận."
+            />
           )}
         </div>
       </div>
     </div>
   );
 };
+export default ExamGradingPage;
