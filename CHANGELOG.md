@@ -2,6 +2,27 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.1.0] — 2026-10-27
+
+### Tái Thiết Kế Trang Đầu Tiên Thành Landing Page Quảng Cáo Vào Đăng Ký / Đăng Nhập
+- **Tái Định Vị Trang Đầu Tiên (`/`) Thành Landing Page Quảng Bá Toàn Diện:**
+  - Chuyển đổi toàn diện mục tiêu của trang chủ từ trang tổng quan nội bộ sang **Trang chủ quảng cáo & chuyển đổi (Promotional Landing Page)** thu hút khách truy cập và học viên mới.
+  - Loại bỏ hoàn toàn widget debug kỹ thuật (kiểm tra kết nối máy chủ `/api/v1/health`) khỏi trang chủ để đảm bảo tính chuyên nghiệp của một cổng dịch vụ công chuẩn quốc gia.
+- **Hero Banner Quảng Cáo & Kêu Gọi Hành Động (CTA) Nổi Bật:**
+  - Thiết kế Hero Banner phong cách Enterprise Gateway với hiệu ứng chiều sâu, badge "CỔNG ĐÀO TẠO & SÁT HẠCH LÁI XE QUỐC GIA".
+  - Tiêu đề quảng bá hấp dẫn: *"Học Lái Xe Chuẩn Hóa — Tự Tin Vững Tay Lái & Chinh Phục GPLX"*.
+  - Bố trí 2 nút kêu gọi hành động lớn, độ tương phản cao:
+    - Nút chính (CTA xanh lá nổi bật): **"Đăng Ký Tài Khoản Học Viên Ngay"** (`/register`).
+    - Nút phụ (Ghost viền trắng): **"Đăng Nhập Hệ Thống"** (`/login`).
+  - Dòng chỉ dẫn bằng chứng xã hội: *"Hơn 15,000+ học viên đã đăng ký và thi đỗ giấy phép lái xe thành công."* đi kèm cụm 5 sao vàng đánh giá uy tín.
+- **Các Khối Nội Dung Quảng Bá Thuyết Phục (High-Converting Sections):**
+  - **4 Chỉ số ấn tượng (Stats Section):** Tỷ lệ thi đỗ lần đầu 98.6%, 5 hạng bằng đào tạo chuẩn Cục ĐBVN (A1, A2, B1, B2, C), 100% km & giờ thực hành DAT, Thẩm định hồ sơ online nhanh chóng 24h.
+  - **4 Trụ cột lợi thế vượt trội (Why Choose Us):** Hồ sơ điện tử 100% online, Ôn tập thông minh 600 câu với thuật toán Spaced Repetition, Giám sát DAT minh bạch và Đội xe mới cùng tỷ lệ đỗ cao.
+  - **Showcase các hạng GPLX tuyển sinh:** Thẻ chi tiết 4 hạng phổ biến (A1, B1, B2 - Popular, C) nêu rõ đối tượng, tính năng nổi bật, số km DAT thực hành và nút trực tiếp *"Đăng ký học ngay"*.
+  - **Lộ trình 4 bước đơn giản:** Nêu bật bắt đầu từ Bước 1: Tạo tài khoản & Nộp hồ sơ trực tuyến.
+  - **Đánh giá học viên thực tế & Cam kết 3 Không:** 3 lời nhận xét chân thực từ cựu học viên tốt nghiệp; cam kết: *Không phát sinh chi phí - Không cắt bớt giờ học DAT - Bảo hành đào tạo đến khi có bằng*.
+  - **Banner chuyển đổi cuối trang (Final Conversion Banner):** Lời kêu gọi hành động mạnh mẽ trước chân trang cùng cụm nút Đăng ký / Đăng nhập cỡ lớn.
+
 ## [2.0.0] — 2026-10-26
 
 ### Triển Khai Phân Hệ Ôn Tập GPLX — Spaced Repetition & Củng Cố Kiến Thức (Full-Stack)
