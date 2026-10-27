@@ -217,6 +217,7 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P16-05`** | Tái Cấu Trúc MainLayout & Giao Diện Trang Chủ HomePage | TSK-P16-03..04 | `DONE` | Tái thiết kế Header phong cách Cổng thông tin Quốc gia, thanh Workspace Bar phân chia 4 phân hệ, Hero Banner uy tín, lộ trình 4 bước và lưới các phân hệ Modular Monolith. |
 | **`TSK-P16-06`** | Đóng Gói Docker Frontend & Kiểm Thử Runtime | TSK-P16-05 | `DONE` | Biên dịch `tsc -b && vite build` 0 lỗi; đóng gói container Nginx `gplx-frontend` v1.9.0; phản hồi HTTP 200 OK tại cổng 3000 kết nối backend 8088. |
 | **`TSK-P16-07`** | Tái Cấu Trúc Menu Góc Trái & Khu Vực Quản Lý Tài Khoản / Người Dùng Góc Phải | TSK-P16-05 | `DONE` | Bố trí thanh menu và drawer bên góc trái; đưa nút Đăng nhập/Đăng ký sang góc phải; sau đăng nhập hiển thị UserAccountMenu góc phải kèm quản lý tài khoản (hồ sơ, đổi mật khẩu) và quản lý người dùng hệ thống. |
+| **`TSK-P16-08`** | Tái Cấu Trúc Trang Đầu Tiên Thành Landing Page Quảng Cáo Vào Đăng Ký / Đăng Nhập | TSK-P16-07 | `DONE` | Thiết kế lại toàn diện HomePage.tsx thành Landing Page quảng cáo: Hero Banner nổi bật với 2 nút CTA Đăng ký / Đăng nhập, 4 chỉ số chất lượng, 4 trụ cột lợi thế đào tạo, Showcase 4 hạng GPLX (A1, B1, B2 - Popular, C), Lộ trình 4 bước, Đánh giá học viên & Cam kết 3 Không, Banner chuyển đổi cuối trang; loại bỏ hoàn toàn các widget debug kỹ thuật khỏi trang chủ. |
 
 
 ---

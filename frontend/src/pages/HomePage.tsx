@@ -1,51 +1,34 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
-import { healthService } from '../services/healthService';
-import type { HealthStatus } from '../types/health';
-import { AppButton, StatCard, StatusBadge, Alert, LoadingSpinner, Icons } from '../components/ui';
+import { AppButton, StatCard, Icons } from '../components/ui';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuth();
-  const [health, setHealth] = useState<HealthStatus | null>(null);
-  const [loadingHealth, setLoadingHealth] = useState<boolean>(true);
-  const [healthError, setHealthError] = useState<string | null>(null);
-
-  const checkHealthStatus = async () => {
-    try {
-      setLoadingHealth(true);
-      setHealthError(null);
-      const data = await healthService.checkHealth();
-      setHealth(data);
-    } catch (err) {
-      setHealthError(err instanceof Error ? err.message : 'Không thể kết nối đến máy chủ Backend');
-    } finally {
-      setLoadingHealth(false);
-    }
-  };
-
-  useEffect(() => {
-    checkHealthStatus();
-  }, []);
 
   return (
     <div className={styles.container}>
-      {/* Hero Banner - Enterprise Gateway Style */}
-      <section className={styles.hero} aria-label="Giới thiệu hệ thống">
+      {/* ========================================================================
+          1. HERO BANNER - QUẢNG BÁ CHÍNH & KÊU GỌI ĐĂNG KÝ / ĐĂNG NHẬP
+          ======================================================================== */}
+      <section className={styles.hero} aria-label="Cổng đào tạo và sát hạch lái xe">
         <div className={styles.heroContent}>
           <div className={styles.heroBadge}>
             <Icons.ShieldCheck size={16} />
-            <span>Cổng Dịch vụ Công & Đào tạo Sát hạch Giấy phép Lái xe</span>
+            <span>CỔNG ĐÀO TẠO & SÁT HẠCH LÁI XE QUỐC GIA</span>
           </div>
-          <h2 className={styles.heroTitle}>
-            Đào tạo lái xe chuẩn hóa, minh bạch & ứng dụng công nghệ giám sát DAT
-          </h2>
+
+          <h1 className={styles.heroTitle}>
+            Học Lái Xe Chuẩn Hóa —{' '}
+            <span className={styles.heroHighlight}>Tự Tin Vững Tay Lái</span> & Chinh Phục GPLX
+          </h1>
+
           <p className={styles.heroDescription}>
-            Nền tảng quản lý toàn diện quy trình tiếp nhận hồ sơ trực tuyến, ôn thi 600 câu hỏi lý thuyết,
-            theo dõi lộ trình thực hành qua thiết bị DAT và tổ chức kỳ sát hạch theo tiêu chuẩn của Cục Đường bộ Việt Nam.
+            Nền tảng đào tạo lái xe toàn diện theo tiêu chuẩn của Cục Đường bộ Việt Nam. Tiếp nhận hồ sơ điện tử trực tuyến,
+            ôn luyện 600 câu hỏi lý thuyết ứng dụng Spaced Repetition thông minh và giám sát thực hành DAT 100% minh bạch.
           </p>
 
+          {/* Action Buttons: Kêu gọi Đăng ký / Đăng nhập */}
           {isAuthenticated && user ? (
             <div className={styles.userWelcomeCard}>
               <div className={styles.userWelcomeInfo}>
@@ -54,7 +37,8 @@ export default function HomePage() {
                   <h4>Xin chào, {user.fullName || user.username}!</h4>
                 </div>
                 <p>
-                  Vai trò: <strong>{user.roles?.map((r) => r.replace('ROLE_', '')).join(', ')}</strong> | Quyền hạn nghiệp vụ đã được kích hoạt.
+                  Tài khoản đã đăng nhập với vai trò:{' '}
+                  <strong>{user.roles?.map((r) => r.replace('ROLE_', '')).join(', ')}</strong>.
                 </p>
               </div>
               <div className={styles.userWelcomeActions}>
@@ -64,8 +48,13 @@ export default function HomePage() {
                   </AppButton>
                 </Link>
                 <Link to="/courses">
-                  <AppButton variant="outline" size="sm" icon={<Icons.BookOpen size={16} />} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.6)' }}>
-                    Khóa học
+                  <AppButton
+                    variant="outline"
+                    size="sm"
+                    icon={<Icons.BookOpen size={16} />}
+                    style={{ color: 'white', borderColor: 'rgba(255,255,255,0.7)' }}
+                  >
+                    Xem khóa học
                   </AppButton>
                 </Link>
                 <Link to="/student/review">
@@ -76,250 +65,458 @@ export default function HomePage() {
               </div>
             </div>
           ) : (
-            <div className={styles.heroActions}>
-              <Link to="/register">
-                <AppButton variant="success" size="lg" icon={<Icons.Plus size={18} />}>
-                  Đăng ký hồ sơ học viên ngay
-                </AppButton>
-              </Link>
-              <Link to="/theory-exam">
-                <AppButton variant="outline" size="lg" icon={<Icons.ClipboardList size={18} />} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}>
-                  Thi thử 600 câu trắc nghiệm
-                </AppButton>
-              </Link>
-            </div>
+            <>
+              <div className={styles.heroActions}>
+                <Link to="/register">
+                  <AppButton
+                    variant="success"
+                    size="lg"
+                    className={styles.primaryCtaBtn}
+                    icon={<Icons.Plus size={18} />}
+                  >
+                    Đăng Ký Tài Khoản Học Viên Ngay
+                  </AppButton>
+                </Link>
+                <Link to="/login">
+                  <AppButton
+                    variant="outline"
+                    size="lg"
+                    className={styles.secondaryCtaBtn}
+                    icon={<Icons.User size={18} />}
+                  >
+                    Đăng Nhập Hệ Thống
+                  </AppButton>
+                </Link>
+              </div>
+              <div className={styles.heroTrustBadge}>
+                <div className={styles.starsGroup}>
+                  <Icons.Star size={16} />
+                  <Icons.Star size={16} />
+                  <Icons.Star size={16} />
+                  <Icons.Star size={16} />
+                  <Icons.Star size={16} />
+                </div>
+                <span>Hơn 15,000+ học viên đã đăng ký và thi đỗ giấy phép lái xe thành công.</span>
+              </div>
+            </>
           )}
         </div>
       </section>
 
-      {/* KPI Highlights */}
-      <section className={styles.statsGrid} aria-label="Các chỉ số hệ thống">
-        <StatCard
-          title="Hạng GPLX hỗ trợ"
-          value="B1, B2, C, D, E"
-          subtitle="Đầy đủ tiêu chuẩn đào tạo lái xe toàn quốc"
-          icon={<Icons.Car size={24} />}
-          variant="primary"
-        />
-        <StatCard
-          title="Ngân hàng câu hỏi lý thuyết"
-          value="600 câu"
-          subtitle="Gồm 60 câu điểm liệt bắt buộc phải đạt"
-          icon={<Icons.BookOpen size={24} />}
-          variant="success"
-        />
-        <StatCard
-          title="Giám sát thiết bị DAT"
-          value="100% km & giờ"
-          subtitle="Truy vết hành trình và nhận diện khuôn mặt học viên"
-          icon={<Icons.Activity size={24} />}
-          variant="warning"
-        />
-        <StatCard
-          title="Thẩm định hồ sơ điện tử"
-          value="Nhanh chóng"
-          subtitle="Rà soát đối chiếu CCCD & Giấy KSK trực tuyến"
-          icon={<Icons.FileText size={24} />}
-          variant="primary"
-        />
+      {/* ========================================================================
+          2. KPI & STATS HIGHLIGHTS (CÁC CON SỐ ẤN TƯỢNG)
+          ======================================================================== */}
+      <section className={styles.statsSection} aria-label="Các chỉ số ấn tượng">
+        <div className={styles.statsGrid}>
+          <StatCard
+            title="Tỷ lệ thi đỗ lần đầu"
+            value="98.6%"
+            subtitle="Phương pháp đào tạo khoa học, bám sát đề thi thật"
+            icon={<Icons.Award size={24} />}
+            variant="success"
+          />
+          <StatCard
+            title="Hạng GPLX đào tạo"
+            value="A1, A2, B1, B2, C"
+            subtitle="Chuẩn hóa theo quy chuẩn Cục Đường bộ VN"
+            icon={<Icons.Car size={24} />}
+            variant="primary"
+          />
+          <StatCard
+            title="Giám sát DAT thực tế"
+            value="100% km & Giờ"
+            subtitle="Nhận diện khuôn mặt & định vị hành trình chuẩn xác"
+            icon={<Icons.Activity size={24} />}
+            variant="warning"
+          />
+          <StatCard
+            title="Thẩm định hồ sơ online"
+            value="Nhanh chóng 24h"
+            subtitle="Nộp CCCD & Giấy KSK trực tuyến, không cần chờ đợi"
+            icon={<Icons.FileText size={24} />}
+            variant="primary"
+          />
+        </div>
       </section>
 
-      {/* Roadmap 4 bước */}
-      <section className={styles.roadmapSection} aria-label="Lộ trình đào tạo 4 bước">
+      {/* ========================================================================
+          3. TẠI SAO NÊN CHỌN HỆ THỐNG ĐÀO TẠO CỦA CHÚNG TÔI? (WHY CHOOSE US)
+          ======================================================================== */}
+      <section aria-label="Lợi thế vượt trội của hệ thống">
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Lộ trình đào tạo & sát hạch 4 bước chuẩn hóa</h3>
+          <span className={styles.sectionBadge}>
+            <Icons.ShieldCheck size={14} /> Ưu thế vượt trội
+          </span>
+          <h2 className={styles.sectionTitle}>Tại sao hơn 15,000 học viên tin chọn hệ thống?</h2>
           <p className={styles.sectionSubtitle}>
-            Học viên theo dõi xuyên suốt từ ngày nộp hồ sơ điện tử đến ngày nhận Giấy phép lái xe
+            Ứng dụng công nghệ hiện đại vào toàn bộ quy trình học tập, rèn luyện và sát hạch giúp học viên tiết kiệm
+            thời gian, tối ưu chi phí và nắm vững kỹ năng lái xe an toàn.
+          </p>
+        </div>
+
+        <div className={styles.featuresGrid}>
+          <div className={styles.featureCard}>
+            <div className={styles.featureIconWrapper} style={{ backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
+              <Icons.FileText size={28} />
+            </div>
+            <h3 className={styles.featureTitle}>Hồ sơ điện tử 100% online</h3>
+            <p className={styles.featureDesc}>
+              Đăng ký tài khoản và nộp hồ sơ, giấy khám sức khỏe, căn cước công dân trực tiếp trên máy tính hoặc điện
+              thoại. Tiếp nhận và thẩm định điện tử chỉ trong 24 giờ làm việc.
+            </p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIconWrapper} style={{ backgroundColor: '#f0fdf4', color: '#15803d' }}>
+              <Icons.BookOpen size={28} />
+            </div>
+            <h3 className={styles.featureTitle}>Ôn tập thông minh 600 câu</h3>
+            <p className={styles.featureDesc}>
+              Thuật toán lặp lại ngắt quãng (Spaced Repetition) với 5 hộp Leitner tự động phát hiện lỗ hổng kiến thức,
+              tập trung củng cố câu sai và bảo đảm làm chủ 60 câu hỏi điểm liệt.
+            </p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIconWrapper} style={{ backgroundColor: '#fffbeb', color: '#b45309' }}>
+              <Icons.Activity size={28} />
+            </div>
+            <h3 className={styles.featureTitle}>Giám sát DAT minh bạch</h3>
+            <p className={styles.featureDesc}>
+              Hệ thống kết nối thiết bị DAT trên xe tập lái ghi nhận chính xác 100% quãng đường km và thời gian thực hành
+              đường trường, đối soát khuôn mặt học viên theo chuẩn Cục ĐBVN.
+            </p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIconWrapper} style={{ backgroundColor: '#fdf2f8', color: '#be185d' }}>
+              <Icons.Award size={28} />
+            </div>
+            <h3 className={styles.featureTitle}>Đội xe mới & Tỷ lệ đỗ cao</h3>
+            <p className={styles.featureDesc}>
+              Xe tập lái đời mới có điều hòa mát mẻ, giáo viên kèm cặp tận tâm 1-kèm-1 sa hình. Bộ đề thi thử bám sát đề
+              sát hạch thực tế giúp học viên tự tin vượt qua kỳ thi.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================
+          4. CÁC HẠNG ĐÀO TẠO & SHOWCASE KHÓA HỌC (CATEGORIES)
+          ======================================================================== */}
+      <section className={styles.categoriesSection} aria-label="Các hạng GPLX tuyển sinh">
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionBadge}>
+            <Icons.Car size={14} /> Khóa học tuyển sinh
+          </span>
+          <h2 className={styles.sectionTitle}>Các hạng Giấy phép lái xe đang mở tuyển sinh</h2>
+          <p className={styles.sectionSubtitle}>
+            Đăng ký tài khoản ngay hôm nay để nhận tài liệu học tập chuẩn hóa và sắp xếp lịch học phù hợp nhất.
+          </p>
+        </div>
+
+        <div className={styles.categoryGrid}>
+          {/* Hạng A1 */}
+          <div className={styles.categoryCard}>
+            <div className={styles.categoryHeader}>
+              <span className={styles.categoryBadge}>Hạng A1</span>
+              <Icons.Car size={24} style={{ color: 'var(--color-primary)' }} />
+            </div>
+            <h3 className={styles.categoryTitle}>Mô tô hai bánh</h3>
+            <p className={styles.categoryDesc}>Dung tích xylanh từ 50cc đến dưới 175cc. Phù hợp cho người đi làm và sinh viên.</p>
+            <ul className={styles.categoryFeatures}>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Học lý thuyết online 200 câu hỏi</span>
+              </li>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Thực hành sa hình số 8 không giới hạn</span>
+              </li>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Lịch thi sát hạch vào Thứ 7 & Chủ Nhật</span>
+              </li>
+            </ul>
+            <Link to="/register" className={styles.categoryCtaBtn}>
+              <AppButton variant="outline" size="sm" fullWidth icon={<Icons.ArrowRight size={15} />}>
+                Đăng ký học Hạng A1
+              </AppButton>
+            </Link>
+          </div>
+
+          {/* Hạng B1 */}
+          <div className={styles.categoryCard}>
+            <div className={styles.categoryHeader}>
+              <span className={styles.categoryBadge}>Hạng B1</span>
+              <Icons.Car size={24} style={{ color: 'var(--color-primary)' }} />
+            </div>
+            <h3 className={styles.categoryTitle}>Ô tô số tự động</h3>
+            <p className={styles.categoryDesc}>Lái ô tô chở người đến 9 chỗ, xe tải dưới 3.500 kg (không kinh doanh vận tải).</p>
+            <ul className={styles.categoryFeatures}>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Dễ học, không lo tắt máy khi leo dốc sa hình</span>
+              </li>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>710km thực hành giám sát DAT đường trường</span>
+              </li>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Xe tập lái Vios, Accent đời mới có máy lạnh</span>
+              </li>
+            </ul>
+            <Link to="/register" className={styles.categoryCtaBtn}>
+              <AppButton variant="outline" size="sm" fullWidth icon={<Icons.ArrowRight size={15} />}>
+                Đăng ký học Hạng B1
+              </AppButton>
+            </Link>
+          </div>
+
+          {/* Hạng B2 (Phổ biến nhất) */}
+          <div className={`${styles.categoryCard} ${styles.popularCategoryCard}`}>
+            <span className={styles.popularBadge}>Học viên chọn nhiều nhất</span>
+            <div className={styles.categoryHeader}>
+              <span className={styles.categoryBadge} style={{ background: '#2563eb', color: '#fff' }}>
+                Hạng B2
+              </span>
+              <Icons.Award size={24} style={{ color: '#2563eb' }} />
+            </div>
+            <h3 className={styles.categoryTitle}>Ô tô số sàn & số tự động</h3>
+            <p className={styles.categoryDesc}>Hành nghề kinh doanh vận tải (taxi, xe dịch vụ, công nghệ) và lái xe gia đình.</p>
+            <ul className={styles.categoryFeatures}>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Nắm vững kỹ năng côn - số chuẩn mực chuyên nghiệp</span>
+              </li>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>810km thực hành DAT đường trường & cabin mô phỏng</span>
+              </li>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Học 1-kèm-1, hỗ trợ đưa đón tại các điểm đào tạo</span>
+              </li>
+            </ul>
+            <Link to="/register" className={styles.categoryCtaBtn}>
+              <AppButton variant="primary" size="sm" fullWidth icon={<Icons.ArrowRight size={15} />}>
+                Đăng ký học Hạng B2
+              </AppButton>
+            </Link>
+          </div>
+
+          {/* Hạng C */}
+          <div className={styles.categoryCard}>
+            <div className={styles.categoryHeader}>
+              <span className={styles.categoryBadge}>Hạng C</span>
+              <Icons.Car size={24} style={{ color: 'var(--color-primary)' }} />
+            </div>
+            <h3 className={styles.categoryTitle}>Ô tô tải hạng nặng</h3>
+            <p className={styles.categoryDesc}>Lái xe tải trên 3.500 kg, máy kéo một rơ moóc và toàn bộ các loại xe quy định cho Hạng B.</p>
+            <ul className={styles.categoryFeatures}>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Cơ hội việc làm thu nhập cao trong ngành Logistics</span>
+              </li>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>825km DAT đường trường thực tế trên xe tải lớn</span>
+              </li>
+              <li className={styles.categoryFeatureItem}>
+                <Icons.CheckCircle size={15} className={styles.categoryFeatureIcon} />
+                <span>Giáo viên nhiều năm kinh nghiệm lái xe đường dài</span>
+              </li>
+            </ul>
+            <Link to="/register" className={styles.categoryCtaBtn}>
+              <AppButton variant="outline" size="sm" fullWidth icon={<Icons.ArrowRight size={15} />}>
+                Đăng ký học Hạng C
+              </AppButton>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================
+          5. ROADMAP 4 BƯỚC ĐÀO TẠO & SÁT HẠCH
+          ======================================================================== */}
+      <section className={styles.roadmapSection} aria-label="Lộ trình 4 bước sở hữu bằng lái">
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionBadge}>
+            <Icons.Activity size={14} /> Lộ trình chuẩn hóa
+          </span>
+          <h2 className={styles.sectionTitle}>Quy trình 4 bước đơn giản để sở hữu GPLX</h2>
+          <p className={styles.sectionSubtitle}>
+            Từ ngày tạo tài khoản trực tuyến đến ngày nhận Giấy phép lái xe, toàn bộ quá trình được số hóa và đồng hành cùng bạn.
           </p>
         </div>
 
         <div className={styles.roadmapGrid}>
           <div className={styles.stepCard}>
             <div className={styles.stepNumber}>1</div>
-            <h4 className={styles.stepTitle}>Nộp hồ sơ trực tuyến</h4>
+            <h3 className={styles.stepTitle}>Tạo tài khoản & Nộp hồ sơ</h3>
             <p className={styles.stepDesc}>
-              Điền thông tin CCCD, tải giấy khám sức khỏe và ảnh chân dung. Nhân viên tuyển sinh thẩm định hồ sơ theo quy tắc ADM-002.
+              Đăng ký tài khoản học viên trong 2 phút, chụp ảnh CCCD và Giấy khám sức khỏe. Cán bộ tuyển sinh thẩm định hồ sơ trực tuyến.
             </p>
-            <Link to="/admissions/new">
-              <AppButton variant="outline" size="sm" fullWidth icon={<Icons.Plus size={15} />}>
-                Nộp hồ sơ
-              </AppButton>
-            </Link>
           </div>
 
           <div className={styles.stepCard}>
             <div className={styles.stepNumber}>2</div>
-            <h4 className={styles.stepTitle}>Học lý thuyết & Thi thử</h4>
+            <h3 className={styles.stepTitle}>Học lý thuyết & Thi thử</h3>
             <p className={styles.stepDesc}>
               Ôn luyện 600 câu hỏi trắc nghiệm, các tình huống mô phỏng và thi thử trực tiếp theo đề thi chuẩn của Cục Đường bộ.
             </p>
-            <Link to="/theory-exam">
-              <AppButton variant="outline" size="sm" fullWidth icon={<Icons.ClipboardList size={15} />}>
-                Luyện thi ngay
-              </AppButton>
-            </Link>
           </div>
 
           <div className={styles.stepCard}>
             <div className={styles.stepNumber}>3</div>
-            <h4 className={styles.stepTitle}>Thực hành lái xe & DAT</h4>
+            <h3 className={styles.stepTitle}>Thực hành sa hình & DAT</h3>
             <p className={styles.stepDesc}>
-              Thực hành cabin mô phỏng, lái xe sa hình và chạy đường trường tích lũy đủ số km quy định qua thiết bị giám sát DAT.
+              Thực hành lái xe sa hình và chạy đường trường tích lũy đủ số km quy định qua thiết bị giám sát hành trình DAT.
             </p>
-            <Link to="/training/schedules">
-              <AppButton variant="outline" size="sm" fullWidth icon={<Icons.Calendar size={15} />}>
-                Xem lịch học
-              </AppButton>
-            </Link>
           </div>
 
           <div className={styles.stepCard}>
             <div className={styles.stepNumber}>4</div>
-            <h4 className={styles.stepTitle}>Sát hạch & Nhận bằng</h4>
+            <h3 className={styles.stepTitle}>Sát hạch & Nhận bằng</h3>
             <p className={styles.stepDesc}>
-              Xét duyệt đủ điều kiện dự thi, tham gia 4 nội dung sát hạch (Lý thuyết, Mô phỏng, Sa hình, Đường trường) và nhận kết quả.
+              Tham gia kỳ sát hạch chính thức do Sở GTVT tổ chức và nhận Giấy phép lái xe quốc gia chỉ sau 10-14 ngày.
             </p>
-            <Link to="/examination/eligibility">
-              <AppButton variant="outline" size="sm" fullWidth icon={<Icons.CheckCircle size={15} />}>
-                Kiểm tra điều kiện
-              </AppButton>
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* Ranh giới các Module Nghiệp vụ */}
-      <section className={styles.modulesSection} aria-label="Phân hệ chức năng chính">
-        <div className={styles.modulesHeader}>
-          <h3 className={styles.modulesTitle}>
-            Phân hệ chức năng chính (Modular Monolith)
-          </h3>
-          <p className={styles.modulesSubtitle}>
-            Kiến trúc phân tầng độc lập, giao tiếp qua API RESTful và tuân thủ các quy tắc nghiệp vụ nghiêm ngặt
+      {/* ========================================================================
+          6. ĐÁNH GIÁ CỦA HỌC VIÊN & CAM KẾT CHẤT LƯỢNG (TESTIMONIALS)
+          ======================================================================== */}
+      <section aria-label="Đánh giá học viên và cam kết">
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionBadge}>
+            <Icons.Star size={14} /> Trải nghiệm thực tế
+          </span>
+          <h2 className={styles.sectionTitle}>Học viên nói gì về chúng tôi?</h2>
+          <p className={styles.sectionSubtitle}>
+            Hàng ngàn học viên đã vượt qua kỳ sát hạch tự tin nhờ phương pháp học tập thông minh và đội ngũ giáo viên tận tâm.
           </p>
         </div>
 
-        <div className={styles.moduleGrid}>
-          <Link to="/courses" className={styles.moduleCard}>
-            <div className={styles.moduleIcon}>
-              <Icons.BookOpen size={24} />
+        <div className={styles.testimonialsGrid}>
+          <div className={styles.testimonialCard}>
+            <div className={styles.testimonialStars}>
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
             </div>
-            <div className={styles.moduleInfo}>
-              <h4>Đào tạo Lý thuyết (Learning)</h4>
-              <p>Khóa học lý thuyết, bài giảng điện tử và ngân hàng 600 câu hỏi trắc nghiệm Cục Đường bộ.</p>
+            <p className={styles.testimonialQuote}>
+              "Hệ thống ôn thi 600 câu trên web quá tiện lợi! Nhờ thuật toán gợi ý ôn lại câu sai mà mình không hề bị nhầm lẫn
+              60 câu điểm liệt. Đi thi lý thuyết đạt 35/35 điểm ngay lần đầu."
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.authorAvatar}>HM</div>
+              <div className={styles.authorInfo}>
+                <h5>Hoàng Minh</h5>
+                <p>Học viên Hạng B2 — Khóa K45</p>
+              </div>
             </div>
-          </Link>
+          </div>
 
-          <Link to="/student/review" className={styles.moduleCard}>
-            <div className={styles.moduleIcon}>
-              <Icons.RefreshCw size={24} />
+          <div className={styles.testimonialCard}>
+            <div className={styles.testimonialStars}>
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
             </div>
-            <div className={styles.moduleInfo}>
-              <h4>Ôn tập Thông minh (Spaced Repetition)</h4>
-              <p>Củng cố câu sai, 60 câu điểm liệt, thuật toán lặp lại ngắt quãng Leitner 5 hộp tăng phản xạ.</p>
+            <p className={styles.testimonialQuote}>
+              "Nộp hồ sơ online cực kỳ nhanh chóng. Mình bận đi làm cả tuần nên việc đăng ký tài khoản rồi theo dõi lịch học
+              thực hành DAT trên điện thoại rất minh bạch, không sợ thiếu km."
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.authorAvatar}>TL</div>
+              <div className={styles.authorInfo}>
+                <h5>Trần Thị Thùy Linh</h5>
+                <p>Học viên Hạng B1 — Khóa K46</p>
+              </div>
             </div>
-          </Link>
+          </div>
 
-          <Link to="/training/schedules" className={styles.moduleCard}>
-            <div className={styles.moduleIcon}>
-              <Icons.Calendar size={24} />
+          <div className={styles.testimonialCard}>
+            <div className={styles.testimonialStars}>
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
+              <Icons.Star size={16} />
             </div>
-            <div className={styles.moduleInfo}>
-              <h4>Đào tạo Thực hành (Training & DAT)</h4>
-              <p>Phân bổ lịch thực hành, điểm danh giáo viên - học viên và giám sát thiết bị DAT thời gian thực.</p>
+            <p className={styles.testimonialQuote}>
+              "Xe tập lái mới, thầy giáo dạy sa hình dốc cầu và lùi chuồng rất kỹ, không hề gắt gỏng. Học phí trọn gói minh
+              bạch từ đầu, không phát sinh bất kỳ khoản phí ngoài nào."
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.authorAvatar}>VT</div>
+              <div className={styles.authorInfo}>
+                <h5>Vũ Đình Thắng</h5>
+                <p>Học viên Hạng C — Khóa K43</p>
+              </div>
             </div>
-          </Link>
+          </div>
+        </div>
 
-          <Link to="/examination/sessions" className={styles.moduleCard}>
-            <div className={styles.moduleIcon}>
-              <Icons.Award size={24} />
+        {/* Cam kết 3 Không */}
+        <div style={{ marginTop: 'var(--space-xl)' }}>
+          <div className={styles.commitmentCard}>
+            <div className={styles.commitmentItem}>
+              <Icons.CheckCircle size={22} className={styles.commitmentIcon} />
+              <span>KHÔNG PHÁT SINH CHI PHÍ ẨN</span>
             </div>
-            <div className={styles.moduleInfo}>
-              <h4>Quản lý Kỳ Sát hạch (Examination)</h4>
-              <p>Xét duyệt danh sách dự thi, lập hội đồng sát hạch và biên bản chấm điểm 4 nội dung thi.</p>
+            <div className={styles.commitmentItem}>
+              <Icons.CheckCircle size={22} className={styles.commitmentIcon} />
+              <span>KHÔNG CẮT BỚT GIỜ & KM THỰC HÀNH DAT</span>
             </div>
-          </Link>
-
-          <Link to="/finance/tuition" className={styles.moduleCard}>
-            <div className={styles.moduleIcon}>
-              <Icons.CreditCard size={24} />
+            <div className={styles.commitmentItem}>
+              <Icons.CheckCircle size={22} className={styles.commitmentIcon} />
+              <span>BẢO HÀNH ĐÀO TẠO CHO ĐẾN KHI CÓ BẰNG</span>
             </div>
-            <div className={styles.moduleInfo}>
-              <h4>Tài chính & Học phí (Finance)</h4>
-              <p>Tra cứu công nợ học phí, thanh toán an toàn chống trùng lặp (Idempotency Key) và xuất hóa đơn.</p>
-            </div>
-          </Link>
-
-          <Link to="/fleet" className={styles.moduleCard}>
-            <div className={styles.moduleIcon}>
-              <Icons.Car size={24} />
-            </div>
-            <div className={styles.moduleInfo}>
-              <h4>Quản lý Đội xe tập lái (Fleet)</h4>
-              <p>Theo dõi thời hạn đăng kiểm an toàn kỹ thuật (FLT-001) và lịch bảo dưỡng xe tập lái.</p>
-            </div>
-          </Link>
-
-          <Link to="/audit-logs" className={styles.moduleCard}>
-            <div className={styles.moduleIcon}>
-              <Icons.ShieldCheck size={24} />
-            </div>
-            <div className={styles.moduleInfo}>
-              <h4>Kiểm toán & Báo cáo (Audit & Reporting)</h4>
-              <p>Truy vết mọi thao tác duyệt, sửa điểm, hủy hồ sơ với bằng chứng nhật ký bất biến (REP-001).</p>
-            </div>
-          </Link>
+          </div>
         </div>
       </section>
 
-      {/* System Health Check Status */}
-      <section className={styles.healthCard} aria-label="Tình trạng hệ thống">
-        <div className={styles.healthHeader}>
-          <div className={styles.healthTitleGroup}>
-            <div className={styles.healthIconWrapper}>
-              <Icons.Server size={20} />
-            </div>
-            <div>
-              <h4 className={styles.healthTitle}>Tình trạng kết nối máy chủ Backend</h4>
-              <span className={styles.healthSubtitle}>
-                Truy vấn tự động endpoint <code>/api/v1/health</code>
-              </span>
-            </div>
-          </div>
-          <AppButton
-            variant="outline"
-            size="sm"
-            onClick={checkHealthStatus}
-            loading={loadingHealth}
-            icon={<Icons.RefreshCw size={14} />}
-          >
-            Làm mới kết nối
-          </AppButton>
+      {/* ========================================================================
+          7. FINAL CONVERSION BANNER (KÊU GỌI HÀNH ĐỘNG CUỐI TRANG)
+          ======================================================================== */}
+      <section className={styles.ctaBanner} aria-label="Kêu gọi đăng ký và đăng nhập">
+        <h2 className={styles.ctaBannerTitle}>
+          Sẵn sàng làm chủ tay lái và chinh phục Giấy phép lái xe ngay hôm nay?
+        </h2>
+        <p className={styles.ctaBannerDesc}>
+          Chỉ mất 2 phút để tạo tài khoản trực tuyến. Bắt đầu ngay lộ trình đào tạo chuẩn Cục Đường bộ với học phí ưu đãi
+          và hỗ trợ nhiệt tình từ ban tuyển sinh.
+        </p>
+        <div className={styles.ctaBannerActions}>
+          <Link to="/register">
+            <AppButton
+              variant="success"
+              size="lg"
+              className={styles.primaryCtaBtn}
+              icon={<Icons.Plus size={18} />}
+            >
+              Đăng Ký Tài Khoản Học Viên Mới
+            </AppButton>
+          </Link>
+          <Link to="/login">
+            <AppButton
+              variant="outline"
+              size="lg"
+              className={styles.secondaryCtaBtn}
+              icon={<Icons.User size={18} />}
+            >
+              Đăng Nhập Tài Khoản
+            </AppButton>
+          </Link>
         </div>
-
-        {healthError ? (
-          <Alert
-            type="danger"
-            title="Lỗi kết nối Backend"
-            message={`${healthError}. Vui lòng kiểm tra container backend gplx-backend đang chạy ở cổng 8088.`}
-          />
-        ) : health ? (
-          <div className={styles.healthStatusBody}>
-            <div className={styles.healthStatusMain}>
-              <StatusBadge variant="success" label="DỊCH VỤ HOẠT ĐỘNG TỐT" />
-              <span className={styles.healthAppName}>
-                <strong>{health.application}</strong> — {health.framework || 'Spring Boot 4.1.1 (Java 21)'}
-              </span>
-            </div>
-            <span className={styles.healthTimestamp}>
-              Cập nhật: {health.timestamp}
-            </span>
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '1rem' }}>
-            <LoadingSpinner size="sm" text="Đang kiểm tra kết nối máy chủ..." />
-          </div>
-        )}
       </section>
     </div>
   );
