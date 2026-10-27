@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../features/auth/AuthContext';
+import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import MainLayout from '../layouts/MainLayout';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
@@ -26,25 +27,144 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route element={<MainLayout />}>
+          {/* Public Routes: Trang chủ quảng cáo & Đăng nhập / Đăng ký */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/admissions/new" element={<SubmitApplicationPage />} />
-          <Route path="/my-applications" element={<MyApplicationsPage />} />
-          <Route path="/admin/admissions" element={<ApplicationManagementPage />} />
-          <Route path="/courses" element={<CoursesPage />} />
-          <Route path="/theory-exam" element={<TheoryExamPage />} />
-          <Route path="/theory-review" element={<TheoryReviewPage />} />
-          <Route path="/student/review" element={<TheoryReviewPage />} />
-          <Route path="/training/schedules" element={<TrainingSchedulePage />} />
-          <Route path="/examination/eligibility" element={<EligibilityCheckPage />} />
-          <Route path="/examination/sessions" element={<ExamSessionsPage />} />
-          <Route path="/examination/grading" element={<ExamGradingPage />} />
-          <Route path="/examination/my-results" element={<MyExamResultsPage />} />
-          <Route path="/finance/tuition" element={<TuitionPaymentPage />} />
-          <Route path="/fleet" element={<FleetManagementPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/audit-logs" element={<AuditLogPage />} />
+
+          {/* Protected Routes: Chỉ khi đăng nhập mới được truy cập các phân hệ module */}
+          <Route
+            path="/courses"
+            element={
+              <ProtectedRoute>
+                <CoursesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/theory-exam"
+            element={
+              <ProtectedRoute>
+                <TheoryExamPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/theory-review"
+            element={
+              <ProtectedRoute>
+                <TheoryReviewPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/review"
+            element={
+              <ProtectedRoute>
+                <TheoryReviewPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/training/schedules"
+            element={
+              <ProtectedRoute>
+                <TrainingSchedulePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fleet"
+            element={
+              <ProtectedRoute>
+                <FleetManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admissions/new"
+            element={
+              <ProtectedRoute>
+                <SubmitApplicationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-applications"
+            element={
+              <ProtectedRoute>
+                <MyApplicationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/tuition"
+            element={
+              <ProtectedRoute>
+                <TuitionPaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/examination/eligibility"
+            element={
+              <ProtectedRoute>
+                <EligibilityCheckPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/examination/sessions"
+            element={
+              <ProtectedRoute>
+                <ExamSessionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/examination/my-results"
+            element={
+              <ProtectedRoute>
+                <MyExamResultsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Phân hệ dành riêng cho Tuyển sinh / Giám khảo / Quản trị viên */}
+          <Route
+            path="/admin/admissions"
+            element={
+              <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER']}>
+                <ApplicationManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/examination/grading"
+            element={
+              <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_MANAGER']}>
+                <ExamGradingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audit-logs"
+            element={
+              <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
+                <AuditLogPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Trang 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

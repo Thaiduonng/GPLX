@@ -23,6 +23,11 @@ Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhậ
   - **Đánh giá học viên thực tế & Cam kết 3 Không:** 3 lời nhận xét chân thực từ cựu học viên tốt nghiệp; cam kết: *Không phát sinh chi phí - Không cắt bớt giờ học DAT - Bảo hành đào tạo đến khi có bằng*.
   - **Banner chuyển đổi cuối trang (Final Conversion Banner):** Lời kêu gọi hành động mạnh mẽ trước chân trang cùng cụm nút Đăng ký / Đăng nhập cỡ lớn.
 
+- **Kiểm Soát Quyền Truy Cập Module & Bảo Vệ Tuyệt Đối Cho Trang Đầu Tiên:**
+  - **Khóa toàn bộ module khi chưa đăng nhập:** Ẩn hoàn toàn nút menu danh mục góc trái (`menuToggleButton`) và các liên kết phân hệ (Khóa học, Thi thử, Ôn tập, Lịch học, Xe tập lái, Sát hạch) trên thanh Header khi người dùng chưa đăng nhập. Khách truy cập ở trang đầu tiên chỉ thấy Trang chủ và cụm nút Đăng ký / Đăng nhập.
+  - **Bảo vệ toàn diện bằng `ProtectedRoute`:** Thiết lập component guard `ProtectedRoute.tsx` bọc toàn bộ 16 routes phân hệ nội bộ (`/courses`, `/theory-exam`, `/theory-review`, `/student/review`, `/training/schedules`, `/fleet`, `/admissions/*`, `/examination/*`, `/finance/*`, `/dashboard`, `/audit-logs`). Mọi nỗ lực truy cập trực tiếp qua thanh URL của trình duyệt khi chưa đăng nhập đều bị chặn và chuyển hướng về `/login`.
+  - **Mở quyền phân hệ sau khi đăng nhập thành công:** Chỉ khi người dùng đăng nhập tài khoản hợp lệ, thanh Header mới kích hoạt các module tương ứng, nút menu Drawer góc trái xuất hiện và thanh Workspace Bar phân bổ theo đúng vai trò học viên / tuyển sinh / giám khảo / quản trị viên.
+
 ## [2.0.0] — 2026-10-26
 
 ### Triển Khai Phân Hệ Ôn Tập GPLX — Spaced Repetition & Củng Cố Kiến Thức (Full-Stack)

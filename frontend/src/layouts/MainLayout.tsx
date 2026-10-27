@@ -64,18 +64,20 @@ export default function MainLayout() {
         <div className={styles.headerContainer}>
           {/* GÓC TRÁI: Thanh Menu, Logo thương hiệu và Điều hướng chính */}
           <div className={styles.leftSection}>
-            {/* Nút bật/mở Thanh Menu góc trái */}
-            <button
-              type="button"
-              className={styles.menuToggleButton}
-              onClick={() => setLeftDrawerOpen(!leftDrawerOpen)}
-              aria-label={leftDrawerOpen ? 'Đóng menu' : 'Mở thanh menu hệ thống'}
-              aria-expanded={leftDrawerOpen}
-              title="Mở menu danh mục phân hệ"
-            >
-              <Icons.Menu size={22} />
-              <span className={styles.menuToggleLabel}>Danh mục</span>
-            </button>
+            {/* Nút bật/mở Thanh Menu góc trái - CHỈ HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP */}
+            {isAuthenticated && (
+              <button
+                type="button"
+                className={styles.menuToggleButton}
+                onClick={() => setLeftDrawerOpen(!leftDrawerOpen)}
+                aria-label={leftDrawerOpen ? 'Đóng menu' : 'Mở thanh menu hệ thống'}
+                aria-expanded={leftDrawerOpen}
+                title="Mở menu danh mục phân hệ"
+              >
+                <Icons.Menu size={22} />
+                <span className={styles.menuToggleLabel}>Danh mục</span>
+              </button>
+            )}
 
             {/* Logo Thương Hiệu */}
             <Link to="/" className={styles.brand} aria-label="Trang chủ Hệ thống GPLX">
@@ -96,57 +98,63 @@ export default function MainLayout() {
               >
                 Trang chủ
               </Link>
-              <Link
-                to="/courses"
-                className={`${styles.navLink} ${isActive('/courses') ? styles.active : ''}`}
-              >
-                <Icons.BookOpen size={16} />
-                Khóa học
-              </Link>
-              <Link
-                to="/theory-exam"
-                className={`${styles.navLink} ${isActive('/theory-exam') ? styles.active : ''}`}
-              >
-                <Icons.ClipboardList size={16} />
-                Thi thử 600 câu
-              </Link>
-              <Link
-                to="/theory-review"
-                className={`${styles.navLink} ${isActive('/theory-review') || isActive('/student/review') ? styles.active : ''}`}
-              >
-                <Icons.RefreshCw size={16} />
-                Ôn tập thông minh
-              </Link>
-              <Link
-                to="/training/schedules"
-                className={`${styles.navLink} ${isActive('/training/schedules') ? styles.active : ''}`}
-              >
-                <Icons.Calendar size={16} />
-                Lịch học & DAT
-              </Link>
-              <Link
-                to="/fleet"
-                className={`${styles.navLink} ${isActive('/fleet') ? styles.active : ''}`}
-              >
-                <Icons.Car size={16} />
-                Xe tập lái
-              </Link>
-              <Link
-                to="/examination/sessions"
-                className={`${styles.navLink} ${isActive('/examination/sessions') ? styles.active : ''}`}
-              >
-                <Icons.Award size={16} />
-                Kỳ sát hạch
-              </Link>
-              <a
-                href="http://localhost:8088/swagger-ui/index.html"
-                target="_blank"
-                rel="noreferrer"
-                className={styles.navLink}
-                title="Tài liệu OpenAPI / Swagger API"
-              >
-                API <Icons.ExternalLink size={12} />
-              </a>
+
+              {/* CHỈ KHI ĐÃ ĐĂNG NHẬP MỚI MỞ CÁC PHÂN HỆ MODULE */}
+              {isAuthenticated && (
+                <>
+                  <Link
+                    to="/courses"
+                    className={`${styles.navLink} ${isActive('/courses') ? styles.active : ''}`}
+                  >
+                    <Icons.BookOpen size={16} />
+                    Khóa học
+                  </Link>
+                  <Link
+                    to="/theory-exam"
+                    className={`${styles.navLink} ${isActive('/theory-exam') ? styles.active : ''}`}
+                  >
+                    <Icons.ClipboardList size={16} />
+                    Thi thử 600 câu
+                  </Link>
+                  <Link
+                    to="/theory-review"
+                    className={`${styles.navLink} ${isActive('/theory-review') || isActive('/student/review') ? styles.active : ''}`}
+                  >
+                    <Icons.RefreshCw size={16} />
+                    Ôn tập thông minh
+                  </Link>
+                  <Link
+                    to="/training/schedules"
+                    className={`${styles.navLink} ${isActive('/training/schedules') ? styles.active : ''}`}
+                  >
+                    <Icons.Calendar size={16} />
+                    Lịch học & DAT
+                  </Link>
+                  <Link
+                    to="/fleet"
+                    className={`${styles.navLink} ${isActive('/fleet') ? styles.active : ''}`}
+                  >
+                    <Icons.Car size={16} />
+                    Xe tập lái
+                  </Link>
+                  <Link
+                    to="/examination/sessions"
+                    className={`${styles.navLink} ${isActive('/examination/sessions') ? styles.active : ''}`}
+                  >
+                    <Icons.Award size={16} />
+                    Kỳ sát hạch
+                  </Link>
+                  <a
+                    href="http://localhost:8088/swagger-ui/index.html"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.navLink}
+                    title="Tài liệu OpenAPI / Swagger API"
+                  >
+                    API <Icons.ExternalLink size={12} />
+                  </a>
+                </>
+              )}
             </nav>
           </div>
 
@@ -293,8 +301,8 @@ export default function MainLayout() {
         </section>
       )}
 
-      {/* THANH MENU GÓC TRÁI (LEFT SIDEBAR DRAWER) */}
-      {leftDrawerOpen && (
+      {/* THANH MENU GÓC TRÁI (LEFT SIDEBAR DRAWER - CHỈ KHI ĐĂNG NHẬP) */}
+      {isAuthenticated && leftDrawerOpen && (
         <div className={styles.drawerBackdrop} onClick={() => setLeftDrawerOpen(false)}>
           <aside
             className={styles.leftDrawer}
