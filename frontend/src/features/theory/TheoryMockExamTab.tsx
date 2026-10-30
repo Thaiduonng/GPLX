@@ -1,3 +1,4 @@
+import { CATEGORY_CONFIGS } from '../../components/home/categoryConfig';
 import React, { useState, useEffect, useCallback } from 'react';
 import { learningService } from '../../services/learningService';
 import type {
@@ -17,18 +18,16 @@ interface ExamRuleConfig {
   desc: string;
 }
 
-const EXAM_RULES: ExamRuleConfig[] = [
-  { category: 'A1', name: 'Hạng A1 (Mô tô 2 bánh dung tích xi-lanh đến 125cm³)', questions: 25, timeMinutes: 19, passScore: 21, desc: 'Đạt từ 21/25 câu, không sai câu điểm liệt' },
-  { category: 'A2', name: 'Hạng A2 (Mô tô 2 bánh dung tích xi-lanh trên 125cm³)', questions: 25, timeMinutes: 19, passScore: 23, desc: 'Đạt từ 23/25 câu, không sai câu điểm liệt' },
-  { category: 'B1', name: 'Hạng B1 (Ô tô số tự động chở người đến 9 chỗ)', questions: 30, timeMinutes: 20, passScore: 27, desc: 'Đạt từ 27/30 câu, không sai câu điểm liệt' },
-  { category: 'B',  name: 'Hạng B / B2 (Ô tô chở người đến 9 chỗ, xe tải dưới 3.5 tấn)', questions: 35, timeMinutes: 22, passScore: 32, desc: 'Đạt từ 32/35 câu, không sai câu điểm liệt' },
-  { category: 'C',  name: 'Hạng C (Ô tô tải, đầu kéo từ 3.5 tấn trở lên)', questions: 40, timeMinutes: 24, passScore: 36, desc: 'Đạt từ 36/40 câu, không sai câu điểm liệt' },
-];
+const EXAM_RULES: ExamRuleConfig[] = Object.values(CATEGORY_CONFIGS).map(c => ({
+  category: c.code, name: c.fullName, questions: c.questionsPerExam,
+  timeMinutes: c.timeMinutes, passScore: Number(c.passingScore.split('/')[0]),
+  desc: `Đạt từ ${c.passingScore} câu, không sai câu điểm liệt`,
+}));
 
 export const TheoryMockExamTab: React.FC = () => {
   // Mode: 'config' (chuẩn bị thi), 'exam' (đang thi), 'result' (xem kết quả bài thi)
   const [viewTab, setViewTab] = useState<'create' | 'history'>('create');
-  const [selectedCategory, setSelectedCategory] = useState<string>('B1');
+  const [selectedCategory, setSelectedCategory] = useState<string>('B');
   const [session, setSession] = useState<MockExamSession | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
@@ -238,14 +237,7 @@ export const TheoryMockExamTab: React.FC = () => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const activeRule: ExamRuleConfig = EXAM_RULES.find((r) => r.category === selectedCategory) || {
-    category: 'B1',
-    name: 'Hạng B1 (Ô tô số tự động chở người đến 9 chỗ)',
-    questions: 30,
-    timeMinutes: 20,
-    passScore: 27,
-    desc: 'Đạt từ 27/30 câu, không sai câu điểm liệt',
-  };
+  const activeRule: ExamRuleConfig = EXAM_RULES.find((r) => r.category === selectedCategory) ?? EXAM_RULES[0]!;
   const currentQuestion: ExamQuestion | undefined = session?.questions[currentIndex];
 
   const answeredCount = Object.keys(userAnswers).length;

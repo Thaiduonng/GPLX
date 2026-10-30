@@ -27,6 +27,12 @@ public class TheoryTopic extends BaseEntity {
     @Column(name = "paralysis_questions", nullable = false)
     private int paralysisQuestions = 0;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+
     public TheoryTopic() {
     }
 

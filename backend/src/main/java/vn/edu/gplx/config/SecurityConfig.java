@@ -16,9 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import vn.edu.gplx.modules.identity.application.JwtAuthenticationEntryPoint;
 import vn.edu.gplx.modules.identity.application.JwtAuthenticationFilter;
 
-/**
- * Spring Security 7 Configuration using modern Lambda DSL.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -46,6 +43,8 @@ public class SecurityConfig {
                 // Public Health and Actuator endpoints
                 .requestMatchers("/api/v1/health/**").permitAll()
                 .requestMatchers("/actuator/health/**").permitAll()
+                // Public Admissions, Inquiries & Applications Tracking
+                .requestMatchers("/api/v1/public/**").permitAll()
                 // Public Authentication endpoints (login, register)
                 .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
                 // Public Catalogs: License Categories, Courses, Theory questions, Examination sessions, Fleet

@@ -128,3 +128,12 @@ cd backend
 
 - Dự án phục vụ mục đích nghiên cứu và bảo vệ đồ án tốt nghiệp đại học.
 - Toàn bộ quy tắc về đào tạo và sát hạch lái xe tuân thủ pháp luật giao thông đường bộ Việt Nam.
+
+
+## MVP sa hình ô tô 3D
+
+Module 3D tại `/student/driving-simulation`: xe B/C1/C/D1/D2/D, ba bài đầu, physics cơ bản, camera/HUD, phát hiện lỗi, chấm điểm từ bộ cấu hình có nguồn/phiên bản, lưu/phát lại cục bộ. Bản 2D giữ ở `/student/driving-simulation/2d`. Chỉ phản hồi phạm vi MVP, không phải kết quả sát hạch chính thức.
+
+- [Cài đặt, chạy thử và kiểm tra](docs/training/simulation3d-mvp.md)
+- [Mã nguồn độc lập ZIP](artifacts/simulation3d-mvp-source.zip) — giải nén, `npm ci`, `npm run dev`, mở cổng 5173; không cần backend.
+- [Kiến trúc và giới hạn](docs/architecture/simulation3d-mvp.md)

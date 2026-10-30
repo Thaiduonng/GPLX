@@ -1,0 +1,8 @@
+.dialog { position: fixed; inset: 0 auto 0 0; margin: 0; padding: 0; width: min(390px, 100%); max-width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; background: var(--color-card-solid); color: var(--color-text-main); box-shadow: 10px 0 45px #0004; }
+.dialog::backdrop { background: #0f172a99; }
+.content { min-height: 100%; }.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px; border-bottom: 1px solid var(--color-border-subtle); position: sticky; top: 0; background: var(--color-card-solid); z-index: 1; }
+.header h2 { font-size: 19px; margin: 0; }.header p { color: var(--color-text-secondary); font-size: 13px; margin: 6px 0 0; }
+.header button { display: grid; place-items: center; min-width: 44px; min-height: 44px; background: transparent; border: 1px solid var(--color-border-subtle); border-radius: 10px; color: inherit; cursor: pointer; }
+.groups { padding: 8px 16px 24px; }.groups section { padding: 12px 0; border-bottom: 1px solid var(--color-border-subtle); }.groups h3 { color: var(--color-text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin: 8px 10px; }
+.link { display: flex; align-items: center; gap: 10px; min-height: 44px; border-radius: 8px; padding: 10px 12px; color: inherit; text-decoration: none; font-size: 14px; }.link:hover { background: var(--color-surface-hover); }.link[aria-current='page'] { background: var(--color-primary-light); color: var(--color-primary); font-weight: 700; }.simulation { border: 1px solid var(--color-primary); margin-bottom: 6px; font-weight: 700; }
+.dialog :focus-visible { outline: 3px solid var(--color-ring); outline-offset: 2px; }

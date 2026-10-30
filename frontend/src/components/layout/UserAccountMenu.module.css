@@ -317,3 +317,7 @@
 .miniTable tr:hover td {
   background-color: #f8fafc;
 }
+
+/* Account controls share the light/dark palette of the header. */
+.userTrigger, .userName { color: var(--color-text-main); }.roleBadge, .chevron { color: var(--color-text-secondary); }.userTrigger { min-height: 44px; border-color: var(--color-border-subtle); }.userTrigger:focus-visible { outline-color: var(--color-ring); }.roleBadge { max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media(max-width: 640px) { .userInfo { display: none; }.userTrigger { padding: 4px; }.chevron { display: none; }.dropdown { width: min(300px, calc(100vw - 24px)); } }

@@ -83,9 +83,6 @@ public class TheoryPracticeServiceImpl implements TheoryPracticeService {
             case "PARALYSIS":
                 String pCat = request.categoryCode() != null ? request.categoryCode() : "ALL";
                 candidateQuestions = questionRepository.findParalysisForLicenseCategory(pCat);
-                if (candidateQuestions.isEmpty()) {
-                    candidateQuestions = questionRepository.findByIsParalysisTrueOrderByQuestionNumberAsc();
-                }
                 break;
 
             case "BOOKMARKED":
@@ -123,6 +120,7 @@ public class TheoryPracticeServiceImpl implements TheoryPracticeService {
                 break;
         }
 
+        candidateQuestions = candidateQuestions.stream().filter(q -> q.isActive() && q.appliesTo(request.categoryCode())).toList();
         if (candidateQuestions.isEmpty()) {
             throw new BadRequestException("Không tìm thấy câu hỏi phù hợp với chế độ luyện tập: " + mode);
         }
@@ -157,7 +155,7 @@ public class TheoryPracticeServiceImpl implements TheoryPracticeService {
         if ("TOPIC".equals(mode) && session.getTopic() != null) {
             questions = questionRepository.findByTopicIdOrderByQuestionNumberAsc(session.getTopic().getId());
         } else if ("PARALYSIS".equals(mode)) {
-            questions = questionRepository.findByIsParalysisTrueOrderByQuestionNumberAsc();
+            questions = questionRepository.findParalysisForLicenseCategory(session.getCategoryCode() != null ? session.getCategoryCode() : "ALL");
         } else if ("BOOKMARKED".equals(mode)) {
             questions = bookmarkRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(BookmarkedQuestion::getQuestion).toList();
         } else if ("INCORRECT".equals(mode)) {
@@ -170,7 +168,7 @@ public class TheoryPracticeServiceImpl implements TheoryPracticeService {
 
         Set<Long> bookmarkedIds = new HashSet<>(bookmarkRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(b -> b.getQuestion().getId()).toList());
 
-        return questions.stream().map(q -> {
+        return questions.stream().filter(q -> q.isActive() && q.appliesTo(session.getCategoryCode())).map(q -> {
             List<StudyAnswerOptionResponse> answers = q.getAnswers().stream()
                     .map(a -> new StudyAnswerOptionResponse(a.getId(), a.getAnswerText(), a.getOrderIndex(), a.isCorrect()))
                     .toList();
@@ -183,7 +181,7 @@ public class TheoryPracticeServiceImpl implements TheoryPracticeService {
                     q.getContent(),
                     q.getImageUrl(),
                     q.getExplanation(),
-                    q.isParalysis(),
+                    q.isParalysisForCategory(session.getCategoryCode()),
                     q.getLegalReference(),
                     bookmarkedIds.contains(q.getId()),
                     answers

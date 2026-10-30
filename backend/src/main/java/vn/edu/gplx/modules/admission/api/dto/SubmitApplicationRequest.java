@@ -17,6 +17,8 @@ public record SubmitApplicationRequest(
         @NotNull(message = "Hạng GPLX đăng ký không được để trống")
         Long categoryId,
 
+        Long courseId,
+
         @NotBlank(message = "Họ và tên không được để trống")
         @Size(max = 100, message = "Họ và tên không quá 100 ký tự")
         String fullName,
@@ -44,7 +46,18 @@ public record SubmitApplicationRequest(
         @Size(max = 255, message = "Địa chỉ không quá 255 ký tự")
         String address,
 
+        String preferredSchedule,
+
+        String trainingLocation,
+
+        boolean consentDataProcessing,
+
         @NotEmpty(message = "Hồ sơ bắt buộc phải đính kèm ít nhất một tài liệu chứng minh")
         List<@Valid DocumentUploadItem> documents
 ) {
+    // Constructor tương thích ngược cho các unit test cũ
+    public SubmitApplicationRequest(Long categoryId, String fullName, String nationalId, LocalDate dateOfBirth,
+                                    Gender gender, String phone, String email, String address, List<DocumentUploadItem> documents) {
+        this(categoryId, null, fullName, nationalId, dateOfBirth, gender, phone, email, address, "WEEKEND", null, true, documents);
+    }
 }

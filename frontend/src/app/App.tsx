@@ -1,3 +1,5 @@
+import LicenseCategoriesPage from '../pages/LicenseCategoriesPage';
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../features/auth/AuthContext';
 import { ProtectedRoute } from '../features/auth/ProtectedRoute';
@@ -10,6 +12,11 @@ import SubmitApplicationPage from '../pages/SubmitApplicationPage';
 import MyApplicationsPage from '../pages/MyApplicationsPage';
 import ApplicationManagementPage from '../pages/ApplicationManagementPage';
 import CoursesPage from '../pages/CoursesPage';
+import CourseDetailPage from '../pages/CourseDetailPage';
+import ApplyPage from '../pages/ApplyPage';
+import ApplicationStatusPage from '../pages/ApplicationStatusPage';
+import CrmLeadsPage from '../pages/CrmLeadsPage';
+import AdmissionDashboardPage from '../pages/AdmissionDashboardPage';
 import TheoryExamPage from '../pages/TheoryExamPage';
 import TheoryReviewPage from '../pages/TheoryReviewPage';
 import TrainingSchedulePage from '../pages/TrainingSchedulePage';
@@ -21,23 +28,37 @@ import { TuitionPaymentPage } from '../pages/TuitionPaymentPage';
 import { FleetManagementPage } from '../pages/FleetManagementPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { AuditLogPage } from '../pages/AuditLogPage';
+import RawVehicleStudentPage from '../pages/RawVehicleStudentPage';
+import RawVehicleInstructorPage from '../pages/RawVehicleInstructorPage';
+import RawVehicleManagerPage from '../pages/RawVehicleManagerPage';
+import RoadSignsPage from '../pages/RoadSignsPage';
+import ExamTipsPage from '../pages/ExamTipsPage';
+import DrivingSimulationPage from '../pages/DrivingSimulationPage';
+const DrivingSimulation3DPage = lazy(() => import('../pages/DrivingSimulation3DPage'));
+import { TheoryAdminConfigTab } from '../features/theory/TheoryAdminConfigTab';
 
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route element={<MainLayout />}>
-          {/* Public Routes: Trang chủ quảng cáo & Đăng nhập / Đăng ký */}
+          {/* Public Routes: Trang chủ, Khóa học, Nộp hồ sơ trực tuyến & Tra cứu hồ sơ */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/license-categories" element={<LicenseCategoriesPage />} />
+          <Route path="/courses/:slug" element={<CourseDetailPage />} />
+          <Route path="/apply" element={<ApplyPage />} />
+          <Route path="/application-status" element={<ApplicationStatusPage />} />
+          <Route path="/apply/track" element={<ApplicationStatusPage />} />
 
-          {/* Protected Routes: Chỉ khi đăng nhập mới được truy cập các phân hệ module */}
+          {/* Protected Routes: Học tập & Ôn thi lý thuyết */}
           <Route
-            path="/courses"
+            path="/theory"
             element={
               <ProtectedRoute>
-                <CoursesPage />
+                <TheoryExamPage />
               </ProtectedRoute>
             }
           />
@@ -66,6 +87,68 @@ export default function App() {
             }
           />
           <Route
+            path="/road-signs"
+            element={
+              <ProtectedRoute>
+                <RoadSignsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tips"
+            element={
+              <ProtectedRoute>
+                <ExamTipsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/student/driving-simulation" element={<ProtectedRoute><Suspense fallback={<p role="status" style={{ padding: 32 }}>Đang tải mô phỏng 3D…</p>}><DrivingSimulation3DPage /></Suspense></ProtectedRoute>} />
+          <Route path="/student/driving-simulation/2d" element={<ProtectedRoute><DrivingSimulationPage /></ProtectedRoute>} />
+
+          {/* Module Đào tạo Xe Thô (Raw Vehicle Training) */}
+          <Route
+            path="/student/raw-vehicle"
+            element={
+              <ProtectedRoute>
+                <RawVehicleStudentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/raw_vehicle"
+            element={
+              <ProtectedRoute>
+                <RawVehicleStudentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/raw vehicle"
+            element={
+              <ProtectedRoute>
+                <RawVehicleStudentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/instructor/raw-vehicle"
+            element={
+              <ProtectedRoute>
+                <RawVehicleInstructorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/training/raw-vehicle"
+            element={
+              <ProtectedRoute>
+                <RawVehicleManagerPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/training/schedules"
             element={
               <ProtectedRoute>
@@ -78,6 +161,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <FleetManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/submit-application"
+            element={
+              <ProtectedRoute>
+                <SubmitApplicationPage />
               </ProtectedRoute>
             }
           />
@@ -130,19 +221,47 @@ export default function App() {
             }
           />
 
-          {/* Phân hệ dành riêng cho Tuyển sinh / Giám khảo / Quản trị viên */}
+          {/* Phân hệ Tuyển sinh, CRM Leads & Dashboard dành cho Cán bộ / Tư vấn / Quản trị viên */}
           <Route
             path="/admin/admissions"
             element={
-              <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER']}>
+              <ProtectedRoute>
                 <ApplicationManagementPage />
               </ProtectedRoute>
             }
           />
           <Route
+            path="/admin/admissions/applications"
+            element={
+              <ProtectedRoute>
+                <ApplicationManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/admissions/leads"
+            element={
+              <ProtectedRoute>
+                <CrmLeadsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/admissions/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdmissionDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/admin/theory" element={<ProtectedRoute><div style={{ maxWidth: 1280, margin: '0 auto', padding: 24 }}><h1>Ngân hàng câu hỏi & cấu hình đề</h1><TheoryAdminConfigTab /></div></ProtectedRoute>} />
+
+          {/* Sát hạch & Giám khảo */}
+          <Route
             path="/examination/grading"
             element={
-              <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_EXAMINER', 'ROLE_MANAGER']}>
+              <ProtectedRoute>
                 <ExamGradingPage />
               </ProtectedRoute>
             }
@@ -150,7 +269,7 @@ export default function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
+              <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -158,7 +277,7 @@ export default function App() {
           <Route
             path="/audit-logs"
             element={
-              <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
+              <ProtectedRoute>
                 <AuditLogPage />
               </ProtectedRoute>
             }

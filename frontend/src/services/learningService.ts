@@ -30,6 +30,16 @@ export const learningService = {
     return response.data.data;
   },
 
+  async getFeaturedCourses(): Promise<Course[]> {
+    const response = await apiClient.get<ApiResponse<Course[]>>('/courses/featured');
+    return response.data.data;
+  },
+
+  async getCourseBySlug(slug: string): Promise<Course> {
+    const response = await apiClient.get<ApiResponse<Course>>(`/courses/slug/${slug}`);
+    return response.data.data;
+  },
+
   async getCourseById(id: number): Promise<Course> {
     const response = await apiClient.get<ApiResponse<Course>>(`/courses/${id}`);
     return response.data.data;

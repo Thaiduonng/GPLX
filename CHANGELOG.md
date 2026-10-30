@@ -2,6 +2,216 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Kiểm chứng trước khi đẩy mã nguồn — 2026-10-30
+
+- Backend: `mvnw.cmd test -B` đạt 96 tests, không lỗi hoặc bỏ qua.
+- Frontend: 58 tests điều hướng/mô phỏng và 4 tests dữ liệu PDF đạt; production build đạt trong container Node 20 với `npm ci` từ lockfile. Vite còn cảnh báo bundle lớn hơn 500 kB.
+- Giới hạn đã biết: cài database trắng còn lỗi khóa ngoại seed CRM tại V14 (INFRA-SEED-14); kiểm thử backend dùng H2 không xác nhận chuỗi migration MySQL cài mới.
+
+## [2.8.1] — 2026-10-28
+
+### Tái Thiết Kế Bố Cục Header & Chuẩn Hóa CSS Module Trang Nộp Hồ Sơ và Tra Cứu Hồ Sơ
+
+- **Tái Cấu Trúc Bố Cục Header (`Navbar.tsx` & `Navbar.module.css`):**
+  - Khắc phục tình trạng phình to và rối mắt ở thanh menu giữa: Tách biệt nút *"Nộp hồ sơ trực tuyến"* thành Action CTA chính đặt tại cụm bên phải với thiết kế capsule gradient Soft Glassmorphism, đèn LED nhấp nháy thu hút sự chú ý.
+  - Tinh gọn menu điều hướng trung tâm: Bố trí cân đối 5 phân mục chính (*Trang chủ*, *Khóa đào tạo*, *Ôn thi 600 câu*, *Biển báo & Mẹo*, *Tra cứu hồ sơ*), loại bỏ các badge gây xao nhãng.
+  - Bổ sung huy hiệu phân hạng *"Chuẩn CSGT 2026"* dưới logo thương hiệu `Ôn Thi GPLX`.
+- **Khắc Phục Toàn Diện & Chuẩn Hóa CSS Module Cho Trang Nộp Hồ Sơ (`ApplyPage.tsx` & `ApplyPage.module.css`):**
+  - Chuyển đổi toàn bộ từ mã Tailwind sang CSS Module bản địa với đầy đủ Design Tokens (`tokens.css`, `global.css`), chấm dứt triệt để lỗi vỡ giao diện (mất style).
+  - Stepper quy trình 4 bước (`Khóa học & Ca học` ➔ `Thông tin cá nhân` ➔ `Tải ảnh hồ sơ` ➔ `Xác nhận & Cam kết`):
+    - Thẻ chọn Hạng GPLX dạng Card tương tác (A1, A, B, B1, C) với học phí, mô tả và điều kiện độ tuổi.
+    - Bộ tính tuổi học viên thời gian thực dựa trên ngày sinh: Tự động cảnh báo đỏ nếu chưa đủ tuổi hoặc bật tích xanh nếu đủ điều kiện quy định.
+    - Khu vực tải 4 tài liệu số hóa kèm quy cách ảnh chụp và thông báo dung lượng.
+    - Màn hình thông báo Nộp hồ sơ thành công chuyên nghiệp: Khối hiển thị Mã hồ sơ và Mã bảo mật tra cứu (Tracking Token) kèm nút sao chép 1 chạm và chuyển hướng tra cứu tức thì.
+- **Tái Thiết Kế Trang Tra Cứu Trạng Thái Hồ Sơ (`ApplicationStatusPage.tsx` & `ApplicationStatusPage.module.css`):**
+  - Form tra cứu kép thông minh: Hỗ trợ xác thực bằng Số điện thoại hoặc Mã bảo mật (Tracking Token).
+  - Dòng thời gian Stepper trực quan 5 chặng tiếp nhận, thẩm định và xếp lớp.
+  - Thẻ thông tin học viên tuân thủ Nghị định 13/2023/NĐ-CP (che mờ dữ liệu cá nhân nhạy cảm).
+  - Phân hệ nộp bổ sung hồ sơ trực tuyến: Tự động hiển thị khi hồ sơ mang trạng thái `SUPPLEMENT_REQUIRED`, cho phép học viên tải bổ sung ảnh ngay tại trang không cần di chuyển đến văn phòng.
+- **Đóng Gói & Vận Hành Container:**
+  - TypeScript biên dịch không cảnh báo lỗi (`tsc -b && vite build`).
+  - Container Docker `gplx-frontend:3000` chạy ổn định, phản hồi HTTP 200 OK trên mọi tuyến đường (`/`, `/apply`, `/application-status`, `/courses`).
+
+## [2.8.0] — 2026-10-28
+
+### Triển Khai Toàn Diện Phân Hệ Quảng Bá Khóa Học GPLX, Tuyển Sinh và Quản Lý Hồ Sơ Học Viên
+
+- **Kiến Trúc & Cơ Sở Dữ Liệu:**
+  - Bổ sung Flyway migration `V14__create_crm_leads_and_course_marketing_tables.sql`:
+    - Mở rộng bảng `courses`: bổ sung các trường marketing phục vụ tuyển sinh (`slug`, `tuition_fee`, `expected_start_date`, `training_location`, `target_audience`, `curriculum_summary`, `documents_required`, `featured`).
+    - Tạo mới bảng `crm_leads`: lưu trữ khách hàng tiềm năng đăng ký nhận tư vấn, theo dõi nguồn (`HOMEPAGE`, `COURSE_DETAIL`, `CAMPAIGN`, `DIRECT`, `REFERRAL`), kênh liên hệ ưu tiên (`PHONE`, `ZALO`, `EMAIL`), trạng thái xử lý (`NEW`, `CONTACTING`, `CONSULTED`, `FOLLOW_UP`, `CONVERTED`, `NOT_INTERESTED`), cam kết bảo vệ dữ liệu cá nhân Nghị định 13/2023/NĐ-CP (`consent_gdpr`).
+    - Tạo mới bảng `crm_lead_interactions`: nhật ký chăm sóc khách hàng (loại hình liên hệ, ghi chú chi tiết, thời điểm hẹn gọi lại, nhân viên thực hiện).
+    - Mở rộng bảng `admission_applications`: bổ sung `course_id`, `preferred_schedule`, `training_location`, `assigned_staff_id`, `enrolled_class_id`, `enrolled_at`, `tracking_token` tra cứu công khai không cần đăng nhập.
+    - Cập nhật enum `ApplicationStatus`: bổ sung trạng thái `RESUBMITTED` (học viên đã nộp bổ sung giấy tờ) và `ENROLLED` (đã vào lớp học chính thức).
+  - Seed dữ liệu chuẩn: 5 khóa học nổi bật theo phân hạng GPLX mới (A1, A, B, B1, C) và dữ liệu khách hàng tiềm năng mẫu.
+
+- **Backend (Spring Boot 4.1.1 & Java 21):**
+  - **Module CRM Tuyển Sinh (`vn.edu.gplx.modules.crm`):**
+    - Entities: `AdmissionLead`, `LeadInteraction`, enum `LeadStatus`, `LeadSource`, `ContactChannel`, `InteractionType`.
+    - Repositories & Services: `AdmissionLeadRepository`, `LeadInteractionRepository`, `CrmLeadService`, `CrmLeadServiceImpl`.
+    - Thống kê thời gian thực `getDashboardStats()`: tổng số lead, tỷ lệ chuyển đổi lead sang hồ sơ, số lượng theo nguồn, trạng thái hồ sơ, phân bổ hạng GPLX.
+    - REST Controller: `PublicCrmController` (`POST /api/v1/public/admission-inquiries`), `CrmLeadController` (`GET /api/v1/admin/admissions/leads`, `PUT /leads/{id}`, `POST /leads/{id}/interactions`, `POST /leads/{id}/convert`, `GET /admin/admissions/dashboard-stats`).
+  - **Module Tuyển Sinh Mở Rộng (`vn.edu.gplx.modules.admission`):**
+    - REST Controller công khai `PublicAdmissionController`:
+      - `POST /api/v1/public/applications`: nộp đơn đăng ký học lái xe trực tuyến công khai không yêu cầu tài khoản trước, tự động sinh mã hồ sơ chuẩn định dạng `APP-{CATEGORY}-{YYYYMMDD}-{RANDOM}` và `tracking_token` bảo mật.
+      - `POST /api/v1/public/applications/track`: tra cứu hồ sơ công khai an toàn (hỗ trợ xác thực bằng Số điện thoại hoặc Mã bảo mật Tracking Token, che mờ thông tin cá nhân PII theo Nghị định 13/2023/NĐ-CP).
+      - `POST /api/v1/public/applications/{code}/supplement`: bổ sung tài liệu trực tuyến khi hồ sơ có trạng thái `SUPPLEMENT_REQUIRED`.
+    - Mở rộng `AdmissionService` & `AdmissionController`:
+      - Tìm kiếm nâng cao đa tiêu chí (`searchApplications`): lọc theo trạng thái, hạng GPLX, cán bộ phụ trách, từ khóa họ tên / CCCD / SĐT.
+      - Xếp lớp học chính thức (`POST /api/v1/admissions/{id}/enroll`): liên kết hồ sơ `APPROVED` vào lớp đào tạo `TrainingClass`, cập nhật trạng thái `ENROLLED`, ghi nhận học viên chính thức trong `class_enrollments`.
+  - **Module Khóa Học (`vn.edu.gplx.modules.learning`):**
+    - Bổ sung `GET /api/v1/courses/featured`: lấy danh sách các khóa học tuyển sinh nổi bật.
+    - Bổ sung `GET /api/v1/courses/slug/{slug}`: tra cứu thông tin chi tiết chương trình học và học phí theo đường dẫn thân thiện SEO.
+
+- **Frontend (React 19 + TypeScript + Vite):**
+  - **Trang Khóa Học Tuyển Sinh (`/courses` & `/courses/:slug`):**
+    - `CoursesPage.tsx`: danh sách khóa học thiết kế dạng thẻ hiện đại, hiển thị học phí niêm yết, thời lượng đào tạo, địa điểm thực hành, ngày khai giảng dự kiến, nút CTA xem chi tiết và nút *"Đăng ký tư vấn miễn phí"*.
+    - `CourseDetailPage.tsx`: trang chi tiết toàn diện với lộ trình đào tạo, đối tượng học viên, yêu cầu hồ sơ giấy tờ, nút nộp hồ sơ trực tuyến ngay (`/apply?categoryId=...&courseId=...`).
+    - `ConsultationModal.tsx`: modal popup tư vấn khóa học nhanh cho phép gửi yêu cầu trực tiếp từ trang chủ hoặc trang khóa học.
+  - **Quy Trình Nộp Hồ Sơ Trực Tuyến 4 Bước (`/apply`):**
+    - `ApplyPage.tsx`: Stepper wizard chuyên nghiệp:
+      - *Bước 1: Chọn khóa học & Lịch học:* Chọn hạng bằng, khóa đào tạo, địa điểm tập sa hình và thời gian học ưu tiên (cuối tuần / các buổi tối / trong tuần).
+      - *Bước 2: Thông tin cá nhân:* Họ tên, CCCD/CMND (kiểm tra 9-12 số), ngày sinh (tự động kiểm tra độ tuổi theo quy định Luật TTATGTĐB 2024), giới tính, SĐT, email, địa chỉ cư trú.
+      - *Bước 3: Tải ảnh hồ sơ:* Kiểm tra checklist tài liệu bắt buộc (Ảnh mặt trước/sau CCCD, ảnh thẻ 3x4 phông trắng, giấy khám sức khỏe).
+      - *Bước 4: Điều khoản & Xác nhận:* Cam kết tuân thủ quy chế đào tạo sát hạch GPLX và đồng thuận xử lý dữ liệu cá nhân theo Nghị định 13/2023/NĐ-CP.
+    - Hiển thị trang hoàn tất kèm mã hồ sơ và mã bảo mật tra cứu, cho phép sao chép 1 chạm và chuyển sang trang tra cứu.
+  - **Trang Tra Cứu Tiến Độ Hồ Sơ Trực Tuyến (`/application-status`):**
+    - `ApplicationStatusPage.tsx`: Tra cứu an toàn bằng mã hồ sơ kết hợp SĐT hoặc Tracking Token.
+    - Hiển thị dòng thời gian trạng thái (Stepper), thông tin hồ sơ đã che mờ PII, lớp đào tạo được xếp và form nộp tài liệu bổ sung trực tuyến khi hồ sơ có yêu cầu bổ sung (`SUPPLEMENT_REQUIRED`).
+  - **Phân Hệ Quản Trị Cán Bộ Tuyển Sinh:**
+    - `AdmissionDashboardPage.tsx` (`/admin/admissions/dashboard`): Dashboard phân tích tuyển sinh thời gian thực: KPI tổng số lead, hồ sơ, tỷ lệ chuyển đổi, tỷ lệ duyệt, biểu đồ phân bổ theo nguồn tư vấn và phân hạng GPLX.
+    - `CrmLeadsPage.tsx` (`/admin/admissions/leads`): Bảng quản lý khách hàng tiềm năng, chuyển đổi trạng thái tiếp cận (`NEW` ➔ `CONTACTING` ➔ `CONSULTED` ➔ `FOLLOW_UP`), mở modal xem lịch sử cuộc gọi và ghi nhận tương tác mới.
+    - `ApplicationManagementPage.tsx` (`/admin/admissions`): Quản lý thẩm định hồ sơ tuyển sinh: bộ lọc đa tiêu chí, thẩm định phê duyệt (`APPROVED`), yêu cầu bổ sung có lý do bắt buộc (`ADM-002`), và modal xếp lớp học chính thức (`ENROLLED`).
+  - **Điều Hướng & Trải Nghiệm:**
+    - Cập nhật `Navbar.tsx` với các đường dẫn nhanh: Khóa đào tạo (`/courses`), Nộp hồ sơ trực tuyến (`/apply`), Tra cứu hồ sơ (`/application-status`).
+    - Cập nhật `MainLayout.tsx` với thanh công cụ nghiệp vụ dành cho cán bộ tuyển sinh (`STAFF`, `COUNSELOR`, `ADMIN`, `MANAGER`).
+
+- **Kiểm Thử Tự Động & Đóng Gói Production:**
+  - Backend Unit Tests: `CrmLeadServiceTest` (3/3 tests PASS), `AdmissionServiceTest` (6/6 tests PASS), toàn bộ 38+ tests hệ thống đạt 100%.
+  - Frontend Production Bundle: `tsc -b && vite build` hoàn thành không cảnh báo lỗi kiểu dữ liệu.
+  - Vận hành Docker Compose v2: Cả 3 container `gplx-frontend:3000`, `gplx-backend:8088`, `gplx-mysql:3306` hoạt động ổn định và đạt trạng thái Healthy.
+
+## [2.7.0] — 2026-10-28
+
+### Triển Khai Phân Hệ Quảng Cáo & Tiếp Nhận, Quản Lý Hồ Sơ Đào Tạo Lái Xe Điện Tử
+- **Xây Dựng Phân Hệ Quảng Cáo Tiếp Nhận Hồ Sơ Độc Lập (`AdmissionPromoSection`):**
+  - Đặt vị trí nổi bật tại Trang chủ (`HomePage.tsx`) nhằm nhấn mạnh năng lực cốt lõi của đề tài về tiếp nhận, thẩm định và quản lý hồ sơ học viên điện tử.
+  - **4 Trụ Cột Nghiệp Vụ Hồ Sơ Điện Tử:**
+    1. *Nộp hồ sơ 100% Online:* Tải ảnh chụp CCCD gắn chip 2 mặt và ảnh thẻ 3x4 số hóa, tự động trích xuất thông tin, không cần photo công chứng.
+    2. *Liên thông Giấy khám sức khỏe điện tử:* Tự động tra cứu mã GKSK từ các cơ sở y tế đủ thẩm quyền theo dữ liệu liên thông Bộ Y tế & Cục CSGT.
+    3. *Theo dõi tiến trình hồ sơ thời gian thực:* Minh bạch 4 giai đoạn (`DRAFT` ➔ `SUBMITTED` ➔ `UNDER_REVIEW` ➔ `APPROVED`), gửi thông báo tức thì khi cán bộ tuyển sinh phê duyệt hoặc yêu cầu bổ sung hồ sơ.
+    4. *Đóng học phí an toàn & Biên lai điện tử:* Hỗ trợ thanh toán trực tuyến, cấp biên lai điện tử có mã tra cứu và tự động xếp lớp đào tạo.
+  - **Mô Hình Hồ Sơ Mẫu Trực Quan (Interactive Live Dossier Mockup):**
+    - Trình diễn thẻ hồ sơ điện tử `HS-B2-2026-0899` với huy hiệu trạng thái `ĐÃ DUYỆT (APPROVED)` có đèn báo nhấp nháy.
+    - Stepper timeline hiển thị 4 chặng: Nộp CCCD ➔ Liên thông GKSK ➔ Thẩm định phê duyệt ➔ Xếp lớp & Phân bổ giáo viên thực hành DAT.
+  - **Cặp Nút Kêu Gọi Hành Động (Action CTAs):**
+    - Nút chính: *"Nộp hồ sơ học lái xe ngay"* (điều hướng tới `/admissions/new` hoặc đăng nhập).
+    - Nút phụ: *"Quản lý hồ sơ của tôi"* (điều hướng tới `/my-applications`).
+- **Nâng Cấp Thanh Điều Hướng (`Navbar.tsx`):**
+  - Bổ sung nút liên kết *"Nộp hồ sơ"* kèm huy hiệu *"Trực tuyến"* nổi bật trên Header để thu hút người dùng ngay khi truy cập trang web.
+  - Bổ sung định tuyến alias `/submit-application` trong `App.tsx` đảm bảo truy cập thông suốt.
+- **Biên Dịch & Kiểm Thử Toàn Vẹn:**
+  - TypeScript `tsc -b && vite build` hoàn thành với 0 cảnh báo lỗi.
+  - Docker container `gplx-frontend:3000` chạy ổn định, phản hồi HTTP 200 OK.
+
+## [2.6.0] — 2026-10-27
+
+### Tái Thiết Kế Giao Diện Toàn Diện Theo Phong Cách Modern SaaS & Soft Glassmorphism (Blue–Purple Gradient)
+- **Tái Cấu Trúc Toàn Diện Các Component Độc Lập (Component-Based Architecture):**
+  - `Navbar.tsx` & `Navbar.module.css`: Header chiều cao 78px, kính mờ Glassmorphism (`backdrop-filter: blur(20px)`), logo 600 tròn với viền đa sắc, chữ thương hiệu *"Ôn Thi **GPLX**"*, menu điều hướng dạng pill, social icons (Facebook, TikTok) và nút CTA *"Đăng ký ngay"*.
+  - `HeroSection.tsx` & `HeroSection.module.css`: Ribbon chính thức Cục CSGT CV 2262/CSGT-P5, tiêu đề lớn chuẩn xác với huy hiệu tích xanh xác thực (*Chuẩn Cục CSGT ✓*) và phụ đề giới thiệu hệ thống 600 câu hỏi sát hạch mới nhất.
+  - `LicenseCategorySelector.tsx` & `StatisticsBar.tsx`: Bộ điều khiển chọn hạng lái xe (Hạng B, B1, C, A1, A) kết hợp hiển thị 4 chỉ số sát hạch (Số câu hỏi/đề, Thời gian làm bài, Điểm đạt, Tổng số câu ngân hàng) trong thanh capsule bo góc mềm 24px.
+  - `LearningRoadmapCard.tsx` & `LearningRoadmapCard.module.css`: Khối 62% cột trái hiển thị lộ trình 3 trạm (Ôn tập câu hỏi ➔ Câu hay sai & Điểm liệt ➔ 20 Bộ đề luyện tập), minh họa làn đường xe di chuyển chuyển động mượt mà và thanh tiến độ học tập.
+  - `MockExamCard.tsx` & `MockExamCard.module.css`: Khối 38% cột phải với nền xanh gradient Primary `#165DFF` sang Indigo `#4934E8`, biểu tượng GraduationCap, danh sách tính năng chấm điểm tức thì và nút CTA *"Bắt đầu thi thử ngay"*.
+  - `EdTechToolsSection.tsx`: 6 khối công cụ học tập thông minh (Học theo 6 chương, Thi thử 20 bộ đề, 60 Câu điểm liệt, Ôn câu hay sai & bẫy đề, Tra cứu biển báo SVG, Mẹo thi sát hạch).
+  - `StudyWorkflowSection.tsx`: Quy trình 4 bước chuẩn đậu GPLX (Hồ sơ điện tử ➔ Lý thuyết 600 câu ➔ Cabin & Giám sát DAT ➔ Sát hạch Cục CSGT).
+  - `FAQSection.tsx`: Khối accordion giải đáp các thắc mắc cốt lõi về quy chế thi, câu điểm liệt và điều kiện DAT.
+  - `Footer.tsx` & `ThemeToggle.tsx`: Chân trang chuẩn SaaS EdTech và nút toggle Light/Dark mode mượt mà.
+- **Hệ Thống Design Tokens Màu Sắc Chuẩn Xác Theo Đặc Tả:**
+  - **Light Mode:** Nền gradient từ `#DCEBFF` đến `#F0E4FF`, Primary `#165DFF`, Primary Hover `#0E4FE0`, Royal Blue `#304FFE`, Indigo `#4934E8`, Sky Blue `#38BDF8`, Mặt phẳng kính `rgba(255, 255, 255, 0.82)`, Chữ tiêu đề `#101828`, Chữ thân bài `#475569`, Viền `rgba(255, 255, 255, 0.75)`.
+  - **Dark Mode:** Nền gradient từ `#0B1B46` đến `#17112F`, Mặt phẳng kính `#172544`, Mặt phẳng nổi `#1D2A49`, Chữ tiêu đề `#F8FAFC`, Chữ thân bài `#CBD5E1`, Viền `rgba(148, 163, 184, 0.18)`, Accent `#4D9BFF`, Violet `#8B7CFF`.
+- **Kiểm Thử & Đóng Gói Docker Container:**
+  - Biên dịch TypeScript thành công (`tsc -b && vite build`), không còn lỗi kiểu dữ liệu.
+  - Container `gplx-frontend` được cập nhật và kiểm tra hoạt động hoàn hảo tại cổng 3000 (HTTP 200 OK).
+
+## [2.5.0] — 2026-10-27
+
+### Chuẩn Hóa Toàn Diện Giao Diện Bằng UI/UX Pro Max — Đồng Nhất, Hiện Đại & Chuẩn WCAG 2.1 AA
+- **Ứng Dụng Design System UI/UX Pro Max (Accessible & Ethical Public EdTech):**
+  - Đồng nhất hệ thống màu sắc chủ đạo Navy/Royal Blue `#1e40af` / `#2563eb`, Slate `#0f172a`, tương phản chữ ≥ 4.5:1 đạt chuẩn WCAG 2.1 AA.
+  - Loại bỏ hoàn toàn 100% emoji làm icon trên giao diện, thay thế đồng bộ bằng bộ SVG vector icons (`Icons.*`) đồng nhất stroke, kích thước và màu sắc.
+  - Chuẩn hóa Bento Grid trên toàn bộ trang: Hero Cards, 6 Khối công cụ EdTech, 4 Phân hệ Đào tạo sinh thái, Lộ trình 4 bước và FAQ.
+- **Đồng Nhất Giao Diện Toàn Hệ Thống:**
+  - Trang Chủ (`HomePage.tsx`): Thống nhất các card, icon SVG, dải ribbon, badge tích xanh, các card phân hệ và FAQ.
+  - Trang Mẹo Thi (`ExamTipsPage.tsx`): Đồng nhất tabs và các thẻ mẹo thi bằng SVG icons chuyên nghiệp.
+  - Trang Biển Báo (`RoadSignsPage.tsx`): Chuẩn hóa card, nút tab, input tìm kiếm và modal chi tiết.
+  - Header & Theme: Tối ưu phản hồi xúc giác cho nút chuyển Dark/Light theme, thanh menu pill mềm mại.
+
+## [2.4.0] — 2026-10-27
+
+### Triển Khai Giao Diện Ôn Thi EdTech Phong Cách OnThiGPLX — Tra Cứu Biển Báo, Mẹo Thi & 6 Khối Chức Năng
+- **Phân Hệ Tra Cứu Biển Báo Giao Thông Đường Bộ (`/road-signs`):**
+  - Xây dựng dữ liệu và giao diện tra cứu biển báo theo Quy chuẩn kỹ thuật quốc gia QCVN 41:2019/BGTVT.
+  - Phân loại 5 nhóm chuẩn: Biển báo cấm (P), Biển cảnh báo nguy hiểm (W), Biển hiệu lệnh (R), Biển chỉ dẫn (I), Biển phụ (S).
+  - Component hiển thị hình ảnh SVG biển báo vector sắc nét, thanh tìm kiếm thông minh theo mã/tên và modal phóng to xem giải thích ý nghĩa pháp lý chi tiết.
+- **Phân Hệ Mẹo Thi Lý Thuyết & Sa Hình (`/tips`):**
+  - Tổng hợp kho kinh nghiệm: Từ khóa vàng chọn ngay đáp án đúng (Bị nghiêm cấm, Không được phép...), Quy tắc 5 bước giải quyết mọi thế sa hình (Nhất chớm, Nhì ưu, Tam đường, Tứ phải, Ngũ hướng), Mẹo cấm nhỏ cấm lớn, Độ tuổi, Tốc độ, Khoảng cách an toàn và chiến lược vượt qua 60 câu điểm liệt.
+- **Hoàn Thiện 6 Khối Chức Năng EdTech Trên Trang Chủ (Chuẩn OnThiGPLX):**
+  - Bổ sung 6 card tính năng: Học theo 6 chương, Thi thử 20 bộ đề CSGT, 60 Câu điểm liệt, Ôn câu hay sai, Tra cứu biển báo, Mẹo thi sát hạch.
+  - Tích hợp Quy trình 4 bước ôn thi đỗ 100%, Khu vực FAQ giải đáp thắc mắc sát hạch và Footer hệ thống đầy đủ căn cứ pháp lý Thông tư 12/2025/TT-BCA.
+
+## [2.3.0] — 2026-10-27
+
+### Tái Thiết Kế Toàn Diện Giao Diện Chuẩn Cục CSGT 2026 & Tích Hợp 20 Bộ Đề Thi Thử Vào Ôn Tập
+- **Thu Thập & Nhập Liệu 600 Câu Hỏi Chuẩn Cục CSGT (CV 2262/CSGT-P5 ngày 7/5/2025):**
+  - Trích xuất và xác thực toàn diện 600 câu hỏi sát hạch, 60 câu điểm liệt, 1.858 đáp án lựa chọn và 315 hình ảnh sa hình / biển báo chất lượng cao.
+  - Nhập thành công 100% vào cơ sở dữ liệu MySQL 8.4 LTS với bảng mã UTF-8 (`theory_questions`, `theory_answers`).
+  - Bộ kiểm định dữ liệu `validate_dataset.js` vượt qua 24/24 bài kiểm tra tính toàn vẹn (đầy đủ câu hỏi, câu điểm liệt, đáp án đúng duy nhất).
+- **Tái Cấu Trúc Phân Hệ Lý Thuyết & 20 Bộ Đề Thi Thử:**
+  - Thay thế nút "Thi thử 600 câu" bằng "Lý thuyết" (`/theory`) trên thanh điều hướng chính, drawer menu và router.
+  - Tích hợp tính năng làm bài thi thử ngẫu nhiên từ 20 đề thi mẫu vào module **Ôn tập** (`/student/review` / `/theory-review`).
+  - Hỗ trợ thi thử trực tiếp: Đồng hồ đếm ngược theo từng hạng bằng, bảng 35 ô số chuyển câu linh hoạt, gắn cờ xem lại, chấm điểm tức thì và phân tích chi tiết câu sai / câu điểm liệt kèm căn cứ pháp lý.
+- **Tái Thiết Kế Trang Chủ Theo Phong Cách Cổng Ôn Thi Cục CSGT:**
+  - **Top Ribbon:** Dải thông báo chính thức *"Theo Công văn 2262/CSGT-P5 ngày 7/5/2025"*.
+  - **Tiêu Đề Lớn:** *"Ôn thi Giấy phép lái xe Chuẩn Cục CSGT ✓ - Hệ thống 600 câu hỏi sát hạch mới nhất 2026"*.
+  - **Floating Config Capsule Bar:** Hộp điều khiển nổi chọn hạng bằng (Hạng B, B1, C, A1, A2) đồng bộ trực tiếp 4 thông số sát hạch (Câu hỏi/đề, Thời gian làm bài, Điểm đạt, Tổng số câu hỏi).
+  - **Hai Card Hero Nổi Bật:**
+    - Card Trái: Lộ trình đậu hạng bằng với 3 trạm (Trạm 1: Ôn tập câu hỏi ➔ Trạm 2: Câu hay sai ➔ Trạm 3: 20 bộ đề thi) kèm hình minh họa giáo trình và xe ô tô.
+    - Card Phải: Thẻ thi thử Online gradient xanh dương rực rỡ, hiển thị thông số đề thi thời gian thực và nút *"Bắt đầu thi thử ngay"*.
+  - **Bố Trí 4 Phân Hệ Nghiệp Vụ Sinh Thái:** Đào tạo xe thô, Giám sát DAT & Lịch học, Hồ sơ & Học phí điện tử, Xét điều kiện & Sát hạch.
+- **Hỗ Trợ Toàn Diện Chế Độ Sáng/Tối (Light & Dark Theme):**
+  - Tích hợp nút chuyển đổi giao diện Mặt trời / Mặt trăng trên Header, lưu trạng thái vào `localStorage` (`gplx_theme`), đồng bộ với hệ thống CSS Variables chuẩn.
+- **Tích Hợp Hệ Thống Animation Động Hiện Đại (Motion Design & Micro-Interactions):**
+  - **Ambient Glow Pulse:** Vùng hào quang nền `heroGlowEffect` thở nhẹ tuần hoàn (8s pulse), tạo chiều sâu không gian sống động.
+  - **CSGT Ribbon & Verified Badge:** Hiệu ứng nhịp đập êm ái `badgePulse` cho tích xanh và dải ruy băng lượn sóng nổi nhẹ.
+  - **Sóng Định Vị Radar Trạm Luyện Tập (`radarPing`):** Chấm tròn trạng thái tại Trạm 1 liên tục phát sóng xung tròn định vị GPS báo hiệu học phần đang thực hiện.
+  - **Xe Ô Tô Lăn Bánh Nhấp Nhô (`floatCar`):** Hình họa xe con màu xanh trên sa hình con đường uốn lượn có chuyển động bập bênh nhẹ nhàng như đang di chuyển thực tế.
+  - **Thẻ Thi Thử Online Gradient Shift & Shimmer CTA:** Nền thẻ thi thử chuyển sắc mượt mà; nút *"Bắt đầu thi thử ngay"* tích hợp dải phản quang kim cương quét qua định kỳ và mũi tên trượt sang phải khi rê chuột (`translateX`).
+  - **Micro-Interactions Header & Modules Grid:** Logo 4 màu xoay 25 độ khi hover; nút Theme xoay 45-180 độ phản hồi bấm; các card phân hệ nâng cao kèm icon xoay 5 độ.
+
+## [2.2.0] — 2026-10-27
+
+### Triển Khai Phân Hệ Đào Tạo Xe Thô — Basic Vehicle Familiarization Training (Full-Stack)
+- **Kiến Trúc & Phân Định Nghiệp Vụ Độc Lập:**
+  - Triển khai phân hệ **Đào tạo xe thô (Raw Vehicle Familiarization Training)** độc lập hoàn toàn với LMS lý thuyết và thi thử.
+  - Xác lập quy tắc nghiệp vụ nội bộ (INTERNAL_RULE): Xe thô là quy trình làm quen xe ban đầu, học viên được học song song với lý thuyết mà không khóa tiến độ lẫn nhau; việc hoàn thành xe thô không đồng nghĩa hoàn thành khóa đào tạo hoặc đủ điều kiện dự thi sát hạch.
+  - Ban hành tài liệu nghiệp vụ: docs/training/raw-vehicle-training.md, docs/training/training-progress-model.md, docs/legal/raw-vehicle-training-rules.md.
+- **Cơ Sở Dữ Liệu & Migrations (Flyway V13):**
+  - Tạo file migration V13__create_raw_vehicle_training_tables.sql thiết lập 6 bảng quan hệ: raw_vehicle_stages, raw_vehicle_enrollments, raw_vehicle_sessions, raw_vehicle_session_attendees, raw_vehicle_skill_evaluations, raw_vehicle_session_change_logs.
+- **Backend Domain, Application Service & REST Controllers (Java 21 & Spring Boot):**
+  - Xây dựng 6 Domain Entities, 4 Enums và 6 Repositories theo chuẩn Modular Monolith Rule 02.
+  - Kiểm tra điều kiện an toàn FLT-001: Chặn xếp trùng lịch giáo viên, chặn phương tiện bảo dưỡng hoặc hết hạn kiểm định an toàn kỹ thuật.
+  - Tính thời lượng thực tế từ số phút giữa giờ bắt đầu và kết thúc thực tế; chỉ tích lũy cho học viên có mặt (PRESENT).
+  - 3 REST Controllers: RawVehicleStudentController, RawVehicleInstructorController, RawVehicleManagerController.
+- **Kiểm Thử Tự Động Backend (Unit Test Suite):**
+  - RawVehicleTrainingServiceTest: 6/6 tests PASS.
+- **Frontend Giao Diện React 19 + TypeScript (3 Trang Chuyên Biệt):**
+  - rawVehicleService.ts, RawVehicleStudentPage.tsx, RawVehicleInstructorPage.tsx, RawVehicleManagerPage.tsx, RawVehicle.module.css.
+- **Tích Hợp Routing, MainLayout & Đóng Gói Docker:**
+  - Bổ sung routes /student/raw-vehicle, /instructor/raw-vehicle, /training/raw-vehicle; tích hợp Header, Drawer góc trái, Workspace Bar.
+
 ## [2.1.0] — 2026-10-27
 
 ### Tái Thiết Kế Trang Đầu Tiên Thành Landing Page Quảng Cáo Vào Đăng Ký / Đăng Nhập
@@ -514,3 +724,38 @@ Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhậ
   - Xây dựng `MainLayout.tsx` chuẩn responsive hỗ trợ tiếng Việt.
   - Xây dựng `HomePage.tsx` tích hợp gọi Health Check API và hiển thị bản đồ các module nghiệp vụ.
   - Xây dựng Axios client wrapper và type definitions `ApiResponse<T>`, `HealthStatus`.
+
+
+## 2026-10-29 — Luyện sa hình với xe ảo (bản đầu)
+
+- Thêm trang đăng nhập `/student/driving-simulation`, liên kết navbar/menu và module engine mô phỏng 2D không thêm dependency.
+- Lấy hạng xe từ API danh mục, hỗ trợ cấu hình mô tô/ô tô/xe tải, hai bài luyện nội bộ, ga/phanh/lùi/đánh lái, điểm dẫn đường, chạm biên và tạm dừng.
+- Kết quả chỉ trong phiên; không ghi DAT hoặc điểm sát hạch. Hạng chưa có cấu hình được hiển thị rõ.
+- Kiểm thử engine 6/6 PASS. Vite build bị chặn bởi thiếu Rollup native Windows; kiểm thử trình duyệt chưa thực hiện. Chi tiết: `docs/architecture/driving-simulation.md`.
+
+
+## 2026-10-29 — Menu và truy cập trang theo vai trò
+
+- Tập trung bảng quyền cho 7 vai trò; đồng bộ danh mục, navbar, lối tắt, tài khoản, footer và ProtectedRoute, gồm các alias. Tài khoản nhiều vai trò nhận hợp quyền; vai trò chưa xác định không tự trở thành học viên.
+- Chia danh mục theo học tập, hồ sơ, tuyển sinh, đào tạo/xe, sát hạch, tài chính và giám sát. Danh mục hoạt động trên điện thoại và có điều hướng bàn phím. Sa hình có lối tắt nổi bật cho học viên, giáo viên, quản lý và quản trị viên.
+- Tư vấn viên thấy CRM/tổng quan; chỉ ADMIN/EXAMINER vào chấm điểm. Thêm trang ngân hàng câu hỏi ADMIN/STAFF, sửa kiểm tra tiền tố ROLE_. Nút tự đăng ký dự thi chỉ hiện với STUDENT.
+- Sửa kiểu dữ liệu hạng GPLX `active` theo backend thật và việc chuyển focus từ sân sang nút điều khiển sa hình.
+- Rebuild và cập nhật riêng frontend Docker để giao diện mới được phục vụ tại cổng 3000. Chi tiết ma trận: `docs/architecture/role-navigation.md`; kiểm chứng: `docs/testing/role-navigation.md`.
+
+
+## 2026-10-29 — MVP sa hình ô tô 3D
+
+- Thêm module `simulation3d`, Three.js 0.180.0 và kiểu TypeScript tương ứng; tách vật lý, render, bài thi, scoring, input/runtime, persistence và UI. Giữ nguyên stack backend.
+- Xe 3D sáu hạng B/C1/C/D1/D2/D, sân mẫu có dốc và cảnh trí; ba bài hoạt động: xuất phát, nhường người đi bộ, ngang dốc. Phím lái có thể đổi; camera sau xe/cabin/trên cao, HUD, toàn màn hình, giọng Việt tùy trình duyệt và nguy hiểm tùy chọn.
+- Bộ luật JSON có nguồn/phiên bản/thời hạn, profile theo hạng; trừ điểm/đình chỉ theo sự kiện, sensor chưa xác minh chỉ cảnh báo. Không công nhận toàn bộ kỳ thi bằng phạm vi MVP.
+- Lịch sử IndexedDB tối đa 5 phiên theo tài khoản, snapshot luật/sân, import/export bản ghi và phát lại/seek theo thời gian. Nhập sân JSON theo schema hành lang thẳng, chưa hỗ trợ CAD/sân bất kỳ.
+- Route chính chuyển sang lazy 3D, giữ 2D tại `/student/driving-simulation/2d` với quyền cũ. Có ZIP source độc lập và hướng dẫn chạy không cần backend.
+- Kiểm chứng: `docs/testing/simulation3d-mvp.md`; kiến trúc: `docs/architecture/simulation3d-mvp.md`; pháp lý: `docs/legal/simulation3d-rules.md`.
+
+## [Unreleased] — 2026-10-29 — Danh mục GPLX và ngân hàng PDF
+
+- Chuẩn hóa 15 hạng GPLX, bổ sung phạm vi C1 bao gồm B, tách B1 mô tô ba bánh khỏi danh mục B1 ô tô cũ để giữ lịch sử; thêm trang tra cứu công khai và đồng bộ các bộ chọn học/thi/quản trị.
+- Nhập phiên bản PDF-2025-6a6dab85: 600 câu, 6 chương, 318 câu có hình, đáp án từ gạch chân; lưu mã băm và trang nguồn. Giữ 600 câu/đáp án cũ ở trạng thái lưu trữ, không phá khóa ngoại lịch sử.
+- Phạm vi câu và điểm liệt riêng A/A1, B1, ô tô; cấu trúc đề đủ 15 hạng, từ chối sinh đề thiếu dữ liệu hoặc quá hạn xác minh sau 28/02/2027. Sửa xóa câu hỏi thành xóa mềm.
+- Kiểm thử dữ liệu, JPA, service, API/MySQL thực, điều hướng và production build. Ghi nhận riêng lỗi dữ liệu mẫu CRM V14 khi cài trắng; đường nâng cấp V14→V17 đã đạt và áp dụng vào hệ thống cục bộ.
+- Tài liệu: docs/architecture/pdf-question-bank.md, docs/legal/pdf-question-bank.md và docs/testing/pdf-question-bank.md.

@@ -52,9 +52,26 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<CourseResponse> getFeaturedCourses() {
+        return courseRepository.findByFeaturedTrueAndIsActiveTrue().stream()
+                .map(this::toCourseResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public CourseResponse getCourseById(Long id) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course", "id", id));
+        return toCourseResponse(course);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CourseResponse getCourseBySlug(String slug) {
+        Course course = courseRepository.findBySlug(slug)
+                .or(() -> courseRepository.findByCode(slug))
+                .orElseThrow(() -> new ResourceNotFoundException("Course", "slug", slug));
         return toCourseResponse(course);
     }
 
@@ -147,9 +164,18 @@ public class CourseServiceImpl implements CourseService {
         return new CourseResponse(
                 course.getId(),
                 course.getCode(),
+                course.getSlug(),
                 course.getTitle(),
                 course.getDescription(),
                 course.getTotalHours(),
+                course.getTuitionFee(),
+                course.getExpectedStartDate(),
+                course.getTrainingLocation(),
+                course.getTargetAudience(),
+                course.getCurriculumSummary(),
+                course.getDocumentsRequired(),
+                course.getBannerImageUrl(),
+                course.isFeatured(),
                 course.isActive(),
                 catResponse,
                 course.getLessons() != null ? course.getLessons().size() : 0,

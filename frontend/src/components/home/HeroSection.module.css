@@ -1,0 +1,116 @@
+.heroSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3.5rem 1.5rem 1.75rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.officialBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.badgeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-success);
+}
+
+.badgeText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.heroTitle {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--color-heading);
+  margin-bottom: 1.25rem;
+}
+
+.verifiedTextGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.gradientTitle {
+  background: linear-gradient(135deg, #165dff 0%, #4934e8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:global([data-theme='dark']) .gradientTitle {
+  background: linear-gradient(135deg, #4d9bff 0%, #8b7cff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.verifiedCheckIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+  vertical-align: middle;
+}
+
+.heroSubtitle {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--color-body);
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .heroSection {
+    padding: 2rem 1rem 1rem;
+  }
+  .officialBadge {
+    padding: 0.35rem 0.75rem;
+  }
+  .badgeText {
+    font-size: 0.75rem;
+  }
+  .heroTitle {
+    font-size: 1.85rem;
+  }
+  .verifiedCheckIcon {
+    width: 22px;
+    height: 22px;
+  }
+}

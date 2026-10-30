@@ -36,6 +36,7 @@ export const ExamSessionsPage: React.FC = () => {
   const [examType, setExamType] = useState<ExamType>('CERTIFICATION');
   const [submittingCreate, setSubmittingCreate] = useState<boolean>(false);
 
+  const canRegisterSelf = user?.roles.includes('ROLE_STUDENT') ?? false;
   const isAdminOrManager = user?.roles?.some((r) => r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER');
 
   const loadData = async () => {
@@ -224,7 +225,7 @@ export const ExamSessionsPage: React.FC = () => {
                 </div>
               </div>
 
-              <AppButton
+              {canRegisterSelf && <AppButton
                 variant="success"
                 onClick={() => handleRegister(session.id)}
                 loading={registeringId === session.id}
@@ -232,7 +233,7 @@ export const ExamSessionsPage: React.FC = () => {
                 icon="✍️"
               >
                 Đăng ký dự thi
-              </AppButton>
+              </AppButton>}
             </div>
           ))}
         </div>

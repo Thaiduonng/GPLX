@@ -117,7 +117,9 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
         if (!questionRepository.existsById(id)) {
             throw new ResourceNotFoundException("TheoryQuestion", "id", id);
         }
-        questionRepository.deleteById(id);
+        TheoryQuestion question = questionRepository.findById(id).orElseThrow();
+        question.setActive(false);
+        questionRepository.save(question);
     }
 
     @Override
@@ -216,22 +218,14 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
             return topicRepository.findById(topicId).orElse(null);
         }
 
-        // Tự động suy diễn chủ đề theo dải câu hỏi chuẩn Tổng cục ĐBVN 600 câu:
-        // 1-166: CH1_RULES
-        // 167-196: CH2_TRANSPORT
-        // 197-217: CH3_CULTURE
-        // 218-273: CH4_TECHNIQUES
-        // 274-308: CH5_REPAIR
-        // 309-486: CH6_SIGNS
-        // 487-600: CH7_SCENARIOS
+        // CV2262/CSGT-P5: six chapters in the 2025 PDF bank; historical topic rows remain intact.
         String code;
-        if (questionNumber <= 166) code = "CH1_RULES";
-        else if (questionNumber <= 196) code = "CH2_TRANSPORT";
-        else if (questionNumber <= 217) code = "CH3_CULTURE";
-        else if (questionNumber <= 273) code = "CH4_TECHNIQUES";
-        else if (questionNumber <= 308) code = "CH5_REPAIR";
-        else if (questionNumber <= 486) code = "CH6_SIGNS";
-        else code = "CH7_SCENARIOS";
+        if (questionNumber <= 180) code = "PDF25_CH1";
+        else if (questionNumber <= 205) code = "PDF25_CH2";
+        else if (questionNumber <= 263) code = "PDF25_CH3";
+        else if (questionNumber <= 300) code = "PDF25_CH4";
+        else if (questionNumber <= 485) code = "PDF25_CH5";
+        else code = "PDF25_CH6";
 
         return topicRepository.findByCode(code).orElse(null);
     }

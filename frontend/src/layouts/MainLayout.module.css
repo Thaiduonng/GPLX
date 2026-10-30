@@ -554,3 +554,231 @@
     display: none;
   }
 }
+
+
+/* ==============================================================================
+   HEADER THEO THIẾT KẾ MẪU ÔN THI GPLX 2026 (LIGHT & DARK THEME)
+   ============================================================================== */
+.headerLightDark {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  color: #0f172a;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  transition: all 0.2s ease;
+}
+
+:global([data-theme='dark']) .headerLightDark {
+  background: rgba(11, 15, 25, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.brandLogoCircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(from 0deg, #ea4335, #fbbc05, #34a853, #4285f4, #ea4335);
+  padding: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+
+.brandLinkWrapper:hover .brandLogoCircle {
+  transform: rotate(25deg) scale(1.08);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+}
+
+.brandLogoInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.65rem;
+  color: #1e40af;
+  text-align: center;
+  line-height: 1;
+}
+
+:global([data-theme='dark']) .brandLogoInner {
+  background: #0f172a;
+  color: #60a5fa;
+}
+
+.brandNameText {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.brandNameHighlight {
+  color: #2563eb;
+}
+
+:global([data-theme='dark']) .brandNameHighlight {
+  color: #38bdf8;
+}
+
+/* Nav links pill style */
+.centerNavPills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.navPillItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.navPillItem:hover {
+  color: var(--color-text-main);
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+:global([data-theme='dark']) .navPillItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.navPillActive {
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+}
+
+:global([data-theme='dark']) .navPillActive {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
+}
+
+/* Social and theme toggle */
+.socialIconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.socialIconBtn:hover {
+  transform: scale(1.12);
+}
+
+.fbIcon {
+  background: #1877f2;
+  color: #ffffff;
+}
+
+.tiktokIcon {
+  background: #000000;
+  color: #ffffff;
+}
+
+:global([data-theme='dark']) .tiktokIcon {
+  background: #27272a;
+}
+
+.themeToggleBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
+}
+
+.themeToggleBtn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+  transform: rotate(45deg) scale(1.08);
+}
+
+.themeToggleBtn:active {
+  transform: rotate(180deg) scale(0.92);
+}
+
+.loginTextLink {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  text-decoration: none;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.loginTextLink:hover {
+  color: var(--color-primary);
+  background: var(--color-surface-hover);
+}
+
+.registerPillBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-full);
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  border: none;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.registerPillBtn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+}
+
+/* Role shortcuts remain visible and wrap instead of hiding on narrow screens. */
+.roleLinks { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.roleLinks .wsLink { min-height: 44px; white-space: normal; }
+.simulationLink { border: 1px solid var(--color-primary); color: var(--color-primary); font-weight: 700; background: var(--color-primary-light); }
+@media (max-width: 900px) { .workspaceContainer { flex-direction: column; align-items: stretch; gap: 8px; } .workspaceLabelWrapper { display: flex; } }
+
+.workspaceLabel { white-space: normal; }.simulationLink { color: #93c5fd; border-color: #60a5fa; }.simulationLink.active { color: white; }

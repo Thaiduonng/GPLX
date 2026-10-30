@@ -33,6 +33,12 @@ public class ExamConfiguration extends BaseEntity {
     @Column(name = "legal_source", nullable = false, length = 255)
     private String legalSource = "Thông tư 12/2017/TT-BGTVT, Thông tư 04/2022/TT-BGTVT";
 
+    @Column(name = "valid_until")
+    private java.time.LocalDate validUntil;
+
+    public java.time.LocalDate getValidUntil() { return validUntil; }
+    public void setValidUntil(java.time.LocalDate date) { this.validUntil = date; }
+
     public ExamConfiguration() {
     }
 

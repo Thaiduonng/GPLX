@@ -8,6 +8,7 @@ import {
   Modal,
   AppButton,
   AppSelect,
+  AppInput,
   AppTextarea,
   Alert,
   DataTable,
@@ -21,12 +22,19 @@ export default function ApplicationManagementPage() {
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [successMsg, setSuccessMsg] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<ApplicationStatus | ''>('');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
 
   // Modal Thẩm định
   const [reviewingApp, setReviewingApp] = useState<ApplicationResponse | null>(null);
   const [targetStatus, setTargetStatus] = useState<ApplicationStatus>('APPROVED');
   const [reviewNote, setReviewNote] = useState<string>('');
   const [submittingReview, setSubmittingReview] = useState<boolean>(false);
+
+  // Modal Xếp lớp nhập học
+  const [enrollingApp, setEnrollingApp] = useState<ApplicationResponse | null>(null);
+  const [classId, setClassId] = useState<number>(1);
+  const [enrollNote, setEnrollNote] = useState<string>('');
+  const [submittingEnroll, setSubmittingEnroll] = useState<boolean>(false);
 
   useEffect(() => {
     loadApplications();
@@ -36,7 +44,13 @@ export default function ApplicationManagementPage() {
     setLoading(true);
     setErrorMsg('');
     try {
-      const data = await admissionService.getApplications(filterStatus || undefined, 0, 50);
+      const data = await admissionService.getApplications(
+        filterStatus || undefined,
+        0,
+        50,
+        undefined,
+        searchKeyword || undefined
+      );
       setApplications(data.content || []);
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -94,12 +108,49 @@ export default function ApplicationManagementPage() {
     }
   };
 
+  const handleSubmitEnroll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!enrollingApp) return;
+
+    setSubmittingEnroll(true);
+    setErrorMsg('');
+    try {
+      const enrolled = await admissionService.enrollApplication(enrollingApp.id, {
+        classId,
+        notes: enrollNote.trim() || undefined,
+      });
+      setSuccessMsg(`Đã xếp lớp và chuyển hồ sơ ${enrolled.applicationCode} thành học viên chính thức thành công!`);
+      setEnrollingApp(null);
+      setEnrollNote('');
+      loadApplications();
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || 'Lỗi khi xếp lớp nhập học.');
+      } else if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg('Lỗi không xác định khi xếp lớp.');
+      }
+    } finally {
+      setSubmittingEnroll(false);
+    }
+  };
+
   const columns: Column<ApplicationResponse>[] = [
     {
       key: 'applicationCode',
       header: 'Mã hồ sơ',
-      render: (app) => <strong style={{ color: 'var(--color-primary)' }}>{app.applicationCode}</strong>,
-      width: '130px',
+      render: (app) => (
+        <div>
+          <strong style={{ color: 'var(--color-primary)' }}>{app.applicationCode}</strong>
+          {app.trackingToken && (
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>
+              Token: {app.trackingToken}
+            </div>
+          )}
+        </div>
+      ),
+      width: '150px',
     },
     {
       key: 'fullName',
@@ -110,14 +161,28 @@ export default function ApplicationManagementPage() {
           <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
             {app.phone} | {app.email}
           </div>
+          {app.trainingLocation && (
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+              📍 {app.trainingLocation}
+            </div>
+          )}
         </div>
       ),
     },
     {
       key: 'category',
       header: 'Hạng GPLX',
-      render: (app) => <strong>Hạng {app.category.code}</strong>,
-      width: '110px',
+      render: (app) => (
+        <div>
+          <strong>Hạng {app.category.code}</strong>
+          {app.courseTitle && (
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }} className="truncate max-w-[140px]">
+              {app.courseTitle}
+            </div>
+          )}
+        </div>
+      ),
+      width: '140px',
     },
     {
       key: 'nationalId',
@@ -143,18 +208,35 @@ export default function ApplicationManagementPage() {
       align: 'right',
       render: (app) => {
         const isApproved = app.status === 'APPROVED';
+        const isEnrolled = app.status === 'ENROLLED';
+
         return (
-          <AppButton
-            variant={isApproved ? 'outline' : 'primary'}
-            size="sm"
-            onClick={() => handleOpenReview(app)}
-            disabled={isApproved}
-          >
-            {isApproved ? 'Đã duyệt ✓' : 'Thẩm định ⚖️'}
-          </AppButton>
+          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+            {isApproved ? (
+              <AppButton
+                variant="success"
+                size="sm"
+                onClick={() => setEnrollingApp(app)}
+              >
+                Xếp lớp 🎓
+              </AppButton>
+            ) : isEnrolled ? (
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#10B981' }}>
+                Đã nhập học ✓
+              </span>
+            ) : (
+              <AppButton
+                variant="primary"
+                size="sm"
+                onClick={() => handleOpenReview(app)}
+              >
+                Thẩm định ⚖️
+              </AppButton>
+            )}
+          </div>
         );
       },
-      width: '130px',
+      width: '140px',
     },
   ];
 
@@ -162,21 +244,38 @@ export default function ApplicationManagementPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <PageHeader
         title="Quản Lý & Thẩm Định Hồ Sơ Tuyển Sinh (ADM-002)"
-        description="Dành cho Cán bộ tuyển sinh, Đào tạo & Quản trị hệ thống tiếp nhận và đối soát hồ sơ học viên."
+        description="Dành cho Cán bộ tuyển sinh, Đào tạo & Quản trị hệ thống tiếp nhận, đối soát và xếp lớp cho học viên."
         actions={
-          <div style={{ width: '240px' }}>
-            <AppSelect
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as ApplicationStatus | '')}
-              options={[
-                { value: '', label: 'Tất cả trạng thái hồ sơ' },
-                { value: 'SUBMITTED', label: 'Chờ tiếp nhận (SUBMITTED)' },
-                { value: 'UNDER_REVIEW', label: 'Đang thẩm định (UNDER_REVIEW)' },
-                { value: 'APPROVED', label: 'Đã phê duyệt (APPROVED)' },
-                { value: 'SUPPLEMENT_REQUIRED', label: 'Yêu cầu bổ sung (SUPPLEMENT_REQUIRED)' },
-                { value: 'REJECTED', label: 'Đã từ chối (REJECTED)' },
-              ]}
-            />
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ width: '220px' }}>
+              <AppInput
+                placeholder="Tìm mã hồ sơ, tên, SĐT..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') loadApplications();
+                }}
+              />
+            </div>
+            <div style={{ width: '240px' }}>
+              <AppSelect
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as ApplicationStatus | '')}
+                options={[
+                  { value: '', label: 'Tất cả trạng thái hồ sơ' },
+                  { value: 'SUBMITTED', label: 'Chờ tiếp nhận (SUBMITTED)' },
+                  { value: 'UNDER_REVIEW', label: 'Đang thẩm định (UNDER_REVIEW)' },
+                  { value: 'SUPPLEMENT_REQUIRED', label: 'Yêu cầu bổ sung (SUPPLEMENT_REQUIRED)' },
+                  { value: 'RESUBMITTED', label: 'Đã nộp bổ sung (RESUBMITTED)' },
+                  { value: 'APPROVED', label: 'Đã phê duyệt (APPROVED)' },
+                  { value: 'ENROLLED', label: 'Đã xếp lớp nhập học (ENROLLED)' },
+                  { value: 'REJECTED', label: 'Đã từ chối (REJECTED)' },
+                ]}
+              />
+            </div>
+            <AppButton variant="secondary" size="md" onClick={loadApplications}>
+              Lọc
+            </AppButton>
           </div>
         }
       />
@@ -205,7 +304,7 @@ export default function ApplicationManagementPage() {
         emptyMessage="Không tìm thấy hồ sơ nào phù hợp với bộ lọc."
       />
 
-      {/* Modal Thẩm định hồ sơ */}
+      {/* Modal 1: Thẩm định hồ sơ */}
       {reviewingApp && (
         <Modal
           isOpen={Boolean(reviewingApp)}
@@ -315,6 +414,52 @@ export default function ApplicationManagementPage() {
                   loading={submittingReview}
                 >
                   Xác nhận quyết định
+                </AppButton>
+              </div>
+            </form>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal 2: Xếp lớp nhập học */}
+      {enrollingApp && (
+        <Modal
+          isOpen={Boolean(enrollingApp)}
+          onClose={() => setEnrollingApp(null)}
+          title={`Xếp lớp nhập học chính thức: ${enrollingApp.applicationCode}`}
+          size="md"
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>
+              Hồ sơ của học viên <strong>{enrollingApp.fullName}</strong> (Hạng {enrollingApp.category.code}) đã được phê duyệt. Vui lòng chọn Lớp đào tạo để chính thức xếp lớp và hoàn thiện thủ tục nhập học.
+            </p>
+
+            <form onSubmit={handleSubmitEnroll} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <AppSelect
+                label="Chọn Lớp đào tạo đang mở"
+                required
+                value={String(classId)}
+                onChange={(e) => setClassId(Number(e.target.value))}
+                options={[
+                  { value: '1', label: 'Lớp B1-2026-K01 — Cơ sở Xuân Thủy (Khai giảng 15/11/2026)' },
+                  { value: '2', label: 'Lớp A1-2026-K02 — Cơ sở Sân sát hạch số 1 (Khai giảng 10/11/2026)' },
+                  { value: '3', label: 'Lớp B-2026-K03 — Cơ sở Thượng Cát (Khai giảng 20/11/2026)' },
+                ]}
+              />
+
+              <AppTextarea
+                label="Ghi chú xếp lớp (tùy chọn)"
+                value={enrollNote}
+                onChange={(e) => setEnrollNote(e.target.value)}
+                placeholder="Ghi chú thêm về ca học, giáo viên phụ trách..."
+              />
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <AppButton variant="outline" type="button" onClick={() => setEnrollingApp(null)}>
+                  Hủy
+                </AppButton>
+                <AppButton variant="success" type="submit" loading={submittingEnroll}>
+                  Xác nhận Nhập học
                 </AppButton>
               </div>
             </form>

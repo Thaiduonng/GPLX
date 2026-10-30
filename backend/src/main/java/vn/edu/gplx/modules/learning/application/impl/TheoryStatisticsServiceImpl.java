@@ -47,6 +47,8 @@ public class TheoryStatisticsServiceImpl implements TheoryStatisticsService {
 
         List<Long> answeredQuestionIds = practiceAnswerRepository.findAnsweredQuestionIdsByUserId(userId);
         Set<Long> uniqueAnsweredSet = new HashSet<>(answeredQuestionIds);
+        Set<Long> activeIds = new HashSet<>(questionRepository.findAll().stream().map(TheoryQuestion::getId).toList());
+        uniqueAnsweredSet.retainAll(activeIds);
         long questionsLearned = uniqueAnsweredSet.size();
         double completionRate = totalQuestionsInBank > 0 ? (double) questionsLearned / totalQuestionsInBank * 100 : 0.0;
 

@@ -49,7 +49,7 @@ export const TheoryOverviewTab: React.FC<TheoryOverviewTabProps> = ({
             Hệ thống Học tập & Thi thử Lý thuyết GPLX
           </h2>
           <p style={{ margin: 0, opacity: 0.9, fontSize: '0.95rem', maxWidth: '640px' }}>
-            Chuẩn hóa theo bộ 600 câu hỏi của Cục Đường bộ Việt Nam. Phân chia rõ ràng 7 chương nghiệp vụ,
+            Chuẩn hóa theo bộ 600 câu hỏi của Cục Cảnh sát giao thông. Phân chia rõ ràng 6 chương nghiệp vụ,
             60 câu hỏi điểm liệt và cấu trúc đề thi chính thức cho từng hạng giấy phép lái xe.
           </p>
         </div>
@@ -125,7 +125,7 @@ export const TheoryOverviewTab: React.FC<TheoryOverviewTabProps> = ({
         >
           <div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0, color: '#1e293b' }}>
-              Tiến độ theo 7 chương lý thuyết chuẩn Cục Đường bộ
+              Tiến độ theo 6 chương lý thuyết theo PDF 2025
             </h3>
             <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.875rem' }}>
               Hoàn thành đầy đủ các chương để tự tin đạt điểm tối đa trong kỳ sát hạch chính thức
@@ -230,7 +230,7 @@ export const TheoryOverviewTab: React.FC<TheoryOverviewTabProps> = ({
             })
           ) : (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
-              Đang đồng bộ danh mục 7 chương lý thuyết...
+              Đang đồng bộ danh mục 6 chương lý thuyết...
             </div>
           )}
         </div>

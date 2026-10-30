@@ -1,3 +1,4 @@
+import { LICENSE_CATEGORIES } from '../../components/home/categoryConfig';
 import React, { useState, useEffect, useCallback } from 'react';
 import { learningService } from '../../services/learningService';
 import type {
@@ -20,7 +21,7 @@ interface QuestionAnswerState {
 
 export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMode = 'PARALYSIS' }) => {
   const [mode, setMode] = useState<PracticeMode>(initialMode);
-  const [category, setCategory] = useState<string>('B1');
+  const [category, setCategory] = useState<string>('B');
   const [topicId, setTopicId] = useState<number | null>(null);
   const [topics, setTopics] = useState<TheoryTopic[]>([]);
 
@@ -276,11 +277,7 @@ export const TheoryPracticeTab: React.FC<TheoryPracticeTabProps> = ({ initialMod
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   options={[
-                    { value: 'A1', label: 'Hạng A1 (Mô tô 2 bánh)' },
-                    { value: 'A2', label: 'Hạng A2 (Mô tô PKL)' },
-                    { value: 'B1', label: 'Hạng B1 (Ô tô số tự động)' },
-                    { value: 'B', label: 'Hạng B / B2 (Ô tô chở người & tải nhẹ)' },
-                    { value: 'C', label: 'Hạng C (Ô tô tải lớn)' },
+                    ...LICENSE_CATEGORIES.map(c => ({ value: c.code, label: c.fullName })),
                   ]}
                 />
               </div>

@@ -54,7 +54,7 @@ public class TheoryLearningController {
     }
 
     // --- TOPICS ---
-    @Operation(summary = "Lấy danh sách 7 chương lý thuyết và tiến độ người học")
+    @Operation(summary = "Lấy danh sách chương của ngân hàng lý thuyết hiện hành và tiến độ người học")
     @GetMapping("/topics")
     public ResponseEntity<ApiResponse<List<TopicResponse>>> getTopics(
             @AuthenticationPrincipal UserPrincipal userPrincipal) {

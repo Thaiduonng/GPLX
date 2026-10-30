@@ -60,3 +60,6 @@ generate_*.py
 __pycache__/
 *.pyc
 *.pyo
+
+# Local database backups may contain personal data
+.local-backups/

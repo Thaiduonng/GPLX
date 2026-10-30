@@ -11,7 +11,11 @@ public interface CourseService {
 
     List<CourseResponse> getAllActiveCourses();
 
+    List<CourseResponse> getFeaturedCourses();
+
     CourseResponse getCourseById(Long id);
+
+    CourseResponse getCourseBySlug(String slug);
 
     List<LessonResponse> getLessonsByCourse(Long courseId, Long userId);
 

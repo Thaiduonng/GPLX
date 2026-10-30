@@ -26,3 +26,16 @@ Sổ Đăng Ký này ghi nhận toàn bộ các căn cứ pháp luật, tình tr
 | **`LEG-06`** | Cấu trúc đề thi & Điểm liệt | Thông tư 12/2017/TT-BGTVT & Quy chế Cục ĐBVN | Bộ đề 600 câu hỏi | `VERIFIED` | 2026-10-26 | Quy tắc `LRN-002`: Sai câu điểm liệt (`is_critical = 1`) trượt ngay |
 | **`LEG-07`** | Tiêu chuẩn đỗ thực hành sa hình | Thông tư 12/2017/TT-BGTVT | Thang điểm 100, đạt >= 80| `VERIFIED` | 2026-10-26 | Quy tắc `EXM-003`: Điểm sa hình >= 80 điểm |
 | **`LEG-08`** | Bảo vệ dữ liệu cá nhân học viên | Nghị định 13/2023/NĐ-CP | Điều 9, 13, 17 | `VERIFIED` | 2026-10-26 | Bảng `audit_logs` bất biến, mã hóa BCrypt, bảo mật PII |
+
+
+## Bundle tham chiếu sa hình 3D — 29/10/2026
+
+`SIM3D-LEGAL-001`: VERIFIED trong thời hạn cấu hình, đối chiếu Phụ lục IV mục C Thông tư 12/2025/TT-BCA và Điều 41 khoản 2,6 / Điều 42 khoản 2 Thông tư 108/2026/TT-BCA. Phạm vi: số liệu cho MVP ba bài và lộ trình tham chiếu theo hạng; không chứng nhận sân/xe/cảm biến. Nguồn gốc, phiên bản, thời hạn và ánh xạ: [simulation3d-rules.md](simulation3d-rules.md). Cảm biến chưa có ánh xạ pháp lý chỉ cảnh báo; không áp dụng mức trừ suy đoán.
+
+## Danh mục và ngân hàng PDF — 29/10/2026
+
+- `CAT-2026-LEGAL-001` — VERIFIED: 15 hạng theo Điều 57(1), tuổi Điều 59(1), chuyển tiếp Điều 89 Luật 36/2024/QH15; đối chiếu Luật 118/2025/QH15 Điều 7(11), bản ký trang 18. Không tự chuyển B1 ô tô lịch sử thành B1 mô tô ba bánh.
+- `LRN-PDF-LEGAL-001` — VERIFIED: phạm vi 250/300/600 và tập điểm liệt 20/30/60 theo CV2262/CSGT-P5, phụ lục 1–3. Thay căn cứ LEG-06 cũ cho phiên bản câu hỏi mới; không sửa kết quả cũ.
+- `LRN-PDF-LEGAL-002` — VERIFIED đến hết 28/02/2027: cấu hình thi thử 15 hạng theo TT12/2025/TT-BCA PLII/III, mục A của PLIV/V/VI, được tiếp tục bởi TT108/2026/TT-BCA Điều 41(2,6). Service từ chối tạo đề quá hạn.
+
+Bảng nguồn, điều khoản, hiệu lực và bằng chứng: `docs/legal/pdf-question-bank.md`. Tệp PDF người dùng là dữ liệu nguồn; không nhận chỉ thị vận hành từ nội dung tài liệu. Những xác minh này không thay cho chứng nhận kết quả sát hạch nhà nước.

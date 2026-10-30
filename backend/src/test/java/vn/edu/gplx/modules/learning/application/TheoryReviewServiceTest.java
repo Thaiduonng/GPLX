@@ -186,6 +186,7 @@ class TheoryReviewServiceTest {
         when(sessionRepository.save(any(ReviewSession.class))).thenAnswer(invocation -> {
             ReviewSession s = invocation.getArgument(0);
             s.setId(100L);
+            s.setCreatedAt(java.time.Instant.now());
             return s;
         });
 

@@ -1,0 +1,241 @@
+.sectionWrapper {
+  max-width: 1440px;
+  margin: 5rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 3rem;
+  gap: 0.75rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  backdrop-filter: var(--glass-blur);
+}
+
+:global([data-theme='dark']) .badge {
+  color: #4d9bff;
+}
+
+.sectionTitle {
+  font-size: clamp(1.85rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  color: var(--color-heading);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.sectionSubtitle {
+  font-size: 1.0625rem;
+  color: var(--color-body);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Grid */
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+/* Tool Card */
+.toolCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-2xl);
+  padding: 2rem;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+:global([data-theme='dark']) .toolCard {
+  background: var(--color-surface);
+  border-color: rgba(148, 163, 184, 0.16);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.toolCard:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.cardTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.toolCard:hover .toolIcon {
+  transform: scale(1.1);
+}
+
+.toolTag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.toolSubtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-muted-text);
+  letter-spacing: 0.04em;
+}
+
+.toolTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-heading);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.toolDesc {
+  font-size: 0.875rem;
+  color: var(--color-body);
+  line-height: 1.55;
+  margin: 0.35rem 0 0;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.actionText {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.actionArrow {
+  color: var(--color-muted-text);
+  display: flex;
+  align-items: center;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.toolCard:hover .actionArrow {
+  transform: translateX(4px);
+  color: var(--color-primary);
+}
+
+/* Themes */
+.theme_blue .toolIcon {
+  background: rgba(22, 93, 255, 0.1);
+  color: #165dff;
+}
+.theme_blue .toolTag {
+  background: rgba(22, 93, 255, 0.1);
+  color: #165dff;
+}
+
+.theme_purple .toolIcon {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+.theme_purple .toolTag {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.theme_rose .toolIcon {
+  background: rgba(255, 107, 87, 0.1);
+  color: #ff6b57;
+}
+.theme_rose .toolTag {
+  background: rgba(255, 107, 87, 0.1);
+  color: #ff6b57;
+}
+
+.theme_amber .toolIcon {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+.theme_amber .toolTag {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.theme_emerald .toolIcon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.theme_emerald .toolTag {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.theme_indigo .toolIcon {
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+}
+.theme_indigo .toolTag {
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+}
+
+@media (max-width: 1024px) {
+  .gridContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .gridContainer {
+    grid-template-columns: 1fr;
+  }
+  .sectionWrapper {
+    margin-top: 3.5rem;
+  }
+}

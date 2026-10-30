@@ -9,6 +9,7 @@ import { TheoryAdminConfigTab } from '../features/theory/TheoryAdminConfigTab';
 import { learningService } from '../services/learningService';
 import type { TheoryStatistics, PracticeMode } from '../types/learning';
 import { useAuth } from '../features/auth/AuthContext';
+import { canAccessPath } from '../features/navigation/navigation';
 
 export default function TheoryExamPage() {
   const { user } = useAuth();
@@ -46,11 +47,11 @@ export default function TheoryExamPage() {
     setActiveTab('TOPICS');
   };
 
-  const isStaffOrAdmin = user?.roles?.includes('ADMIN') || user?.roles?.includes('STAFF');
+  const isStaffOrAdmin = canAccessPath('/admin/theory', user?.roles ?? []);
 
   const tabItems = [
     { id: 'OVERVIEW', label: '📊 Tổng quan & Tiến độ' },
-    { id: 'TOPICS', label: '📖 Học theo 7 chương' },
+    { id: 'TOPICS', label: '📖 Học theo 6 chương' },
     { id: 'PRACTICE', label: '🎯 Rèn luyện 8 chế độ' },
     { id: 'MOCK_EXAM', label: '🚗 Thi thử theo hạng' },
     { id: 'REVIEW', label: '🔄 Ôn tập câu sai & Đánh dấu' },
@@ -61,7 +62,7 @@ export default function TheoryExamPage() {
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <PageHeader
         title="Học tập, Rèn luyện & Thi thử Lý thuyết GPLX"
-        description="Hệ thống chuẩn hóa theo bộ 600 câu hỏi sát hạch lý thuyết lái xe của Cục Đường bộ Việt Nam"
+        description="Hệ thống chuẩn hóa theo bộ 600 câu hỏi sát hạch lý thuyết lái xe của Cục Cảnh sát giao thông"
       />
 
       <Tabs

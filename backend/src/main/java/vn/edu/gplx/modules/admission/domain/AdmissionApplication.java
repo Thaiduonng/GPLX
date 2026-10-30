@@ -12,6 +12,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import vn.edu.gplx.modules.identity.domain.User;
+import vn.edu.gplx.modules.learning.domain.Course;
+import vn.edu.gplx.modules.training.domain.TrainingClass;
 import vn.edu.gplx.shared.domain.BaseEntity;
 
 import java.time.Instant;
@@ -26,12 +29,19 @@ public class AdmissionApplication extends BaseEntity {
     @Column(name = "application_code", nullable = false, unique = true, length = 50)
     private String applicationCode;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "tracking_token", length = 100)
+    private String trackingToken;
+
+    @Column(name = "user_id")
     private Long userId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
     private LicenseCategory category;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "course_id")
+    private Course course;
 
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
@@ -55,6 +65,12 @@ public class AdmissionApplication extends BaseEntity {
     @Column(name = "address", nullable = false, length = 255)
     private String address;
 
+    @Column(name = "preferred_schedule", length = 50)
+    private String preferredSchedule;
+
+    @Column(name = "training_location", length = 150)
+    private String trainingLocation;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private ApplicationStatus status = ApplicationStatus.SUBMITTED;
@@ -67,6 +83,20 @@ public class AdmissionApplication extends BaseEntity {
 
     @Column(name = "reviewed_at")
     private Instant reviewedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_staff_id")
+    private User assignedStaff;
+
+    @Column(name = "consent_data_processing", nullable = false)
+    private boolean consentDataProcessing = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enrolled_class_id")
+    private TrainingClass enrolledClass;
+
+    @Column(name = "enrolled_at")
+    private Instant enrolledAt;
 
     @Version
     @Column(name = "version", nullable = false)
@@ -95,16 +125,12 @@ public class AdmissionApplication extends BaseEntity {
         this.email = email;
         this.address = address;
         this.status = ApplicationStatus.SUBMITTED;
+        this.consentDataProcessing = true;
     }
 
     public void addDocument(AdmissionDocument document) {
         documents.add(document);
         document.setApplication(this);
-    }
-
-    public void addStatusHistory(ApplicationStatus fromStatus, ApplicationStatus toStatus, String note, Long changedBy) {
-        ApplicationStatusHistory history = new ApplicationStatusHistory(this, fromStatus, toStatus, note, changedBy);
-        statusHistories.add(history);
     }
 
     public void addStatusHistory(ApplicationStatusHistory history) {
@@ -118,6 +144,14 @@ public class AdmissionApplication extends BaseEntity {
 
     public void setApplicationCode(String applicationCode) {
         this.applicationCode = applicationCode;
+    }
+
+    public String getTrackingToken() {
+        return trackingToken;
+    }
+
+    public void setTrackingToken(String trackingToken) {
+        this.trackingToken = trackingToken;
     }
 
     public Long getUserId() {
@@ -134,6 +168,14 @@ public class AdmissionApplication extends BaseEntity {
 
     public void setCategory(LicenseCategory category) {
         this.category = category;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
     }
 
     public String getFullName() {
@@ -192,6 +234,22 @@ public class AdmissionApplication extends BaseEntity {
         this.address = address;
     }
 
+    public String getPreferredSchedule() {
+        return preferredSchedule;
+    }
+
+    public void setPreferredSchedule(String preferredSchedule) {
+        this.preferredSchedule = preferredSchedule;
+    }
+
+    public String getTrainingLocation() {
+        return trainingLocation;
+    }
+
+    public void setTrainingLocation(String trainingLocation) {
+        this.trainingLocation = trainingLocation;
+    }
+
     public ApplicationStatus getStatus() {
         return status;
     }
@@ -222,6 +280,38 @@ public class AdmissionApplication extends BaseEntity {
 
     public void setReviewedAt(Instant reviewedAt) {
         this.reviewedAt = reviewedAt;
+    }
+
+    public User getAssignedStaff() {
+        return assignedStaff;
+    }
+
+    public void setAssignedStaff(User assignedStaff) {
+        this.assignedStaff = assignedStaff;
+    }
+
+    public boolean isConsentDataProcessing() {
+        return consentDataProcessing;
+    }
+
+    public void setConsentDataProcessing(boolean consentDataProcessing) {
+        this.consentDataProcessing = consentDataProcessing;
+    }
+
+    public TrainingClass getEnrolledClass() {
+        return enrolledClass;
+    }
+
+    public void setEnrolledClass(TrainingClass enrolledClass) {
+        this.enrolledClass = enrolledClass;
+    }
+
+    public Instant getEnrolledAt() {
+        return enrolledAt;
+    }
+
+    public void setEnrolledAt(Instant enrolledAt) {
+        this.enrolledAt = enrolledAt;
     }
 
     public Long getVersion() {

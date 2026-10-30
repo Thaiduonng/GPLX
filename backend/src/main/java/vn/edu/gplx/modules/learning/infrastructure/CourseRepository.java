@@ -12,7 +12,11 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     Optional<Course> findByCode(String code);
 
+    Optional<Course> findBySlug(String slug);
+
     List<Course> findByIsActiveTrue();
+
+    List<Course> findByFeaturedTrueAndIsActiveTrue();
 
     List<Course> findByCategoryIdAndIsActiveTrue(Long categoryId);
 }

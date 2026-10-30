@@ -105,10 +105,14 @@ public class TheoryTopicServiceImpl implements TheoryTopicService {
                 : Collections.emptySet();
 
         Page<TheoryQuestion> page = questionRepository.searchQuestionsAdvanced(topicId, categoryCode, isParalysis, keyword, pageable);
-        return page.map(q -> toDetailResponse(q, topic.getName(), bookmarkedIds.contains(q.getId())));
+        return page.map(q -> toDetailResponse(q, topic.getName(), bookmarkedIds.contains(q.getId()), categoryCode));
     }
 
     private QuestionDetailResponse toDetailResponse(TheoryQuestion q, String topicName, boolean isBookmarked) {
+        return toDetailResponse(q, topicName, isBookmarked, null);
+    }
+
+    private QuestionDetailResponse toDetailResponse(TheoryQuestion q, String topicName, boolean isBookmarked, String category) {
         List<StudyAnswerOptionResponse> answers = q.getAnswers().stream()
                 .map(a -> new StudyAnswerOptionResponse(a.getId(), a.getAnswerText(), a.getOrderIndex(), a.isCorrect()))
                 .toList();
@@ -122,7 +126,7 @@ public class TheoryTopicServiceImpl implements TheoryTopicService {
                 q.getContent(),
                 q.getImageUrl(),
                 q.getExplanation(),
-                q.isParalysis(),
+                q.isParalysisForCategory(category),
                 q.getLegalReference(),
                 isBookmarked,
                 answers

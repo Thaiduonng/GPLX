@@ -233,3 +233,141 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P17-05`** | Backend Unit Tests Suite | TSK-P17-03 | `DONE` | Khởi tạo `TheoryReviewServiceTest`: 5 kịch bản kiểm thử (Leitner thăng/hạ hộp khi trả lời đúng/sai, reset chu kỳ, Dashboard cho học viên mới, tạo phiên ôn thông minh, hoàn thành phiên và gợi ý bước tiếp theo). |
 | **`TSK-P17-06`** | Frontend Giao Diện Ôn Tập React 19 + TypeScript | TSK-P17-04 | `DONE` | `TheoryReviewPage.tsx` và `reviewService.ts`: Dashboard 6 thẻ KPI, 6 tab nghiệp vụ (Tổng quan, Ôn câu sai, Ôn điểm liệt, Ôn câu đã lưu, Ôn theo 7 chủ đề, Lịch sử phiên ôn) + Màn hình phiên ôn trực tiếp với phản hồi tức thì, Leitner box level và giải thích pháp lý. |
 | **`TSK-P17-07`** | Điều Hướng Routing, Layout & Kiểm Thử Tích Hợp E2E | TSK-P17-05..06 | `DONE` | Tích hợp route `/student/review` và `/theory-review` vào `App.tsx`; bổ sung liên kết vào Header, Drawer góc trái, Workspace bar học viên và `HomePage.tsx`; đóng gói Docker container và chạy kiểm thử E2E 8/8 bước thành công 100%. |
+
+
+---
+
+## Danh mục Tasks — Phase 18: Phân Hệ Đào Tạo Xe Thô (Raw Vehicle Familiarization Training — Full-Stack)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P18-01`** | Nghiệp Vụ & Pháp Lý Đào Tạo Xe Thô & Mô Hình Tiến Độ Độc Lập | TSK-P17-07 | `DONE` | Xây dựng tài liệu `docs/training/raw-vehicle-training.md`, `docs/training/training-progress-model.md`, `docs/legal/raw-vehicle-training-rules.md`; xác định rõ "Xe thô" là thuật ngữ nội bộ (`INTERNAL_RULE`), tiến độ độc lập hoàn toàn với lý thuyết (học song song, không khóa tiến độ, hoàn thành xe thô không tự động đủ điều kiện dự thi). |
+| **`TSK-P18-02`** | Database Migration V13 & Seed Khung 8 Giai Đoạn Kỹ Năng | TSK-P18-01 | `DONE` | Flyway V13 tạo 6 bảng (`raw_vehicle_stages`, `raw_vehicle_enrollments`, `raw_vehicle_sessions`, `raw_vehicle_session_attendees`, `raw_vehicle_skill_evaluations`, `raw_vehicle_session_change_logs`); seed 8 giai đoạn làm quen xe ban đầu chuẩn hóa thời lượng và ghi chú an toàn. |
+| **`TSK-P18-03`** | Domain Entities, Enums & Repositories Backend | TSK-P18-02 | `DONE` | Khởi tạo 6 JPA Entities, 4 Enums (`RawVehicleEnrollmentStatus`, `RawVehicleSessionStatus`, `AttendeeAttendanceStatus`, `SkillEvaluationStatus`) và 6 Spring Data JPA Repositories theo chuẩn Modular Monolith Rule 02. |
+| **`TSK-P18-04`** | Application Service, An Toàn Kiểm Định FLT-001 & Thời Lượng Thực Tế | TSK-P18-03 | `DONE` | `RawVehicleTrainingServiceImpl`: Kiểm tra chặn xếp trùng lịch giáo viên, chặn phương tiện bảo dưỡng hoặc hết hạn kiểm định an toàn (FLT-001); tính thời lượng thực tế chính xác theo phút giữa giờ bắt đầu - kết thúc thực tế; chỉ tích lũy thời lượng cho học viên có mặt (`PRESENT`); ghi nhận audit log thay đổi lịch. |
+| **`TSK-P18-05`** | REST API Controllers Cho 3 Phân Quyền (Học Viên, Giáo Viên, Quản Lý) | TSK-P18-04 | `DONE` | `RawVehicleStudentController` (`/student/**`), `RawVehicleInstructorController` (`/instructor/**`), `RawVehicleManagerController` (`/manager/**`) cung cấp đầy đủ API nghiệp vụ kèm bảo mật Spring Security RBAC. |
+| **`TSK-P18-06`** | Backend Unit Tests Suite (RawVehicleTrainingServiceTest) | TSK-P18-04 | `DONE` | Khởi tạo 6 unit tests bao phủ 100% kịch bản trọng yếu: Đăng ký học viên, chặn trùng lặp active enrollment, chặn xung đột giáo viên, chặn xe hết hạn đăng kiểm an toàn, điểm danh & tích lũy phút thực tế, đánh giá kỹ năng 1-5 sao. Kết quả: 6/6 tests PASS. |
+| **`TSK-P18-07`** | Frontend Giao Diện React 19 + TypeScript (3 Trang Chuyên Biệt) | TSK-P18-05 | `DONE` | `rawVehicleService.ts`, `rawVehicle.ts`, `RawVehicleStudentPage.tsx`, `RawVehicleInstructorPage.tsx`, `RawVehicleManagerPage.tsx`, `RawVehicle.module.css` theo phong cách `ui-ux-pro-max`, hỗ trợ điểm danh, tính thời lượng, đánh giá 1-5 sao và modal audit log. |
+| **`TSK-P18-08`** | Tích Hợp Routing, MainLayout (Header, Drawer, Workspace) & Đóng Gói Docker | TSK-P18-06..07 | `DONE` | Bổ sung 3 routes mới được bảo vệ bởi `ProtectedRoute` trong `App.tsx`; tích hợp vào Header điều hướng, thanh Drawer danh mục góc trái và Workspace Bar phân quyền; build Docker frontend và backend thành công 100%. |
+
+---
+
+## Danh mục Tasks — Phase 19: Thu Thập 600 Câu Chuẩn CSGT, Tái Cấu Trúc Thi Thử Vào Ôn Tập & Giao Diện Mới
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P19-01`** | Thu Thập & Xác Thực 600 Câu Hỏi CSGT (CV 2262/CSGT-P5) | TSK-P18-08 | `DONE` | Thu thập 600 câu hỏi, 60 câu điểm liệt, 1.858 đáp án và 315 ảnh sa hình/biển báo; kiểm định 24/24 test bằng script xác thực tự động; nạp trọn vẹn dữ liệu UTF-8 vào MySQL 8.4 LTS. |
+| **`TSK-P19-02`** | Chuyển Đổi "Thi Thử 600 Câu" Sang "Lý Thuyết" & Tích Hợp 20 Bộ Đề Vào Ôn Tập | TSK-P19-01 | `DONE` | Thay liên kết `/theory-exam` thành `/theory` trên thanh điều hướng; chuyển chức năng thi thử ngẫu nhiên từ 20 bộ đề mẫu chuẩn vào module Ôn tập (`/student/review?tab=MOCK_EXAM_SETS`) với đồng hồ đếm ngược, bảng 35 ô số và phân tích kết quả đỗ/trượt điểm liệt. |
+| **`TSK-P19-03`** | Tái Thiết Kế Header & Hệ Thống Theme Light/Dark | TSK-P19-02 | `DONE` | Header hiện đại: Logo tròn 4 màu CSGT "600 Ôn Thi GPLX", menu trung tâm dạng Pill, nút chuyển đổi Light/Dark theme đồng bộ `localStorage` và CSS tokens. |
+| **`TSK-P19-04`** | Tái Thiết Kế Trang Chủ Theo Mẫu Cổng Ôn Thi CSGT 2026 | TSK-P19-03 | `DONE` | Hero Ribbon CSGT, Tiêu đề tích xanh chuẩn, Floating Config Capsule chọn hạng (A1, A2, B1, B, C) kèm 4 chỉ số đề thi thời gian thực, 2 Card Hero Lộ trình đậu bằng & Thi thử Online gradient, bố trí 4 phân hệ đào tạo sinh thái. |
+| **`TSK-P19-05`** | Biên Dịch Production & Đóng Gói Docker Compose | TSK-P19-04 | `DONE` | `tsc -b && vite build` hoàn tất 0 lỗi; container frontend `gplx-frontend:3000` và backend `gplx-backend:8088` chạy Healthy, phản hồi HTTP 200 OK. |
+| **`TSK-P19-06`** | Tích Hợp Motion Design & Animation Động Cho Giao Diện | TSK-P19-05 | `DONE` | Ambient Glow pulse 8s, Badge tích xanh và Ribbon nhịp thở, Sóng định vị radar Trạm 1 (`radarPing`), Xe ô tô lăn bánh nhấp nhô (`floatCar`), Thẻ thi thử gradient chuyển sắc & CTA Shimmer ánh sáng quét, Micro-interactions Logo/Theme/Cards hover lift. |
+
+---
+
+## Danh mục Tasks — Phase 20: Xây Dựng Giao Diện Ôn Thi EdTech Phong Cách OnThiGPLX
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P20-01`** | Phân Hệ Tra Cứu Biển Báo Giao Thông Đường Bộ (`/road-signs`) | TSK-P19-06 | `DONE` | 30+ biển báo theo QCVN 41:2019/BGTVT, phân chia 5 nhóm (Cấm, Nguy hiểm, Hiệu lệnh, Chỉ dẫn, Phụ), SVG vector render, thanh tìm kiếm mã/tên, modal phóng to chi tiết. |
+| **`TSK-P20-02`** | Phân Hệ Mẹo Thi Lý Thuyết & Sa Hình (`/tips`) | TSK-P20-01 | `DONE` | Kho mẹo thi: Từ khóa vàng, Quy tắc 5 bước giải sa hình (Nhất chớm, Nhì ưu...), Cấm nhỏ cấm lớn, Độ tuổi, Tốc độ, Khoảng cách và 60 câu điểm liệt. |
+| **`TSK-P20-03`** | Tái Cấu Trúc Trang Chủ & 6 Box Chức Năng Chuẩn OnThiGPLX | TSK-P20-02 | `DONE` | Bổ sung 6 khối chức năng EdTech trên trang chủ, quy trình 4 bước ôn thi, FAQ giải đáp thắc mắc và Footer hệ thống đầy đủ thông tin pháp lý. |
+| **`TSK-P20-04`** | Biên Dịch & Đóng Gói Container Frontend Nginx | TSK-P20-03 | `DONE` | `tsc -b && vite build` hoàn tất 0 lỗi; container `gplx-frontend:3000` chạy Healthy, kiểm thử HTTP 200 OK. |
+
+---
+
+## Danh mục Tasks — Phase 21: Chuẩn Hóa Toàn Diện Giao Diện Bằng UI/UX Pro Max
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P21-01`** | Chuẩn Hóa Bộ Icons SVG Đồng Bộ & Pre-Delivery Checklist | TSK-P20-04 | `DONE` | Bổ sung đầy đủ 10+ icon SVG mới trong `Icons.tsx` (`Lightbulb`, `Clock`, `Zap`, `AlertOctagon`, `RotateCcw`, `Trophy`, `HelpCircle`, `Check`...); loại bỏ 100% emoji rời rạc trong giao diện. |
+| **`TSK-P21-02`** | Tái Cấu Trúc Bento Grid & Visual Hierarchy Toàn Hệ Thống | TSK-P21-01 | `DONE` | Chuẩn hóa Bento Grid trên Trang chủ, Mẹo thi và Biển báo; đồng nhất độ tương phản WCAG 2.1 AA, hover state mượt mà, focus-visible cho bàn phím. |
+| **`TSK-P21-03`** | Đóng Gói Container Frontend & Kiểm Thử Runtime | TSK-P21-02 | `DONE` | `tsc -b && vite build` hoàn tất 0 lỗi; container `gplx-frontend:3000` phản hồi HTTP 200 OK, đồng bộ Dark/Light theme. |
+
+---
+
+## Danh mục Tasks — Phase 22: Tái Cấu Trúc Component & Visual Design Modern SaaS (Blue–Purple Gradient & Soft Glassmorphism)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P22-01`** | Tái Cấu Trúc Kiến Trúc Component Độc Lập | TSK-P21-03 | `DONE` | Tách rời các module giao diện thành các components độc lập tại `frontend/src/components/home/` và `frontend/src/components/layout/`: `Navbar.tsx`, `HeroSection.tsx`, `LicenseCategorySelector.tsx`, `StatisticsBar.tsx`, `ConfigCapsuleBar.tsx`, `LearningRoadmapCard.tsx`, `MockExamCard.tsx`, `EdTechToolsSection.tsx`, `StudyWorkflowSection.tsx`, `FAQSection.tsx`, `ThemeToggle.tsx`, `Footer.tsx`. |
+| **`TSK-P22-02`** | Hệ Thống Token Màu Sắc Chuẩn Xác Theo Master Prompt | TSK-P22-01 | `DONE` | Cập nhật `tokens.css` với hệ màu Modern SaaS EdTech: Light Mode (nền gradient `#DCEBFF` đến `#F0E4FF`, primary `#165DFF`, surface kính mờ `rgba(255,255,255,0.82)`, viền `rgba(255,255,255,0.75)`), Dark Mode (nền gradient `#0B1B46` đến `#17112F`, surface `#172544`, accent `#4D9BFF`, violet `#8B7CFF`, viền `rgba(148,163,184,0.18)`). |
+| **`TSK-P22-03`** | Bố Trí Layout Desktop Tỷ Lệ 62% / 38% & Soft Glassmorphism | TSK-P22-02 | `DONE` | Thiết lập Bento Grid chuẩn với tỷ lệ 62% Lộ trình học 3 trạm và 38% Thi thử Online gradient, bo góc 24-28px, hiệu ứng đổ bóng đa tầng và kính mờ blur 20px. |
+| **`TSK-P22-04`** | Tích Hợp Navbar 78px & Footer Chuẩn SaaS | TSK-P22-03 | `DONE` | Navbar kính mờ 78px, logo tròn 600 đa sắc, text thương hiệu *"Ôn Thi GPLX"*, menu điều hướng pill, social Facebook/TikTok, ThemeToggle, tích hợp đầy đủ vào `MainLayout.tsx` và `Footer.tsx`. |
+| **`TSK-P22-05`** | Biên Dịch TypeScript, Build & Kiểm Thử Runtime Container | TSK-P22-04 | `DONE` | `tsc -b && vite build` thành công 0 lỗi; container Docker `gplx-frontend:3000` chạy Healthy, phản hồi HTTP 200 OK. |
+
+---
+
+## Danh mục Tasks — Phase 23: Phân Hệ Quảng Cáo & Tiếp Nhận, Quản Lý Hồ Sơ Đào Tạo Lái Xe Điện Tử
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P23-01`** | Thiết Kế Giao Diện Quảng Cáo Tiếp Nhận Hồ Sơ (`AdmissionPromoSection`) | TSK-P22-05 | `DONE` | Khởi tạo component `AdmissionPromoSection.tsx` & `AdmissionPromoSection.module.css` theo phong cách Modern SaaS Soft Glassmorphism, 4 trụ cột nghiệp vụ (100% online, liên thông GKSK, theo dõi 4 giai đoạn, học phí điện tử). |
+| **`TSK-P23-02`** | Xây Dựng Thẻ Mô Phỏng Hồ Sơ Mẫu Trực Quan (Interactive Mockup) | TSK-P23-01 | `DONE` | Thẻ mô phỏng hồ sơ điện tử `HS-B2-2026-0899` với huy hiệu trạng thái `APPROVED` nhấp nháy, thông tin học viên, khóa học và stepper timeline 4 chặng thẩm định. |
+| **`TSK-P23-03`** | Nâng Cấp Điều Hướng Header & Tích Hợp Định Tuyến Song Song | TSK-P23-02 | `DONE` | Thêm nút *"Nộp hồ sơ"* có badge *"Trực tuyến"* trên `Navbar.tsx`; bổ sung route alias `/submit-application` song song với `/admissions/new` trong `App.tsx`. |
+| **`TSK-P23-04`** | Tích Hợp Vào Trang Chủ & Đóng Gói Container Docker | TSK-P23-03 | `DONE` | Tích hợp vào `HomePage.tsx`; biên dịch production (`tsc -b && vite build`) thành công 0 lỗi; container `gplx-frontend:3000` chạy Healthy, kiểm thử HTTP 200 OK. |
+
+---
+
+## Danh mục Tasks — Phase 24: Phân Hệ Toàn Diện Quảng Bá Khóa Học, CRM Tuyển Sinh & Quản Lý Hồ Sơ Học Viên
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P24-01`** | Migration V14 & Schema CRM Leads & Course Marketing | TSK-P23-04 | `DONE` | Tạo bảng `crm_leads`, `crm_lead_interactions`, mở rộng `courses` (marketing fields: slug, tuition_fee, expected_start_date...), mở rộng `admission_applications` (tracking_token, preferred_schedule, enrolled_class_id...), enum `RESUBMITTED`, `ENROLLED`. |
+| **`TSK-P24-02`** | Backend CRM Tuyển Sinh & Dashboard Analytics | TSK-P24-01 | `DONE` | Module `crm` với `CrmLeadService`, `CrmLeadController`, `PublicCrmController`: gửi yêu cầu tư vấn, cập nhật trạng thái leads, ghi log cuộc gọi/zalo, dashboard stats realtime. Unit test 3/3 PASS. |
+| **`TSK-P24-03`** | Backend Tuyển Sinh Trực Tuyến Công Khai & Xếp Lớp | TSK-P24-01 | `DONE` | `PublicAdmissionController`: Nộp hồ sơ công khai sinh mã `APP-...` & `tracking_token`, tra cứu an toàn theo SĐT/token che PII, bổ sung hồ sơ trực tuyến, API xếp lớp đào tạo `TrainingClass` cho cán bộ tuyển sinh. Unit test 6/6 PASS. |
+| **`TSK-P24-04`** | Frontend Danh Mục & Chi Tiết Khóa Học Tuyển Sinh | TSK-P24-02 | `DONE` | `CoursesPage.tsx` dạng thẻ khóa học kèm học phí/lịch khai giảng/địa điểm, `CourseDetailPage.tsx` theo slug SEO, `ConsultationModal.tsx` gửi yêu cầu tư vấn nhanh từ mọi trang. |
+| **`TSK-P24-05`** | Frontend Stepper Nộp Hồ Sơ Trực Tuyến 4 Bước (`/apply`) | TSK-P24-03 | `DONE` | `ApplyPage.tsx`: Chọn khóa học & lịch học, thông tin cá nhân & kiểm tra độ tuổi tự động, upload checklist tài liệu, đồng thuận xử lý dữ liệu Nghị định 13/2023/NĐ-CP, màn hình hoàn tất kèm mã hồ sơ & tracking token. |
+| **`TSK-P24-06`** | Frontend Tra Cứu Tiến Độ Hồ Sơ & Nộp Bổ Sung (`/application-status`) | TSK-P24-03 | `DONE` | `ApplicationStatusPage.tsx`: Tra cứu an toàn theo mã hồ sơ + SĐT/token, hiển thị stepper tiến trình, form upload tài liệu bổ sung khi trạng thái `SUPPLEMENT_REQUIRED`. |
+| **`TSK-P24-07`** | Frontend CRM Leads & Dashboard Tuyển Sinh Cán Bộ | TSK-P24-02 | `DONE` | `AdmissionDashboardPage.tsx` biểu đồ KPI tuyển sinh & chuyển đổi realtime; `CrmLeadsPage.tsx` quản lý khách hàng tiềm năng & tương tác; `ApplicationManagementPage.tsx` thẩm định và xếp lớp học viên chính thức. |
+| **`TSK-P24-08`** | Biên Dịch Production, Kiểm Thử Tích Hợp & Đóng Gói Docker Compose | TSK-P24-07 | `DONE` | `tsc -b && vite build` 0 lỗi; rebuild và restart các container; kiểm thử API endpoints qua curl/REST thành công; các service chạy Healthy. |
+
+
+## Module luyện sa hình trực tuyến với xe ảo
+
+| Task ID | Công việc | Trạng thái | Tiêu chí / hiện trạng |
+| :--- | :--- | :--- | :--- |
+| SIM-01 | Mô phỏng 2D theo hạng xe, điều khiển bàn phím/cảm ứng, bài luyện tuần tự | IN_PROGRESS | Đã triển khai engine, giao diện, route/menu; 6/6 unit tests PASS, TypeScript và Vite build Docker PASS; Chrome smoke bàn phím/nút giữ ga và danh mục thật PASS ở 375/768/1440px. Chờ cảm ứng thiết bị thật/đánh giá mô hình với giáo viên; chưa đạt DoD toàn bộ module. |
+| SIM-02 | Lưu lịch sử luyện và quản lý cấu hình xe/bài tập trên backend | TODO | Phân quyền theo tài khoản, migration, API và kiểm thử tích hợp. |
+| SIM-03 | Sa hình chuẩn và mô hình nâng cao | TODO | Xác minh pháp lý, đối chiếu với giáo viên trước khi mô hình hóa; không quy đổi dữ liệu mô phỏng thành DAT. |
+
+Thiết kế và giới hạn: `docs/architecture/driving-simulation.md`.
+
+
+## Điều hướng theo vai trò — 29/10/2026
+
+| Task ID | Công việc | Trạng thái | Tiêu chí / kiểm chứng |
+| :--- | :--- | :--- | :--- |
+| NAV-01 | Đồng bộ quyền frontend và tổ chức menu cho 7 vai trò | DONE | Bảng quyền dùng chung cho menu/route/alias, phân nhóm, menu tài khoản/footer, từ chối sai quyền, hợp nhiều vai trò. 12/12 unit tests PASS. |
+| NAV-02 | Khôi phục mục sa hình trên giao diện đang chạy | DONE | Lối tắt rõ trên desktop/mobile, sửa DTO active; production Docker build và recreate frontend. Chrome 21/21 tổ hợp vai trò/viewport + guest PASS, sa hình dùng danh mục thật, phím và nút giữ ga hoạt động. |
+
+Ma trận: `docs/architecture/role-navigation.md`. Phạm vi kiểm chứng frontend và giới hạn backend: `docs/testing/role-navigation.md`.
+
+
+## MVP sa hình 3D — 29/10/2026
+
+| Task ID | Công việc | Trạng thái | Phạm vi / nghiệm thu |
+| :--- | :--- | :--- | :--- |
+| SIM3D-01 | Kiến trúc, xe/sân 3D, vật lý cơ bản và input/camera | DONE (MVP) | Tách module, sáu hạng, ba camera, physics 60 Hz; TypeScript/build PASS, Chrome WebGL2/camera/input PASS. |
+| SIM3D-02 | Ba bài đầu, cảm biến, luật có phiên bản và HUD | DONE (MVP) | 58/58 kiểm thử phần bị ảnh hưởng PASS; Chrome phát hiện lỗi/trừ điểm PASS.  Xuất phát/người đi bộ/ngang dốc; bundle có nguồn và thời hạn, profile từng hạng, không suy đoán điểm phạt. |
+| SIM3D-03 | Lịch sử cục bộ, replay, nhập sân giới hạn và source ZIP độc lập | DONE (MVP) | Chrome lưu/reload/replay/seek/validation PASS.  5 phiên trong IndexedDB; snapshot/seek/import/export, schema Layout v1; ZIP đã npm ci + build trên container sạch. |
+| SIM3D-04 | Hoàn thiện toàn bộ bài thi, hiệu chuẩn xe/sân và backend | TODO | Các bài còn lại, detector đỏ/đường sắt/ghép xe, sân nhiều nhánh/CAD, động lực học nâng cao, hiệu chuẩn với giáo viên; server sở hữu dữ liệu/audit/chống sửa. Không coi MVP là hoàn thành toàn bộ ứng dụng sát hạch. |
+
+Hướng dẫn: `docs/training/simulation3d-mvp.md`; kiểm chứng và giới hạn: `docs/testing/simulation3d-mvp.md`.
+
+## Danh mục GPLX 2026 và nhập ngân hàng từ PDF — 29/10/2026
+
+| Task ID | Công việc | Trạng thái | Nghiệm thu |
+|---|---|---|---|
+| CAT-2026-01 | Chuẩn hóa 15 hạng, phân biệt B1 mô tô và B1 ô tô lịch sử | DONE | V15; trang /license-categories; bộ chọn dùng danh mục chung; giữ ID hồ sơ/khóa học cũ, 15 hạng hoạt động qua API thực. |
+| LRN-PDF-01 | Nhập 600 câu/đáp án/hình từ PDF người dùng | DONE | Phiên bản PDF-2025-6a6dab85; 6 chương; 318 câu có hình; mỗi câu một đáp án gạch chân; lưu hash/trang nguồn; V16 giữ 600 câu cũ. |
+| LRN-PDF-02 | Phạm vi và điểm liệt theo hạng, cấu trúc thi có thời hạn | DONE | 250/300/600 và 20/30/60 theo phụ lục; 15 cấu hình thi, V17 hết hạn 28/02/2027; 23 test Java, 4 Python, API thực 15 hạng đạt. |
+| INFRA-SEED-14 | Xử lý tham chiếu user mẫu CRM của V14 trên database trắng | TODO | Cài trắng hiện lỗi FK assigned_to trước V15; nâng cấp từ dữ liệu V14 hiện hữu đã đạt. Không sửa checksum migration đã chạy. |
+
+Kiến trúc, giới hạn và thao tác: `docs/architecture/pdf-question-bank.md`; pháp lý: `docs/legal/pdf-question-bank.md`; bằng chứng: `docs/testing/pdf-question-bank.md`.
+
+### Kiểm chứng trước commit — 30/10/2026
+
+- Backend: 96/96 tests PASS; frontend điều hướng/mô phỏng: 58/58 PASS; dữ liệu PDF: 4/4 PASS.
+- Production frontend build PASS trong container Node 20 sạch, cài dependency bằng `npm ci`; còn cảnh báo kích thước bundle.
+- INFRA-SEED-14 giữ TODO. Bộ test H2 không thay thế kiểm chứng Flyway trên MySQL trắng; đợt commit này không xác nhận đủ điều kiện triển khai production.

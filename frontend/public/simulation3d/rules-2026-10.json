@@ -1,0 +1,320 @@
+{
+  "version": "tt12-2025-transition-2026-10-29-mvp1",
+  "status": "VERIFIED",
+  "validFrom": "2025-03-01",
+  "validUntil": "2027-02-28",
+  "initialScore": 100,
+  "passScore": 80,
+  "stopTolerance": 0.5,
+  "maxRpm": 4000,
+  "startWarnSeconds": 20,
+  "startSuspendSeconds": 30,
+  "hillRestartSeconds": 30,
+  "rollbackLimit": 0.5,
+  "rules": {
+    "belt": {
+      "label": "Chưa thắt dây an toàn",
+      "points": 5,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.1"
+    },
+    "signal_missing": {
+      "label": "Chưa bật xi nhan trái khi xuất phát",
+      "points": 5,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.2"
+    },
+    "signal_late": {
+      "label": "Chưa tắt xi nhan sau vạch xuất phát",
+      "points": 5,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.3"
+    },
+    "start_delay": {
+      "label": "Chưa qua vạch xuất phát sau 20 giây",
+      "points": 5,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.5"
+    },
+    "start_timeout": {
+      "label": "Chưa qua vạch xuất phát sau 30 giây",
+      "points": 0,
+      "suspend": true,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.6"
+    },
+    "pedestrian_stop": {
+      "label": "Không dừng đúng vị trí nhường người đi bộ",
+      "points": 5,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.b.1–3"
+    },
+    "hill_early": {
+      "label": "Dừng trước vùng dừng trên dốc",
+      "points": 5,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.c.2"
+    },
+    "hill_missed": {
+      "label": "Không dừng trước vạch trên dốc",
+      "points": 0,
+      "suspend": true,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.c.1,3"
+    },
+    "hill_timeout": {
+      "label": "Quá thời gian khởi hành trên dốc",
+      "points": 0,
+      "suspend": true,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.c.4"
+    },
+    "rollback": {
+      "label": "Tụt dốc quá giới hạn",
+      "points": 0,
+      "suspend": true,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.c.5"
+    },
+    "collision": {
+      "label": "Va chạm vật cản trong sân mẫu",
+      "points": 0,
+      "suspend": true,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.8,b.5,c.6"
+    },
+    "curb": {
+      "label": "Bánh xe lên lề sân mẫu",
+      "points": 0,
+      "suspend": true,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.7,b.4"
+    },
+    "stall": {
+      "label": "Động cơ bị tắt trong khi thực hiện bài",
+      "points": 5,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.9,b.6,c.7"
+    },
+    "rpm": {
+      "label": "Vòng tua vượt giới hạn",
+      "points": 5,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.10,b.7,c.8"
+    },
+    "overspeed": {
+      "label": "Vượt tốc độ trong 3 giây",
+      "points": 1,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.2.a.11,b.8,c.9",
+      "repeatSeconds": 3
+    },
+    "hazard_stop": {
+      "label": "Không dừng khi có tín hiệu nguy hiểm",
+      "points": 10,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.1.d"
+    },
+    "hazard_lights": {
+      "label": "Chưa bật cảnh báo nguy hiểm",
+      "points": 10,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.1.d"
+    },
+    "hazard_clear": {
+      "label": "Chưa tắt cảnh báo trước khi đi tiếp",
+      "points": 10,
+      "suspend": false,
+      "status": "VERIFIED",
+      "source": "TT12-PLIV-C.2.2.1.d"
+    },
+    "line": {
+      "label": "Bánh xe chạm vạch dẫn đường (cảnh báo luyện tập)",
+      "points": 0,
+      "suspend": false,
+      "status": "NEEDS_VERIFICATION",
+      "source": "MVP-SENSOR: chưa gán mức trừ cho vạch dẫn của sân mẫu"
+    },
+    "route": {
+      "label": "Đi ngược tuyến luyện tập",
+      "points": 0,
+      "suspend": false,
+      "status": "NEEDS_VERIFICATION",
+      "source": "MVP-SENSOR: cảnh báo hướng tuyến, không tự suy ra lỗi đình chỉ"
+    }
+  },
+  "sources": [
+    {
+      "title": "Thông tư 12/2025/TT-BCA — Bộ Công an, hiệu lực 01/03/2025",
+      "url": "https://congbaocdn.chinhphu.vn/CongBaoCP/VanBan/2025/2/44366/55281-1-2025471-47212-2025-tt-bca.pdf",
+      "section": "Phụ lục IV mục C.2.2.1 và C.2.2.2(a,b,c); PDF trang 56–60"
+    },
+    {
+      "title": "Thông tư 108/2026/TT-BCA — Bộ Công an, hiệu lực 01/07/2026",
+      "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/7/thong-tu-so-108.2026.tt-bca-ngay-29.6.2026-ban-day-du-v03.pdf",
+      "section": "Điều 41 khoản 2,6; Điều 42 khoản 2; PDF trang 36–37. Mục C Phụ lục IV TT12 tiếp tục đến 28/02/2027."
+    }
+  ],
+  "profiles": {
+    "B": {
+      "speedLimit": 24,
+      "fullSequence": [
+        "departure",
+        "pedestrian",
+        "hill",
+        "wheel_track",
+        "traffic_lights",
+        "winding",
+        "parking_vertical",
+        "parking_parallel",
+        "railway",
+        "gear_change",
+        "finish"
+      ],
+      "mvpSequence": [
+        "departure",
+        "pedestrian",
+        "hill"
+      ],
+      "timeLimitSeconds": 1080,
+      "parking": [
+        "vertical",
+        "parallel"
+      ]
+    },
+    "C1": {
+      "speedLimit": 20,
+      "fullSequence": [
+        "departure",
+        "pedestrian",
+        "hill",
+        "wheel_track",
+        "traffic_lights",
+        "winding",
+        "parking_vertical",
+        "railway",
+        "gear_change",
+        "finish"
+      ],
+      "mvpSequence": [
+        "departure",
+        "pedestrian",
+        "hill"
+      ],
+      "timeLimitSeconds": 1200,
+      "parking": [
+        "vertical"
+      ]
+    },
+    "C": {
+      "speedLimit": 20,
+      "fullSequence": [
+        "departure",
+        "pedestrian",
+        "hill",
+        "wheel_track",
+        "traffic_lights",
+        "winding",
+        "parking_parallel",
+        "railway",
+        "gear_change",
+        "finish"
+      ],
+      "mvpSequence": [
+        "departure",
+        "pedestrian",
+        "hill"
+      ],
+      "timeLimitSeconds": 1200,
+      "parking": [
+        "parallel"
+      ]
+    },
+    "D1": {
+      "speedLimit": 24,
+      "fullSequence": [
+        "departure",
+        "pedestrian",
+        "hill",
+        "wheel_track",
+        "traffic_lights",
+        "winding",
+        "parking_parallel",
+        "railway",
+        "gear_change",
+        "finish"
+      ],
+      "mvpSequence": [
+        "departure",
+        "pedestrian",
+        "hill"
+      ],
+      "timeLimitSeconds": 900,
+      "parking": [
+        "parallel"
+      ]
+    },
+    "D2": {
+      "speedLimit": 24,
+      "fullSequence": [
+        "departure",
+        "pedestrian",
+        "hill",
+        "wheel_track",
+        "traffic_lights",
+        "winding",
+        "parking_parallel",
+        "railway",
+        "gear_change",
+        "finish"
+      ],
+      "mvpSequence": [
+        "departure",
+        "pedestrian",
+        "hill"
+      ],
+      "timeLimitSeconds": 900,
+      "parking": [
+        "parallel"
+      ]
+    },
+    "D": {
+      "speedLimit": 20,
+      "fullSequence": [
+        "departure",
+        "pedestrian",
+        "hill",
+        "wheel_track",
+        "traffic_lights",
+        "winding",
+        "parking_parallel",
+        "railway",
+        "gear_change",
+        "finish"
+      ],
+      "mvpSequence": [
+        "departure",
+        "pedestrian",
+        "hill"
+      ],
+      "timeLimitSeconds": 1200,
+      "parking": [
+        "parallel"
+      ]
+    }
+  },
+  "signalCancelDistance": 5,
+  "hazardStopSeconds": 3,
+  "hazardLightSeconds": 5
+}

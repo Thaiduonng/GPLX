@@ -87,7 +87,11 @@ class TheoryExamSecureWorkflowTest {
     @DisplayName("Bảo mật đề thi: Sinh đề thi thử không trả về đáp án đúng cho client")
     void should_notExposeCorrectAnswer_when_startMockExam() {
         when(configRepository.findByCategoryCodeAndActiveTrue("A1")).thenReturn(Optional.of(configA1));
-        when(questionRepository.findForLicenseCategory("A1")).thenReturn(List.of(normalQuestion, paralysisQuestion));
+        // A minimal valid configured fixture keeps the security assertion independent of the real exam size.
+        configA1.setTotalQuestions(2);
+        configA1.setStructureJson("{\"paralysis\":1,\"rules\":1}");
+        when(questionRepository.findParalysisForLicenseCategory("A1")).thenReturn(List.of(paralysisQuestion));
+        when(questionRepository.findByTopicCodeAndParalysis("PDF25_CH1", "A1", false)).thenReturn(List.of(normalQuestion));
         when(examSessionRepository.save(any(MockExamSession.class))).thenAnswer(invocation -> {
             MockExamSession s = invocation.getArgument(0);
             ReflectionTestUtils.setField(s, "id", 500L);
@@ -215,5 +219,33 @@ class TheoryExamSecureWorkflowTest {
 
         assertThat(result.passed()).isTrue();
         assertThat(result.score()).isEqualTo(2); // Vẫn giữ điểm 2 ban đầu
+    }
+
+    @Test
+    void should_rejectUnknownCategory_insteadOfGuessingRules() {
+        when(configRepository.findByCategoryCodeAndActiveTrue("B2")).thenReturn(Optional.empty());
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> examService.startMockExam(1L, new StartMockExamRequest("B2")))
+                .isInstanceOf(vn.edu.gplx.shared.exception.BadRequestException.class);
+        org.mockito.Mockito.verifyNoInteractions(questionRepository, examSessionRepository);
+    }
+
+    @Test
+    void should_rejectIncompleteBank_insteadOfFillingFromOtherCategories() {
+        configA1.setStructureJson("{\"paralysis\":1,\"rules\":24}");
+        when(configRepository.findByCategoryCodeAndActiveTrue("A1")).thenReturn(Optional.of(configA1));
+        when(questionRepository.findParalysisForLicenseCategory("A1")).thenReturn(List.of());
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> examService.startMockExam(1L, new StartMockExamRequest("A1")))
+                .isInstanceOf(vn.edu.gplx.shared.exception.BadRequestException.class);
+        org.mockito.Mockito.verifyNoInteractions(examSessionRepository);
+    }
+
+    @Test
+    void should_rejectExpiredVerifiedRules_when_startingNewExam() {
+        configA1.setValidUntil(java.time.LocalDate.of(2020, 1, 1));
+        when(configRepository.findByCategoryCodeAndActiveTrue("A1")).thenReturn(Optional.of(configA1));
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> examService.startMockExam(1L, new StartMockExamRequest("A1")))
+                .isInstanceOf(vn.edu.gplx.shared.exception.BadRequestException.class)
+                .hasMessageContaining("hết thời hạn");
+        org.mockito.Mockito.verifyNoInteractions(questionRepository, examSessionRepository);
     }
 }

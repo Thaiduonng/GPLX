@@ -1,3 +1,4 @@
+import { LICENSE_CATEGORIES } from '../../components/home/categoryConfig';
 import React, { useState, useEffect, useCallback } from 'react';
 import { learningService } from '../../services/learningService';
 import type {
@@ -646,7 +647,7 @@ export const TheoryAdminConfigTab: React.FC = () => {
                     value={selectedTopicFilter}
                     onChange={(e) => setSelectedTopicFilter(e.target.value)}
                     options={[
-                      { value: '', label: 'Tất cả 7 chương lý thuyết' },
+                      { value: '', label: 'Tất cả 6 chương lý thuyết' },
                       ...topics.map((t) => ({ value: String(t.id), label: `${t.code}. ${t.name}` })),
                     ]}
                   />
@@ -657,11 +658,7 @@ export const TheoryAdminConfigTab: React.FC = () => {
                     onChange={(e) => setSelectedCategoryFilter(e.target.value)}
                     options={[
                       { value: '', label: 'Tất cả hạng GPLX' },
-                      { value: 'A1', label: 'Hạng A1' },
-                      { value: 'A2', label: 'Hạng A2' },
-                      { value: 'B1', label: 'Hạng B1' },
-                      { value: 'B', label: 'Hạng B / B2' },
-                      { value: 'C', label: 'Hạng C' },
+                      ...LICENSE_CATEGORIES.map(c => ({ value: c.code, label: c.fullName })),
                     ]}
                   />
                 </div>
@@ -993,11 +990,7 @@ export const TheoryAdminConfigTab: React.FC = () => {
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value)}
                       options={[
-                        { value: 'A1', label: 'Hạng A1' },
-                        { value: 'A2', label: 'Hạng A2' },
-                        { value: 'B1', label: 'Hạng B1' },
-                        { value: 'B', label: 'Hạng B / B2' },
-                        { value: 'C', label: 'Hạng C' },
+                        ...LICENSE_CATEGORIES.map(c => ({ value: c.code, label: c.fullName })),
                       ]}
                     />
                   </div>

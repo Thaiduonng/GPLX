@@ -1,0 +1,77 @@
+{
+  "generated_at": "2026-10-27T09:24:53.410Z",
+  "primary_sources": [
+    {
+      "title": "Bộ 600 câu hỏi dùng cho sát hạch lái xe cơ giới đường bộ",
+      "issuing_authority": "Cục Cảnh sát giao thông — Bộ Công an",
+      "legal_basis": "Khoản 1 Điều 35 Thông tư số 12/2025/TT-BCA ngày 28/02/2025 của Bộ trưởng Bộ Công an quy định về sát hạch, cấp giấy phép lái xe; cấp, sử dụng giấy phép lái xe quốc tế (thực hiện theo Luật Trật tự, an toàn giao thông đường bộ năm 2024)",
+      "document_number": "Công văn số 2262/CSGT-P5",
+      "issued_date": "2025-05-07",
+      "status": "VERIFIED",
+      "access_url_reference": "https://www.csgt.vn/upload/services/273963059_Bo_600_cau_hoi.pdf",
+      "notes": "Kế thừa bộ 600 câu hỏi và 60 câu điểm liệt theo Quyết định 791/QĐ-TCĐBVN ngày 18/02/2020 của Tổng cục Đường bộ Việt Nam; áp dụng thống nhất toàn quốc từ năm 2025 dưới sự quản lý của Bộ Công an."
+    },
+    {
+      "title": "Hướng dẫn sử dụng bộ 600 câu hỏi dùng cho sát hạch lái xe cơ giới đường bộ",
+      "issuing_authority": "Cục Cảnh sát giao thông — Bộ Công an",
+      "legal_basis": "Thông tư số 12/2025/TT-BCA",
+      "document_number": "2262/CSGT-P5",
+      "issued_date": "2025-05-07",
+      "status": "VERIFIED",
+      "access_url_reference": "https://www.csgt.vn/upload/services/2071319603_Huong_dan_su_dung_bo_cau_hoi.pdf",
+      "notes": "Quy định cơ cấu 6 chương, danh mục 60 câu hỏi điểm liệt (tình huống mất an toàn giao thông nghiêm trọng), kết cấu đề thi và thời gian thi sát hạch lý thuyết các hạng GPLX."
+    }
+  ],
+  "chapter_structure": [
+    {
+      "chapter": 1,
+      "id": "CHAPTER_1",
+      "name": "Quy định chung và quy tắc giao thông đường bộ",
+      "questions_count": 180,
+      "range": "1-180",
+      "critical_questions_count": 47
+    },
+    {
+      "chapter": 2,
+      "id": "CHAPTER_2",
+      "name": "Văn hóa giao thông, đạo đức người lái xe, kỹ năng PCCC và CNCH",
+      "questions_count": 25,
+      "range": "181-205",
+      "critical_questions_count": 2
+    },
+    {
+      "chapter": 3,
+      "id": "CHAPTER_3",
+      "name": "Kỹ thuật lái xe",
+      "questions_count": 58,
+      "range": "206-263",
+      "critical_questions_count": 11
+    },
+    {
+      "chapter": 4,
+      "id": "CHAPTER_4",
+      "name": "Cấu tạo và sửa chữa xe",
+      "questions_count": 37,
+      "range": "264-300",
+      "critical_questions_count": 0
+    },
+    {
+      "chapter": 5,
+      "id": "CHAPTER_5",
+      "name": "Hệ thống biển báo hiệu đường bộ",
+      "questions_count": 185,
+      "range": "301-485",
+      "critical_questions_count": 0
+    },
+    {
+      "chapter": 6,
+      "id": "CHAPTER_6",
+      "name": "Giải các thế sa hình và kỹ năng xử lý tình huống giao thông",
+      "questions_count": 115,
+      "range": "486-600",
+      "critical_questions_count": 0
+    }
+  ],
+  "total_questions": 600,
+  "total_critical_questions": 60
+}

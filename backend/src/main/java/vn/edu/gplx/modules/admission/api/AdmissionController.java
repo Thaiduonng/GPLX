@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.gplx.modules.admission.api.dto.ApplicationResponse;
+import vn.edu.gplx.modules.admission.api.dto.EnrollApplicationRequest;
 import vn.edu.gplx.modules.admission.api.dto.ReviewApplicationRequest;
 import vn.edu.gplx.modules.admission.api.dto.SubmitApplicationRequest;
 import vn.edu.gplx.modules.admission.application.AdmissionService;
@@ -71,19 +72,22 @@ public class AdmissionController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Cán bộ tuyển sinh/Quản trị viên xem danh sách hồ sơ cần thẩm định")
+    @Operation(summary = "Cán bộ tuyển sinh/Quản trị viên xem danh sách hồ sơ cần thẩm định kèm bộ lọc")
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'MANAGER', 'COUNSELOR')")
     public ResponseEntity<ApiResponse<Page<ApplicationResponse>>> getApplications(
             @RequestParam(required = false) ApplicationStatus status,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long staffId,
+            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ApplicationResponse> page = admissionService.getApplications(status, pageable);
+        Page<ApplicationResponse> page = admissionService.searchApplications(status, categoryId, staffId, keyword, pageable);
         return ResponseEntity.ok(ApiResponse.success(page));
     }
 
     @Operation(summary = "Cán bộ tuyển sinh/Quản trị viên thẩm định xét duyệt hồ sơ")
     @PostMapping("/{id}/review")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'MANAGER', 'COUNSELOR')")
     public ResponseEntity<ApiResponse<ApplicationResponse>> reviewApplication(
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -92,10 +96,22 @@ public class AdmissionController {
         return ResponseEntity.ok(ApiResponse.success("Thẩm định hồ sơ thành công", response));
     }
 
+    @Operation(summary = "Xếp lớp đào tạo và chuyển hồ sơ đã duyệt thành học viên chính thức (ENROLLED)")
+    @PostMapping("/{id}/enroll")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'MANAGER')")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> enrollApplication(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @Valid @RequestBody EnrollApplicationRequest request) {
+        ApplicationResponse response = admissionService.enrollApplication(id, userPrincipal.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("Xếp lớp và ghi nhận học viên chính thức thành công", response));
+    }
+
     private boolean isStaffOrAdmin(UserPrincipal userPrincipal) {
         return userPrincipal.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
                         || a.getAuthority().equals("ROLE_STAFF")
-                        || a.getAuthority().equals("ROLE_MANAGER"));
+                        || a.getAuthority().equals("ROLE_MANAGER")
+                        || a.getAuthority().equals("ROLE_COUNSELOR"));
     }
 }

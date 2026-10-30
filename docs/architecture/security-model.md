@@ -19,3 +19,8 @@
 - **Quyền sở hữu tài nguyên (Resource Ownership):**
   - Học viên không thể xem hoặc sửa đổi thông tin của học viên khác bằng cách thay đổi ID trên URL request.
   - Service layer bắt buộc lấy ID người dùng từ `SecurityContext` hiện tại và so sánh với ID của chủ sở hữu tài nguyên trước khi trả về dữ liệu.
+
+
+## Điều hướng frontend theo vai trò (29/10/2026)
+
+Danh mục, lối tắt và route frontend dùng chung bảng quyền trong `features/navigation/navigation.ts`; mặc định từ chối trang chưa khai báo. Ma trận và giới hạn phạm vi: [role-navigation.md](role-navigation.md). Đây là lớp điều hướng bổ sung, không thay thế quyền tại backend.

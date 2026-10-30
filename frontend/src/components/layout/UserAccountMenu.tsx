@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { UserProfile } from '../../types/auth';
 import { Icons, Modal, AppButton, AppInput, StatusBadge, Alert } from '../ui';
 import styles from './UserAccountMenu.module.css';
+import { canAccessPath, getQuickLinks, getRoleLabel } from '../../features/navigation/navigation';
 
 export interface UserAccountMenuProps {
   user: UserProfile;
@@ -53,18 +54,8 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({ user, logout }
     };
   }, [dropdownOpen]);
 
-  const isAdminOrStaff = user.roles.some(
-    (r) => r === 'ROLE_ADMIN' || r === 'ROLE_STAFF' || r === 'ROLE_MANAGER'
-  );
-
-  const getRoleDisplayName = (roles: string[]) => {
-    if (roles.includes('ROLE_ADMIN')) return 'Quản trị viên';
-    if (roles.includes('ROLE_MANAGER')) return 'Ban Quản lý';
-    if (roles.includes('ROLE_STAFF')) return 'Tuyển sinh';
-    if (roles.includes('ROLE_EXAMINER')) return 'Sát hạch viên';
-    if (roles.includes('ROLE_INSTRUCTOR')) return 'Giáo viên';
-    return 'Học viên';
-  };
+  const isAdmin = user.roles.includes('ROLE_ADMIN');
+  const getRoleDisplayName = getRoleLabel;
 
   const getInitials = (name?: string, username?: string) => {
     const target = (name || username || 'U').trim();
@@ -192,10 +183,10 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({ user, logout }
           </div>
 
           {/* Section 2: Quản lý người dùng (Dành cho Quản trị viên / Cán bộ) */}
-          {isAdminOrStaff && (
+          {canAccessPath('/audit-logs', user.roles) && (
             <div className={styles.dropdownSection}>
               <div className={styles.sectionLabel}>Quản trị hệ thống</div>
-              <button
+              {isAdmin && <button
                 type="button"
                 className={styles.dropdownItem}
                 onClick={() => {
@@ -205,8 +196,8 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({ user, logout }
                 role="menuitem"
               >
                 <Icons.Users size={16} className={styles.itemIcon} />
-                <span>Quản lý người dùng</span>
-              </button>
+                <span>Danh sách tài khoản (minh họa)</span>
+              </button>}
               <Link
                 to="/audit-logs"
                 className={styles.dropdownItem}
@@ -219,36 +210,10 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({ user, logout }
             </div>
           )}
 
-          {/* Section 3: Lối tắt cá nhân */}
+          {/* Lối tắt dùng cùng quyền với danh mục và route. */}
           <div className={styles.dropdownSection}>
-            <div className={styles.sectionLabel}>Lối tắt của tôi</div>
-            <Link
-              to="/my-applications"
-              className={styles.dropdownItem}
-              onClick={() => setDropdownOpen(false)}
-              role="menuitem"
-            >
-              <Icons.FileText size={16} className={styles.itemIcon} />
-              <span>Hồ sơ điện tử của tôi</span>
-            </Link>
-            <Link
-              to="/examination/my-results"
-              className={styles.dropdownItem}
-              onClick={() => setDropdownOpen(false)}
-              role="menuitem"
-            >
-              <Icons.Award size={16} className={styles.itemIcon} />
-              <span>Kết quả sát hạch</span>
-            </Link>
-            <Link
-              to="/finance/tuition"
-              className={styles.dropdownItem}
-              onClick={() => setDropdownOpen(false)}
-              role="menuitem"
-            >
-              <Icons.CreditCard size={16} className={styles.itemIcon} />
-              <span>Lịch sử nộp học phí</span>
-            </Link>
+            <div className={styles.sectionLabel}>Chức năng theo vai trò</div>
+            {getQuickLinks(user.roles).map(item => <Link key={item.path} to={item.path} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)} role="menuitem">{item.label}</Link>)}
           </div>
 
           {/* Section 4: Logout */}

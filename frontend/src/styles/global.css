@@ -26,6 +26,8 @@ body {
   line-height: 1.6;
   color: var(--color-text-main);
   background-color: var(--color-bg-app);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
   min-height: 100vh;
   text-rendering: optimizeLegibility;
 }

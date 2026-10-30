@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface TheoryTopicRepository extends JpaRepository<TheoryTopic, Long> {
+    @org.springframework.data.jpa.repository.Query("SELECT t FROM TheoryTopic t WHERE t.active = true ORDER BY t.orderIndex ASC")
     List<TheoryTopic> findAllByOrderByOrderIndexAsc();
     Optional<TheoryTopic> findByCode(String code);
 }

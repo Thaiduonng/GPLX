@@ -214,9 +214,6 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
     public List<QuestionDetailResponse> getCriticalQuestions(Long userId, String categoryCode, String statusFilter) {
         String cat = (categoryCode != null && !categoryCode.isBlank()) ? categoryCode : "ALL";
         List<TheoryQuestion> questions = questionRepository.findParalysisForLicenseCategory(cat);
-        if (questions.isEmpty()) {
-            questions = questionRepository.findByIsParalysisTrueOrderByQuestionNumberAsc();
-        }
 
         // Lấy danh sách bookmark của user
         Set<Long> bookmarkedIds = new HashSet<>(bookmarkRepository.findQuestionIdsByUserId(userId));
@@ -237,7 +234,7 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
                     }
                     return true;
                 })
-                .map(q -> toQuestionDetailResponse(q, bookmarkedIds.contains(q.getId())))
+                .map(q -> toQuestionDetailResponse(q, bookmarkedIds.contains(q.getId()), cat))
                 .toList();
     }
 
@@ -329,9 +326,6 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
             case "CRITICAL_PARALYSIS":
                 String pCat = request.categoryCode() != null ? request.categoryCode() : "ALL";
                 candidates = questionRepository.findParalysisForLicenseCategory(pCat);
-                if (candidates.isEmpty()) {
-                    candidates = questionRepository.findByIsParalysisTrueOrderByQuestionNumberAsc();
-                }
                 break;
 
             case "BOOKMARKED":
@@ -373,16 +367,19 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
                 }
 
                 // Nếu học viên mới chưa có lịch sử, chọn câu điểm liệt & câu cốt lõi
-                if (candidates.isEmpty()) {
+                candidates = candidates.stream().filter(q -> q.isActive() && q.appliesTo(request.categoryCode())).toList();
+        if (candidates.isEmpty()) {
                     String sCat = request.categoryCode() != null ? request.categoryCode() : "ALL";
                     candidates = questionRepository.findParalysisForLicenseCategory(sCat);
-                    if (candidates.isEmpty()) {
+                    candidates = candidates.stream().filter(q -> q.isActive() && q.appliesTo(request.categoryCode())).toList();
+        if (candidates.isEmpty()) {
                         candidates = questionRepository.findAll();
                     }
                 }
                 break;
         }
 
+        candidates = candidates.stream().filter(q -> q.isActive() && q.appliesTo(request.categoryCode())).toList();
         if (candidates.isEmpty()) {
             throw new BadRequestException("Không tìm thấy câu hỏi phù hợp cho chế độ ôn tập này");
         }
@@ -408,7 +405,7 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
 
         Set<Long> bookmarkedIds = new HashSet<>(bookmarkRepository.findQuestionIdsByUserId(userId));
         List<QuestionDetailResponse> questionDtos = selectedQuestions.stream()
-                .map(q -> toQuestionDetailResponse(q, bookmarkedIds.contains(q.getId())))
+                .map(q -> toQuestionDetailResponse(q, bookmarkedIds.contains(q.getId()), savedSession.getCategoryCode()))
                 .toList();
 
         return new ReviewSessionDetailResponse(
@@ -443,7 +440,7 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
                 .toList();
 
         List<QuestionDetailResponse> questionDtos = questions.stream()
-                .map(q -> toQuestionDetailResponse(q, bookmarkedIds.contains(q.getId())))
+                .map(q -> toQuestionDetailResponse(q, bookmarkedIds.contains(q.getId()), session.getCategoryCode()))
                 .toList();
 
         return new ReviewSessionDetailResponse(
@@ -577,7 +574,7 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
 
         Set<Long> bookmarkedIds = new HashSet<>(bookmarkRepository.findQuestionIdsByUserId(userId));
         List<QuestionDetailResponse> needConsolidation = incorrectQuestions.stream()
-                .map(q -> toQuestionDetailResponse(q, bookmarkedIds.contains(q.getId())))
+                .map(q -> toQuestionDetailResponse(q, bookmarkedIds.contains(q.getId()), session.getCategoryCode()))
                 .toList();
 
         double accuracyRate = 0.0;
@@ -639,6 +636,10 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
     }
 
     private QuestionDetailResponse toQuestionDetailResponse(TheoryQuestion q, boolean isBookmarked) {
+        return toQuestionDetailResponse(q, isBookmarked, null);
+    }
+
+    private QuestionDetailResponse toQuestionDetailResponse(TheoryQuestion q, boolean isBookmarked, String category) {
         List<StudyAnswerOptionResponse> answerDtos = q.getAnswers().stream()
                 .map(a -> new StudyAnswerOptionResponse(a.getId(), a.getAnswerText(), a.getOrderIndex(), a.isCorrect()))
                 .toList();
@@ -652,7 +653,7 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
                 q.getContent(),
                 q.getImageUrl(),
                 q.getExplanation(),
-                q.isParalysis(),
+                q.isParalysisForCategory(category),
                 q.getLegalReference(),
                 isBookmarked,
                 answerDtos

@@ -53,6 +53,33 @@ public class TheoryQuestion extends BaseEntity {
     @OrderBy("orderIndex ASC")
     private List<TheoryAnswer> answers = new ArrayList<>();
 
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
+
+    @Column(name = "applicable_categories", length = 255)
+    private String applicableCategories;
+
+    @Column(name = "paralysis_categories", length = 255)
+    private String paralysisCategories;
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+    public String getApplicableCategories() { return applicableCategories; }
+    public void setApplicableCategories(String categories) { this.applicableCategories = categories; }
+    public String getParalysisCategories() { return paralysisCategories; }
+    public void setParalysisCategories(String categories) { this.paralysisCategories = categories; }
+
+    public boolean appliesTo(String category) {
+        return category == null || "ALL".equals(category)
+                || (applicableCategories == null ? "ALL".equals(categoryCode) || categoryCode.equals(category)
+                : applicableCategories.contains("," + category + ","));
+    }
+
+    public boolean isParalysisForCategory(String category) {
+        return paralysisCategories == null || category == null || "ALL".equals(category)
+                ? isParalysis : paralysisCategories.contains("," + category + ",");
+    }
+
     public TheoryQuestion() {
     }
 

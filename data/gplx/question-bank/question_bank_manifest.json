@@ -1,0 +1,64 @@
+{
+  "dataset_name": "Vietnam Driver License Theory 600 Questions Standard Dataset",
+  "version": "2025.1.0",
+  "created_at": "2026-10-27T09:24:53.411Z",
+  "total_questions": 600,
+  "total_critical_questions": 60,
+  "chapters_count": 6,
+  "distribution_by_chapter": {
+    "CHAPTER_1": 180,
+    "CHAPTER_2": 25,
+    "CHAPTER_3": 58,
+    "CHAPTER_4": 37,
+    "CHAPTER_5": 185,
+    "CHAPTER_6": 115
+  },
+  "critical_by_chapter": {
+    "CHAPTER_1": 47,
+    "CHAPTER_2": 2,
+    "CHAPTER_3": 11,
+    "CHAPTER_4": 0,
+    "CHAPTER_5": 0,
+    "CHAPTER_6": 0
+  },
+  "checksums": {
+    "questions_600.json": {
+      "sha256": "f3fa02ded4bdfa84d8999e6fbddad654bfeb40dbedf9440b8e21ab6be8b715e0",
+      "size_bytes": 753708
+    },
+    "questions_600.csv": {
+      "sha256": "47814c9829af2dec123f620b05eaf65d7dddb898db94e9fb14ccce2078b6cac6",
+      "size_bytes": 390275
+    },
+    "extraction_errors.csv": {
+      "sha256": "73fcd5cba712c05a11f464223eaab5d1ee63e4938dc37fa7189e531050dd4f45",
+      "size_bytes": 1420
+    },
+    "source_register.json": {
+      "sha256": "9a5e177e39b29119544530b2b187cb4ca6f56ed398d46488e17099a6bca25c58",
+      "size_bytes": 3202
+    }
+  },
+  "license_classes_applicability": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A",
+    "B1",
+    "B2",
+    "B",
+    "C",
+    "C1",
+    "D",
+    "D1",
+    "D2",
+    "E",
+    "F",
+    "FB2",
+    "FC",
+    "FD",
+    "FE"
+  ],
+  "quality_status": "PASSED_ALL_VALIDATIONS"
+}

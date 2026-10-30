@@ -6,6 +6,15 @@ export interface Course {
   title: string;
   description: string;
   totalHours: number;
+  tuitionFee?: number;
+  slug?: string;
+  expectedStartDate?: string;
+  trainingLocation?: string;
+  targetAudience?: string;
+  curriculumSummary?: string;
+  documentsRequired?: string;
+  bannerImageUrl?: string;
+  featured?: boolean;
   isActive: boolean;
   category: LicenseCategory;
   lessonCount: number;

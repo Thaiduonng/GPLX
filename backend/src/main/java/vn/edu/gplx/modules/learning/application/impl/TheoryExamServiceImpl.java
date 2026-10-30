@@ -76,9 +76,14 @@ public class TheoryExamServiceImpl implements TheoryExamService {
     public MockExamSessionResponse startMockExam(Long userId, StartMockExamRequest request) {
         String category = request.categoryCode().toUpperCase();
         ExamConfiguration config = configRepository.findByCategoryCodeAndActiveTrue(category)
-                .orElseGet(() -> new ExamConfiguration(category, 30, 20, 27, "DEFAULT", true, "Quy chế chung"));
+                .orElseThrow(() -> new BadRequestException("Hạng GPLX chưa có cấu hình thi đã xác minh"));
 
-        // Lựa chọn câu hỏi theo cơ cấu cấu hình hoặc fallback
+        if (config.getValidUntil() != null && java.time.LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))
+                .isAfter(config.getValidUntil())) {
+            throw new BadRequestException("Quy trình thi đã hết thời hạn xác minh, cần cập nhật cấu hình mới");
+        }
+
+        // Lựa chọn câu hỏi theo đúng cơ cấu đã xác minh
         List<TheoryQuestion> selected = generateQuestionsFromStructure(config, category);
 
         // Đảo ngẫu nhiên lại thứ tự câu hỏi trong đề
@@ -117,7 +122,7 @@ public class TheoryExamServiceImpl implements TheoryExamService {
                     q.getQuestionNumber(),
                     q.getContent(),
                     q.getImageUrl(),
-                    q.isParalysis(),
+                    q.isParalysisForCategory(session.getCategoryCode()),
                     null, // Chưa có đáp án đã chọn ban đầu
                     options
             ));
@@ -139,81 +144,42 @@ public class TheoryExamServiceImpl implements TheoryExamService {
 
     private List<TheoryQuestion> generateQuestionsFromStructure(ExamConfiguration config, String category) {
         List<TheoryQuestion> selected = new ArrayList<>();
-        Set<Long> chosenIds = new HashSet<>();
-
-        // Kiểm tra nếu có structure_json phân bổ từng chương
-        if (config.getStructureJson() != null && !config.getStructureJson().isBlank()) {
-            try {
-                JsonNode root = objectMapper.readTree(config.getStructureJson());
-
-                // 1. Chọn câu điểm liệt bắt buộc
-                int paralysisNeeded = root.has("paralysis") ? root.get("paralysis").asInt() : 1;
-                List<TheoryQuestion> paralysisCandidates = new ArrayList<>(questionRepository.findParalysisForLicenseCategory(category));
-                if (paralysisCandidates.isEmpty()) {
-                    paralysisCandidates = questionRepository.findByIsParalysisTrueOrderByQuestionNumberAsc();
+        try {
+            JsonNode root = objectMapper.readTree(config.getStructureJson());
+            Map<String, List<String>> topics = Map.of(
+                    "rules", List.of("PDF25_CH1"), "culture", List.of("PDF25_CH2"),
+                    "technique", List.of("PDF25_CH3"), "repair", List.of("PDF25_CH4"),
+                    "techniqueOrRepair", List.of("PDF25_CH3", "PDF25_CH4"),
+                    "signs", List.of("PDF25_CH5"), "scenarios", List.of("PDF25_CH6"));
+            addRandomQuestions(selected, questionRepository.findParalysisForLicenseCategory(category),
+                    root.path("paralysis").asInt());
+            for (Map.Entry<String, List<String>> entry : topics.entrySet()) {
+                int needed = root.path(entry.getKey()).asInt();
+                if (needed == 0) continue;
+                List<TheoryQuestion> pool = new ArrayList<>();
+                for (String topic : entry.getValue()) {
+                    pool.addAll(questionRepository.findByTopicCodeAndParalysis(topic, category, false));
                 }
-                Collections.shuffle(paralysisCandidates);
-                for (int i = 0; i < Math.min(paralysisNeeded, paralysisCandidates.size()); i++) {
-                    TheoryQuestion q = paralysisCandidates.get(i);
-                    selected.add(q);
-                    chosenIds.add(q.getId());
-                }
-
-                // 2. Chọn câu theo từng chương nếu có cấu hình
-                Map<String, String> topicCodeMapping = Map.of(
-                        "rules", "CH1_RULES",
-                        "transport", "CH2_TRANSPORT",
-                        "culture", "CH3_CULTURE",
-                        "technique", "CH4_TECHNIQUES",
-                        "repair", "CH5_REPAIR",
-                        "signs", "CH6_SIGNS",
-                        "scenarios", "CH7_SCENARIOS"
-                );
-
-                for (Map.Entry<String, String> entry : topicCodeMapping.entrySet()) {
-                    String jsonKey = entry.getKey();
-                    String topicCode = entry.getValue();
-
-                    if (root.has(jsonKey)) {
-                        int countNeeded = root.get(jsonKey).asInt();
-                        List<TheoryQuestion> topicQuestions = new ArrayList<>(questionRepository.findByTopicCodeAndParalysis(topicCode, false));
-                        Collections.shuffle(topicQuestions);
-
-                        int added = 0;
-                        for (TheoryQuestion q : topicQuestions) {
-                            if (!chosenIds.contains(q.getId())) {
-                                selected.add(q);
-                                chosenIds.add(q.getId());
-                                added++;
-                                if (added >= countNeeded) break;
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Không thể parse structure_json cho hạng {}: {}", category, e.getMessage());
+                addRandomQuestions(selected, pool, needed);
             }
+        } catch (com.fasterxml.jackson.core.JsonProcessingException | IllegalArgumentException e) {
+            log.error("Cấu hình thi không hợp lệ cho hạng {}", category, e);
+            throw new BadRequestException("Cấu hình đề thi không hợp lệ, vui lòng liên hệ quản trị viên");
         }
-
-        // Nếu số câu chưa đủ totalQuestions (do thiếu câu mẫu trong topic), bổ sung thêm từ ngân hàng
-        if (selected.size() < config.getTotalQuestions()) {
-            List<TheoryQuestion> all = new ArrayList<>(questionRepository.findForLicenseCategory(category));
-            if (all.isEmpty()) {
-                all = questionRepository.findAll();
-            }
-            Collections.shuffle(all);
-            for (TheoryQuestion q : all) {
-                if (!chosenIds.contains(q.getId())) {
-                    selected.add(q);
-                    chosenIds.add(q.getId());
-                    if (selected.size() >= config.getTotalQuestions()) {
-                        break;
-                    }
-                }
-            }
+        if (selected.size() != config.getTotalQuestions()) {
+            throw new BadRequestException("Ngân hàng câu hỏi chưa đủ đúng cơ cấu của hạng GPLX này");
         }
-
         return selected;
+    }
+
+    private void addRandomQuestions(List<TheoryQuestion> selected, List<TheoryQuestion> candidates, int count) {
+        Set<Long> chosen = new HashSet<>(selected.stream().map(TheoryQuestion::getId).toList());
+        List<TheoryQuestion> pool = new ArrayList<>(candidates.stream().filter(q -> !chosen.contains(q.getId())).toList());
+        if (count < 0 || pool.size() < count) {
+            throw new BadRequestException("Không đủ câu hỏi đúng phạm vi và cơ cấu hạng GPLX");
+        }
+        Collections.shuffle(pool);
+        selected.addAll(pool.subList(0, count));
     }
 
     @Override
@@ -238,7 +204,7 @@ public class TheoryExamServiceImpl implements TheoryExamService {
                     q.getQuestionNumber(),
                     q.getContent(),
                     q.getImageUrl(),
-                    q.isParalysis(),
+                    q.isParalysisForCategory(session.getCategoryCode()),
                     sa.getSelectedAnswer() != null ? sa.getSelectedAnswer().getId() : null, // Khôi phục câu đã làm
                     options
             );
@@ -365,7 +331,7 @@ public class TheoryExamServiceImpl implements TheoryExamService {
             if (isCorrect) {
                 correctCount++;
             } else {
-                if (question.isParalysis()) {
+                if (question.isParalysisForCategory(session.getCategoryCode())) {
                     failedParalysis = true;
                 }
             }
@@ -450,7 +416,7 @@ public class TheoryExamServiceImpl implements TheoryExamService {
                     q.getQuestionNumber(),
                     q.getContent(),
                     q.getImageUrl(),
-                    q.isParalysis(),
+                    q.isParalysisForCategory(session.getCategoryCode()),
                     sa.getSelectedAnswer() != null ? sa.getSelectedAnswer().getId() : null,
                     correctAnswerId,
                     sa.isCorrect(),
@@ -495,9 +461,6 @@ public class TheoryExamServiceImpl implements TheoryExamService {
     @Transactional(readOnly = true)
     public List<QuestionResponse> generateMockExam(String categoryCode, int limit) {
         List<TheoryQuestion> all = questionRepository.findForLicenseCategory(categoryCode);
-        if (all.isEmpty()) {
-            all = questionRepository.findAll();
-        }
         List<TheoryQuestion> shuffled = new ArrayList<>(all);
         Collections.shuffle(shuffled);
         int count = Math.min(limit > 0 ? limit : 25, shuffled.size());
@@ -533,7 +496,7 @@ public class TheoryExamServiceImpl implements TheoryExamService {
                 correctCount++;
             } else {
                 wrongCount++;
-                if (question.isParalysis()) {
+                if (question.isParalysisForCategory(request.categoryCode())) {
                     failedDueToParalysis = true;
                 }
             }
@@ -542,7 +505,7 @@ public class TheoryExamServiceImpl implements TheoryExamService {
                     question.getId(),
                     question.getQuestionNumber(),
                     question.getContent(),
-                    question.isParalysis(),
+                    question.isParalysisForCategory(request.categoryCode()),
                     selectedAnswerId,
                     correctAnswerId,
                     isCorrect,
