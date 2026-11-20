@@ -60,3 +60,4 @@ generate_*.py
 __pycache__/
 *.pyc
 *.pyo
+.superpowers/
