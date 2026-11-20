@@ -124,6 +124,13 @@ export default function MainLayout() {
                     Ôn tập thông minh
                   </Link>
                   <Link
+                    to="/traffic-signs"
+                    className={`${styles.navLink} ${isActive('/traffic-signs') ? styles.active : ''}`}
+                  >
+                    <Icons.ShieldCheck size={16} />
+                    Biển báo
+                  </Link>
+                  <Link
                     to="/training/schedules"
                     className={`${styles.navLink} ${isActive('/training/schedules') ? styles.active : ''}`}
                   >
@@ -351,6 +358,10 @@ export default function MainLayout() {
                 <Link to="/theory-review" className={styles.drawerLink} onClick={() => setLeftDrawerOpen(false)}>
                   <Icons.RefreshCw size={16} />
                   <span>Ôn tập thông minh & Spaced Repetition</span>
+                </Link>
+                <Link to="/traffic-signs" className={styles.drawerLink} onClick={() => setLeftDrawerOpen(false)}>
+                  <Icons.ShieldCheck size={16} />
+                  <span>Danh mục biển báo</span>
                 </Link>
                 <Link to="/examination/sessions" className={styles.drawerLink} onClick={() => setLeftDrawerOpen(false)}>
                   <Icons.Award size={16} />

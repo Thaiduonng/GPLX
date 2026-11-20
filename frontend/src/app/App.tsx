@@ -12,6 +12,7 @@ import ApplicationManagementPage from '../pages/ApplicationManagementPage';
 import CoursesPage from '../pages/CoursesPage';
 import TheoryExamPage from '../pages/TheoryExamPage';
 import TheoryReviewPage from '../pages/TheoryReviewPage';
+import TrafficSignCatalogPage from '../pages/TrafficSignCatalogPage';
 import TrainingSchedulePage from '../pages/TrainingSchedulePage';
 import { EligibilityCheckPage } from '../pages/EligibilityCheckPage';
 import { ExamSessionsPage } from '../pages/ExamSessionsPage';
@@ -54,6 +55,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <TheoryReviewPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/traffic-signs"
+            element={
+              <ProtectedRoute>
+                <TrafficSignCatalogPage />
               </ProtectedRoute>
             }
           />

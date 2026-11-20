@@ -24,3 +24,13 @@ export interface FieldErrorDetail {
   field: string;
   message: string;
 }
+
+/**
+ * Trang dữ liệu khớp với Spring Data Page (content, totalElements, totalPages, number).
+ */
+export interface PageResult<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
