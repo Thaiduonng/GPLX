@@ -243,7 +243,7 @@ Thiết kế: `docs/superpowers/specs/2026-11-20-sa-hinh-simulator-and-sign-cata
 | Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
 | :--- | :--- | :--- | :--- | :--- |
 | **`TSK-P18-01`** | Đưa QCVN 15:2026 & tài liệu biển báo vào nguồn pháp lý | — | `DONE` | File gốc trong `docs/legal/sources/`; 13 ảnh trang bản vẽ; `SRC-QCVN-15`, `SRC-QCVN-41-2019` trong legal-source-catalog. |
-| **`TSK-P18-02`** | Script trích danh mục biển + ảnh + seed SQL | TSK-P18-01 | `DONE` | 288 mã, 185 hình ghép đúng (kiểm tra mắt 12 biển); `V14` sinh tự động; 12 unit test Python. |
+| **`TSK-P18-02`** | Script trích danh mục biển + ảnh + seed SQL | TSK-P18-01 | `DONE` | 288 mã, 187 hình ghép đúng (kiểm tra mắt 22 biển); `V14` sinh tự động; 16 unit test Python. |
 | **`TSK-P18-03`** | Backend bảng `traffic_signs` & API tra cứu/cập nhật | TSK-P18-02 | `DONE` | `V13`; tìm không dấu, lọc nhóm, phân trang; 401/403/404/400 đúng; 11 test service + controller. |
 | **`TSK-P18-04`** | Liên kết câu hỏi lý thuyết với biển báo | TSK-P18-03 | `DONE` | `V15`; mã không tồn tại bị từ chối; chi tiết câu hỏi trả `trafficSignCode`. |
 | **`TSK-P18-05`** | Vitest + SVG 13 biển trên sân sa hình | — | `DONE` | Hình dạng/màu theo QCVN 41 (bát giác đỏ, tam giác vàng viền đỏ, tròn xanh, chữ X đường sắt). |
