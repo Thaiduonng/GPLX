@@ -1,13 +1,17 @@
 # Báo cáo trích danh mục biển báo (QCVN 41 bản 2016/2019)
 
 - Số mã biển: **288** (CAM: 62, CHI_DAN: 65, HIEU_LENH: 59, NGUY_HIEM: 83, PHU: 19)
-- Số ảnh nhúng trong file: 204; số vị trí [pic]: 204; số hình ghép được: 185
+- Số ảnh nhúng trong file: 204; số vị trí [pic]: 204; số hình ghép được: 187
 - Vị trí ảnh không phải PNG/JPEG (bỏ qua): 0
 - Thứ tự ảnh lấy theo vị trí ký tự ảnh trong văn bản (sprmCPicLocation trong CHPX FKP), không theo thứ tự lưu trong stream Data.
 
-## Mã chưa có ảnh (45)
+## Mã chưa có ảnh (37)
 
-P.106a, P.106b, P.106c, P.110a, P.110b, P.138, W.201c, W.201d, W.211, W.219, W.244, R.301a, R.301b, R.301c, R.301d, R.306, R.412a, R.412b, R.412c, R.412d, R.412e, R.412f, R.412g, R.412h, R.412i, R.412j, R.412k, R.412l, R.412m, R.412n, R.412o, R.412p, R.415, I.409, I.419, I.422, I.444, I.445, I.447, S.501, S.503d, S.503e, S.503f, S.510a, S.510b
+P.106a, P.106b, P.106c, P.110a, P.110b, P.138, W.201c, W.201d, W.211, W.219, W.244, R.412a, R.412b, R.412c, R.412d, R.412e, R.412f, R.412g, R.412h, R.412i, R.412j, R.412k, R.412l, R.412m, R.412n, R.412o, R.412p, R.415, I.409, I.419, I.422, I.444, I.445, I.447, S.501, S.510a, S.510b
+
+## Hình đã trích nhưng không gán cho biển nào (32)
+
+B-27a, B-38, C-21, C-46, D-5, D-6, D-21, D-22, D-23, E-19a, E-19b, E-22a, E-22b, E-25, E-35b, E-35c, E-48, E-49, E-50, E-51, E-52, E-53, E-54, E-56, E-57, F-3b-2, F-12, F-13, F-14, F-15, F-16, F-17
 
 ## Bảng ghép hình → ảnh
 
@@ -44,6 +48,7 @@ P.106a, P.106b, P.106c, P.110a, P.110b, P.138, W.201c, W.201d, W.211, W.219, W.2
 | B-27c | `/signs/raster/B-27c.png` |
 | B-27d | `/signs/raster/B-27d.png` |
 | B-27e | `/signs/raster/B-27e.png` |
+| B-27d-2 | `/signs/raster/B-27d-2.png` |
 | B-28 | `/signs/raster/B-28.png` |
 | B-29 | `/signs/raster/B-29.png` |
 | B-30 | `/signs/raster/B-30.png` |
@@ -184,6 +189,7 @@ P.106a, P.106b, P.106c, P.110a, P.110b, P.138, W.201c, W.201d, W.211, W.219, W.2
 | F-2 | `/signs/raster/F-2.png` |
 | F-3a | `/signs/raster/F-3a.png` |
 | F-3b | `/signs/raster/F-3b.png` |
+| F-3b-2 | `/signs/raster/F-3b-2.png` |
 | F-4 | `/signs/raster/F-4.jpg` |
 | F-5 | `/signs/raster/F-5.jpg` |
 | F-6 | `/signs/raster/F-6.png` |

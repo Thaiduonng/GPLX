@@ -96,6 +96,55 @@ class PicturePairingTest(unittest.TestCase):
         self.assertIsNone(by_code["R.122"].raster_asset)
 
 
+class ReviewFixesTest(unittest.TestCase):
+    """Các lỗi phát hiện ở vòng review toàn nhánh."""
+
+    BASE_THEN_VARIANT = (
+        "B.27 Biển số P.127 “Tốc độ tối đa cho phép”, biển số P.127a “Tốc độ tối đa về ban đêm”\n\nmô tả\n\n"
+        "    [pic]\n\n      Hình B.27b - Biển số P.127\n\n"
+        "    [pic]\n\n      Hình B.27c - Biển số P.127a\n\n"
+    )
+
+    def test_exact_variant_figure_wins_over_base_caption(self):
+        pairing = ex.pair_pictures(self.BASE_THEN_VARIANT, image_count=2)
+        entries = ex.attach_assets(ex.parse_entries(self.BASE_THEN_VARIANT), self.BASE_THEN_VARIANT, pairing,
+                                   {0: "/b27b.png", 1: "/b27c.png"})
+        by_code = {e.code: e.raster_asset for e in entries}
+        self.assertEqual(by_code, {"P.127": "/b27b.png", "P.127a": "/b27c.png"})
+
+    def test_caption_code_without_dot_is_recognized(self):
+        text = (
+            'D.1a  Biển số R.301 (a,b) "Hướng đi phải theo"\n\nmô tả\n\n'
+            "    [pic]\n\n      Hình D.2 - Biển số R301 (a,b)\n"
+        )
+        pairing = ex.pair_pictures(text, image_count=1)
+        entries = ex.attach_assets(ex.parse_entries(text), text, pairing, {0: "/d2.png"})
+        self.assertEqual({e.code: e.raster_asset for e in entries}, {"R.301a": "/d2.png", "R.301b": "/d2.png"})
+
+    def test_duplicate_figure_numbers_keep_their_own_caption(self):
+        text = (
+            "B.27 Biển số P.127b “Tốc độ theo làn”\n\nmô tả\n\n    [pic]\n\n      Hình B.27d - Biển số P.127b\n\n"
+            "B.28 Biển số DP.127 “Hết tốc độ theo làn”\n\nmô tả\n\n    [pic]\n\n      Hình B.27d - Biển số DP.127\n"
+        )
+        pairing = ex.pair_pictures(text, image_count=2)
+        self.assertEqual(pairing, {"B-27d": 0, "B-27d-2": 1})
+        entries = ex.attach_assets(ex.parse_entries(text), text, pairing, {0: "/p127b.png", 1: "/dp127.png"})
+        self.assertEqual({e.code: e.raster_asset for e in entries}, {"P.127b": "/p127b.png", "DP.127": "/dp127.png"})
+
+    def test_long_meaning_is_not_cut_at_2000_chars(self):
+        text = "B.1 Biển số P.101 “Đường cấm”\n\n" + ("chữ " * 800) + "\n\n    [pic]\n"
+        entry = ex.parse_entries(text)[0]
+        self.assertGreater(len(entry.meaning), 3000)
+        self.assertTrue(entry.meaning.endswith("chữ"))
+
+    def test_unused_figures_are_listed(self):
+        pairing = ex.pair_pictures(self.BASE_THEN_VARIANT, image_count=2)
+        entries = ex.attach_assets(ex.parse_entries(self.BASE_THEN_VARIANT), self.BASE_THEN_VARIANT, pairing,
+                                   {0: "/b27b.png", 1: "/b27c.png"})
+        entries[1].raster_asset = None  # giả lập P.127a không nhận ảnh
+        self.assertEqual(ex.unused_figures(entries, pairing), ["B-27c"])
+
+
 class DocPictureOrderTest(unittest.TestCase):
     @staticmethod
     def _fkp(runs):

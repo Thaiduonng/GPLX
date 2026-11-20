@@ -23,7 +23,7 @@ import unicodedata
 
 STANDARD_VERSION = "QCVN41:2019"
 LEGAL_STATUS = "NEEDS_VERIFICATION"
-MEANING_MAX = 2000
+MEANING_MAX = 4000  # khớp giới hạn TrafficSignUpdateRequest.meaning
 
 GROUP_BY_PREFIX = {
     "DP": "CAM",
@@ -35,7 +35,8 @@ GROUP_BY_PREFIX = {
 }
 
 # "P.103", "P.103a", "R.301 (a,b,c)", "DP.135"
-CODE_RE = re.compile(r"\b(DP|[PRWIS])\.(\d{3})([a-z]?)(?:\s*\(([a-z ,]+)\))?")
+# Chấp nhận cả mã thiếu dấu chấm trong chú thích (vd "R301 (a,b,c,d)").
+CODE_RE = re.compile(r"\b(DP|[PRWIS])\.?(\d{3})([a-z]?)(?:\s*\(([a-z ,]+)\))?")
 NAME_RE = re.compile(r"[“\"]([^”\"]+)[”\"]")
 HEADING_RE = re.compile(r"^[A-F]\.?\s*\d+[a-z]?\.?(?:\s+[A-F])?\s+Biển số\s")
 CAPTION_RE = re.compile(r"^\s*Hình\s+([A-F])\.(\d+[a-z]?)\s*-\s*(.+?)\s*$")
@@ -163,6 +164,7 @@ def _captions_after_pics(text: str) -> list[tuple[str, str] | None]:
     """Với mỗi [pic] theo thứ tự: (figure_id, phần mô tả chú thích) hoặc None nếu không có chú thích gần."""
     lines = _clean(text).split("\n")
     out: list[tuple[str, str] | None] = []
+    seen_ids: dict[str, int] = {}
     for i, line in enumerate(lines):
         if PIC not in line:
             continue
@@ -174,7 +176,12 @@ def _captions_after_pics(text: str) -> list[tuple[str, str] | None]:
             seen_nonblank += 1
             m = CAPTION_RE.match(nxt)
             if m:
-                found = (f"{m.group(1)}-{m.group(2)}", m.group(3))
+                figure_id = f"{m.group(1)}-{m.group(2)}"
+                # Tài liệu có số hình trùng (vd hai lần "Hình B.27d") → thêm hậu tố để mỗi hình giữ chú thích riêng.
+                seen_ids[figure_id] = seen_ids.get(figure_id, 0) + 1
+                if seen_ids[figure_id] > 1:
+                    figure_id = f"{figure_id}-{seen_ids[figure_id]}"
+                found = (figure_id, m.group(3))
             break
         out.append(found if seen_nonblank <= CAPTION_WINDOW else None)
         # Nhiều [pic] trên cùng một dòng: chú thích thuộc ảnh đầu, các ảnh sau vẫn chiếm chỉ số.
@@ -188,7 +195,7 @@ def pair_pictures(text: str, image_count: int) -> dict[str, int]:
     for index, caption in enumerate(_captions_after_pics(text)):
         if index >= image_count:
             break
-        if caption and caption[0] not in pairing:
+        if caption:
             pairing[caption[0]] = index
     return pairing
 
@@ -197,6 +204,7 @@ def attach_assets(entries: list[SignEntry], text: str, pairing: dict[str, int],
                   image_assets: dict[int, str]) -> list[SignEntry]:
     """Gán ảnh cho biển theo mã trong chú thích (mã không có chữ cái áp dụng cho mọi biến thể)."""
     captions = {c[0]: c[1] for c in _captions_after_pics(text) if c}
+    figures: list[tuple[str, str, list[str]]] = []
     for figure_id, image_index in pairing.items():
         asset = image_assets.get(image_index)
         if asset is None:
@@ -204,14 +212,25 @@ def attach_assets(entries: list[SignEntry], text: str, pairing: dict[str, int],
         caption_codes: list[str] = []
         for m in CODE_RE.finditer(captions.get(figure_id, "")):
             caption_codes.extend(_codes_of(m))
-        for entry in entries:
-            if entry.raster_asset is not None:
-                continue
-            base = re.sub(r"[a-z]$", "", entry.code)
-            if entry.code in caption_codes or base in caption_codes:
-                entry.raster_asset = asset
-                entry.figure_id = figure_id
+        figures.append((figure_id, asset, caption_codes))
+
+    def assign(match) -> None:
+        for figure_id, asset, caption_codes in figures:
+            for entry in entries:
+                if entry.raster_asset is None and match(entry, caption_codes):
+                    entry.raster_asset = asset
+                    entry.figure_id = figure_id
+
+    # Lượt 1: chú thích ghi đúng mã biến thể. Lượt 2: chú thích chỉ ghi mã gốc (P.127 → biến thể chưa có ảnh riêng).
+    assign(lambda e, codes: e.code in codes)
+    assign(lambda e, codes: re.sub(r"[a-z]$", "", e.code) in codes)
     return entries
+
+
+def unused_figures(entries: list[SignEntry], pairing: dict[str, int]) -> list[str]:
+    """Các hình đã trích được nhưng không gán cho biển nào (cần kiểm tra chú thích bằng mắt)."""
+    used = {e.figure_id for e in entries if e.raster_asset is not None}
+    return [figure_id for figure_id in pairing if figure_id not in used]
 
 
 def _sql_str(value: str | None) -> str:
@@ -366,7 +385,9 @@ def main(argv: list[str]) -> int:
         report.append(f"- ⚠ Số ảnh ({len(images)}) khác số [pic] ({pic_count}): ghép theo thứ tự đến hết số nhỏ hơn — cần kiểm tra mắt.")
     report.append(f"- Vị trí ảnh không phải PNG/JPEG (bỏ qua): {sum(1 for i in images if i is None)}")
     report.append("- Thứ tự ảnh lấy theo vị trí ký tự ảnh trong văn bản (sprmCPicLocation trong CHPX FKP), không theo thứ tự lưu trong stream Data.")
+    unused = unused_figures(entries, pairing)
     report += ["", f"## Mã chưa có ảnh ({len(missing)})", "", ", ".join(missing) or "(không có)", "",
+               f"## Hình đã trích nhưng không gán cho biển nào ({len(unused)})", "", ", ".join(unused) or "(không có)", "",
                "## Bảng ghép hình → ảnh", "", "| Hình | Ảnh |", "| :--- | :--- |"]
     report += [f"| {fid} | `{assets[idx]}` |" for fid, idx in pairing.items()]
     (sources / "sign-extraction-report.md").write_text("\n".join(report) + "\n", encoding="utf-8")
