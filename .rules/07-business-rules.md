@@ -21,6 +21,7 @@
 
 ### Phân hệ Học tập & Đào tạo (Learning - LRN / Training - TRN)
 - **`LRN-001`** [Trạng thái: `INTERNAL_RULE`]: Tiến độ học tập trực tuyến được lưu vết theo từng tài khoản học viên gắn với mã bài giảng và thời lượng học thực tế.
+- **`LRN-SIGN-001`** [Trạng thái: `NEEDS_VERIFICATION`]: Danh mục biển báo (`traffic_signs`) là nguồn duy nhất cho câu hỏi lý thuyết chương biển báo và mô phỏng sa hình. Dữ liệu hiện nhập từ tài liệu QCVN 41 bản 2016/2019; mỗi biển ghi rõ phiên bản quy chuẩn và trạng thái xác minh, chờ đối chiếu QCVN 41:2024/BGTVT. Chỉ ADMIN/MANAGER được sửa.
 - **`TRN-001`** [Trạng thái: `INTERNAL_RULE`]: Hệ thống xếp lịch học thực hành phải kiểm tra xung đột thời gian: Một giáo viên hoặc một xe tập lái không thể được xếp vào 2 ca học trùng nhau.
 - **`TRN-002`** [Trạng thái: `INTERNAL_RULE`]: Điểm danh chỉ được phép thực hiện trong khung giờ diễn ra buổi học cộng trừ 30 phút theo cấu hình.
 

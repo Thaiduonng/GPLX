@@ -24,5 +24,7 @@ Sổ Đăng Ký này ghi nhận toàn bộ các căn cứ pháp luật, tình tr
 | **`LEG-04`** | Giám sát thực hành đường trường DAT | Thông tư 04/2022/TT-BGTVT (sửa đổi TT 12/2017) | Điều 13a, 14 | `VERIFIED` | 2026-10-26 | Quy tắc `TRN-003`: Bảng `dat_practice_sessions` |
 | **`LEG-05`** | Định mức chi tiết km/giờ DAT | Thông tư hướng dẫn thi hành Luật 36/2024/QH15 | Dự thảo / Thông tư mới| `NEEDS_VERIFICATION` | 2026-10-26 | Cấu hình tham số km/giờ trong Database, không hard-code |
 | **`LEG-06`** | Cấu trúc đề thi & Điểm liệt | Thông tư 12/2017/TT-BGTVT & Quy chế Cục ĐBVN | Bộ đề 600 câu hỏi | `VERIFIED` | 2026-10-26 | Quy tắc `LRN-002`: Sai câu điểm liệt (`is_critical = 1`) trượt ngay |
+| **`LEG-SIM-01`** | Kích thước hình các bài sát hạch sa hình A1, A, B | QCVN 15:2026/BCA | Mục 2.1.13, 2.1.15, 2.2 | `VERIFIED` | 2026-11-20 | Mô phỏng sa hình: sinh hình bài thi theo thông số xe |
+| **`LEG-SIGN-01`** | Danh mục biển báo hiệu đường bộ | QCVN 41 bản 2016/2019 (tài liệu tổng hợp); hiện hành QCVN 41:2024/BGTVT | Phụ lục B–F | `NEEDS_VERIFICATION` | 2026-11-20 | Bảng `traffic_signs` (`LRN-SIGN-001`) |
 | **`LEG-07`** | Tiêu chuẩn đỗ thực hành sa hình | Thông tư 12/2017/TT-BGTVT | Thang điểm 100, đạt >= 80| `VERIFIED` | 2026-10-26 | Quy tắc `EXM-003`: Điểm sa hình >= 80 điểm |
 | **`LEG-08`** | Bảo vệ dữ liệu cá nhân học viên | Nghị định 13/2023/NĐ-CP | Điều 9, 13, 17 | `VERIFIED` | 2026-10-26 | Bảng `audit_logs` bất biến, mã hóa BCrypt, bảo mật PII |

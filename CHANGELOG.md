@@ -2,6 +2,246 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Danh Mục Biển Báo Chuẩn (Giai đoạn 1 — Mô phỏng sa hình & chuẩn hóa biển báo)
+- **Nguồn pháp lý:** bổ sung QCVN 15:2026/BCA (trung tâm sát hạch, kèm Phụ lục) và tài liệu tổng hợp biển báo QCVN 41 bản 2016/2019 vào `docs/legal/sources/`; ảnh bản vẽ Hình 1–20 của QCVN 15 tại `docs/legal/sources/qcvn15-2026-figures/`.
+- **Công cụ trích dữ liệu** `tools/signs/extract_signs.py`: đọc file .doc → 288 mã biển (CAM 62, NGUY_HIEM 83, HIEU_LENH 59, CHI_DAN 65, PHU 19), 187 hình biển ghép đúng theo vị trí ảnh trong văn bản (`sprmCPicLocation`), ưu tiên hình đúng mã biến thể, sinh migration seed `V14`.
+- **Backend (`learning`):** bảng `traffic_signs` (`V13`), seed (`V14`), cột `theory_questions.traffic_sign_code` (`V15`); API `GET/PUT /api/v1/learning/traffic-signs` — tìm theo mã/tên không phân biệt dấu, lọc nhóm, phân trang; chỉ `ADMIN`/`MANAGER` được sửa. Câu hỏi lý thuyết có thể liên kết mã biển (kiểm tra mã tồn tại).
+- **Frontend:** trang **`/traffic-signs`** tra cứu biển báo (tìm có/không dấu, lọc nhóm, chi tiết, nhãn "Chờ xác minh"), form chỉnh sửa cho quản trị; 13 biển dùng trên sân sa hình vẽ SVG đúng hình dạng/màu QCVN 41; bổ sung Vitest + Testing Library (15 test).
+- **Trạng thái pháp lý:** toàn bộ biển nhập từ tài liệu gắn `QCVN41:2019` / `NEEDS_VERIFICATION`, chờ đối chiếu QCVN 41:2024/BGTVT (`LRN-SIGN-001`).
+
+## [2.1.0] — 2026-10-27
+
+### Tái Thiết Kế Trang Đầu Tiên Thành Landing Page Quảng Cáo Vào Đăng Ký / Đăng Nhập
+- **Tái Định Vị Trang Đầu Tiên (`/`) Thành Landing Page Quảng Bá Toàn Diện:**
+  - Chuyển đổi toàn diện mục tiêu của trang chủ từ trang tổng quan nội bộ sang **Trang chủ quảng cáo & chuyển đổi (Promotional Landing Page)** thu hút khách truy cập và học viên mới.
+  - Loại bỏ hoàn toàn widget debug kỹ thuật (kiểm tra kết nối máy chủ `/api/v1/health`) khỏi trang chủ để đảm bảo tính chuyên nghiệp của một cổng dịch vụ công chuẩn quốc gia.
+- **Hero Banner Quảng Cáo & Kêu Gọi Hành Động (CTA) Nổi Bật:**
+  - Thiết kế Hero Banner phong cách Enterprise Gateway với hiệu ứng chiều sâu, badge "CỔNG ĐÀO TẠO & SÁT HẠCH LÁI XE QUỐC GIA".
+  - Tiêu đề quảng bá hấp dẫn: *"Học Lái Xe Chuẩn Hóa — Tự Tin Vững Tay Lái & Chinh Phục GPLX"*.
+  - Bố trí 2 nút kêu gọi hành động lớn, độ tương phản cao:
+    - Nút chính (CTA xanh lá nổi bật): **"Đăng Ký Tài Khoản Học Viên Ngay"** (`/register`).
+    - Nút phụ (Ghost viền trắng): **"Đăng Nhập Hệ Thống"** (`/login`).
+  - Dòng chỉ dẫn bằng chứng xã hội: *"Hơn 15,000+ học viên đã đăng ký và thi đỗ giấy phép lái xe thành công."* đi kèm cụm 5 sao vàng đánh giá uy tín.
+- **Các Khối Nội Dung Quảng Bá Thuyết Phục (High-Converting Sections):**
+  - **4 Chỉ số ấn tượng (Stats Section):** Tỷ lệ thi đỗ lần đầu 98.6%, 5 hạng bằng đào tạo chuẩn Cục ĐBVN (A1, A2, B1, B2, C), 100% km & giờ thực hành DAT, Thẩm định hồ sơ online nhanh chóng 24h.
+  - **4 Trụ cột lợi thế vượt trội (Why Choose Us):** Hồ sơ điện tử 100% online, Ôn tập thông minh 600 câu với thuật toán Spaced Repetition, Giám sát DAT minh bạch và Đội xe mới cùng tỷ lệ đỗ cao.
+  - **Showcase các hạng GPLX tuyển sinh:** Thẻ chi tiết 4 hạng phổ biến (A1, B1, B2 - Popular, C) nêu rõ đối tượng, tính năng nổi bật, số km DAT thực hành và nút trực tiếp *"Đăng ký học ngay"*.
+  - **Lộ trình 4 bước đơn giản:** Nêu bật bắt đầu từ Bước 1: Tạo tài khoản & Nộp hồ sơ trực tuyến.
+  - **Đánh giá học viên thực tế & Cam kết 3 Không:** 3 lời nhận xét chân thực từ cựu học viên tốt nghiệp; cam kết: *Không phát sinh chi phí - Không cắt bớt giờ học DAT - Bảo hành đào tạo đến khi có bằng*.
+  - **Banner chuyển đổi cuối trang (Final Conversion Banner):** Lời kêu gọi hành động mạnh mẽ trước chân trang cùng cụm nút Đăng ký / Đăng nhập cỡ lớn.
+
+- **Kiểm Soát Quyền Truy Cập Module & Bảo Vệ Tuyệt Đối Cho Trang Đầu Tiên:**
+  - **Khóa toàn bộ module khi chưa đăng nhập:** Ẩn hoàn toàn nút menu danh mục góc trái (`menuToggleButton`) và các liên kết phân hệ (Khóa học, Thi thử, Ôn tập, Lịch học, Xe tập lái, Sát hạch) trên thanh Header khi người dùng chưa đăng nhập. Khách truy cập ở trang đầu tiên chỉ thấy Trang chủ và cụm nút Đăng ký / Đăng nhập.
+  - **Bảo vệ toàn diện bằng `ProtectedRoute`:** Thiết lập component guard `ProtectedRoute.tsx` bọc toàn bộ 16 routes phân hệ nội bộ (`/courses`, `/theory-exam`, `/theory-review`, `/student/review`, `/training/schedules`, `/fleet`, `/admissions/*`, `/examination/*`, `/finance/*`, `/dashboard`, `/audit-logs`). Mọi nỗ lực truy cập trực tiếp qua thanh URL của trình duyệt khi chưa đăng nhập đều bị chặn và chuyển hướng về `/login`.
+  - **Mở quyền phân hệ sau khi đăng nhập thành công:** Chỉ khi người dùng đăng nhập tài khoản hợp lệ, thanh Header mới kích hoạt các module tương ứng, nút menu Drawer góc trái xuất hiện và thanh Workspace Bar phân bổ theo đúng vai trò học viên / tuyển sinh / giám khảo / quản trị viên.
+
+## [2.0.0] — 2026-10-26
+
+### Triển Khai Phân Hệ Ôn Tập GPLX — Spaced Repetition & Củng Cố Kiến Thức (Full-Stack)
+- **Kiến Trúc & Phân Định Trách Nhiệm Chức Năng:**
+  - Thiết lập phân hệ **Ôn tập (Review)** chuyên biệt tách biệt khỏi Học tập (tiếp nhận kiến thức) và Rèn luyện/Thi thử (thực hành đề thi).
+  - Trọng tâm phân hệ là củng cố kiến thức chưa vững, xóa điểm yếu, ôn lại các câu từng làm sai và câu hỏi điểm liệt ⚠️ với thuật toán lặp lại ngắt quãng khoa học.
+- **Cơ Sở Dữ Liệu & Migrations (Flyway V12):**
+  - Khởi tạo file migration `V12__create_review_module_tables.sql` tạo 3 bảng quan hệ:
+    - `question_retention_states`: Quản lý trạng thái ghi nhớ từng câu hỏi của người học, cấp độ hộp Leitner 1..5, chu kỳ ngắt quãng 1->3->7->14->30 ngày, số lần đúng/sai liên tiếp, điểm ưu tiên (`priority_score`) và trạng thái thành thạo (`NEEDS_PRACTICE`, `REVIEWING`, `MASTERED`).
+    - `review_sessions`: Lưu trữ các phiên ôn tập độc lập (`session_code`, `review_mode`, `category_code`, `total_questions`, `correct_count`, `incorrect_count`, `status`).
+    - `review_session_answers`: Lưu chi tiết từng lượt trả lời trong phiên ôn, phương án chọn, tính đúng/sai và dấu thời gian.
+- **Backend Domain, Application Service & DTOs (Java 21 & Spring Boot):**
+  - Domain Model `QuestionRetentionState`: Thuật toán lặp lại ngắt quãng (Spaced Repetition / Leitner System), nâng cấp hộp khi đúng và reset về Hộp 1 khi sai, tính điểm ưu tiên thông minh dựa trên: câu điểm liệt (+35), tần suất sai (+10/lần), tỷ lệ sai (+20), quá hạn ôn (+20) và cấp độ hộp 1-2 (+15).
+  - Service `TheoryReviewService` & `TheoryReviewServiceImpl`:
+    - Tự động đồng bộ câu hỏi sai từ lịch sử luyện tập `PracticeAnswer` sang `QuestionRetentionState`.
+    - Sinh hàng đợi ôn tập thông minh (`SMART`) ưu tiên câu điểm liệt chưa vững và câu quá hạn ôn tập.
+    - Chấm điểm tức thì (Idempotent), phản hồi giải thích đáp án và căn cứ pháp lý.
+    - Kết thúc phiên ôn, tính tỷ lệ chính xác và đưa ra khuyến nghị ôn tập tiếp theo.
+  - REST Controller `TheoryReviewController`: 10 endpoints chuẩn OpenAPI tại `/api/v1/review/**`.
+  - Unit Test Suite `TheoryReviewServiceTest`: 5 test cases kiểm thử tự động đạt chuẩn.
+- **Frontend Module Ôn Tập React 19 + TypeScript + Vite:**
+  - Khởi tạo `TheoryReviewPage.tsx` và `TheoryReviewPage.module.css`:
+    - **Dashboard tổng quan:** 6 thẻ KPI (câu cần ôn, câu sai chưa củng cố, câu đến hạn hôm nay, câu điểm liệt cần ôn, câu đã lưu, tỷ lệ đúng gần đây), biểu đồ thanh tiến độ theo 7 chương, lịch sử phiên ôn gần nhất và banner gợi ý thông minh.
+    - **6 Tab chuyển đổi nghiệp vụ:** Tổng quan, Ôn câu trả lời sai (gộp các lần làm bài, hiển thị số lần sai), Ôn câu điểm liệt (lọc Đang củng cố / Đã thành thạo), Ôn câu đã đánh dấu, Ôn theo 7 chủ đề, Lịch sử phiên ôn.
+    - **Màn hình phiên ôn tập trực tiếp (Live Session):** Giao diện tập trung, thanh tiến độ làm bài, huy hiệu câu điểm liệt, nút lưu bookmark, lựa chọn đáp án trắc nghiệm A-B-C-D, hiển thị giải thích đáp án và căn cứ pháp lý, huy hiệu hộp Leitner 1..5 và chu kỳ ôn tiếp theo.
+    - **Màn hình tổng kết phiên ôn:** Biểu đồ tỷ lệ chính xác, số câu đúng/sai, đánh giá thuật toán và nút bắt đầu phiên ôn câu sai ngay lập tức.
+- **Tích Hợp Hệ Thống Điều Hướng & Routing Toàn Diện:**
+  - Đăng ký routes `/student/review` và `/theory-review` trong `App.tsx`.
+  - Tích hợp liên kết `Ôn tập thông minh` vào Navigation Header góc trái, Drawer hệ thống, thanh Workspace Bar học viên (`MainLayout.tsx`) và thẻ lối tắt nhanh trên Trang chủ (`HomePage.tsx`).
+- **Đóng Gói & Kiểm Thử Tích Hợp End-to-End (E2E):**
+  - Đóng gói Docker Compose backend và frontend với Spring Boot 4.1.1 (Java 21) và Nginx Alpine.
+  - Chạy kịch bản kiểm thử E2E tự động qua API thực tế: Đăng nhập -> Lấy Dashboard -> Lấy 7 chủ đề -> Lấy 6 câu điểm liệt -> Khởi tạo phiên ôn -> Nộp đáp án -> Cập nhật hộp Leitner -> Hoàn tất phiên và ghi nhận lịch sử (ĐẠT 8/8 BƯỚC).
+
+## [1.9.0] — 2026-10-26
+
+### Tái Thiết Kế Menu Góc Trái & Khu Vực Quản Lý Tài Khoản / Người Dùng (Góc Phải)
+- **Tái Cấu Trúc Header Điều Hướng Góc Trái:**
+  - Tích hợp nút bật thanh menu (`menuToggleButton`) ở góc trái đi kèm Drawer danh mục phân hệ toàn diện (`Left Drawer`).
+  - Đặt toàn bộ các liên kết điều hướng chính (Trang chủ, Khóa học, Thi thử 600 câu, Lịch học & DAT, Xe tập lái, Kỳ sát hạch, API Spec) ở góc trái bên cạnh thương hiệu.
+- **Đưa Nút Đăng Nhập / Đăng Ký Cố Định Sang Góc Phải (Chưa Đăng Nhập):**
+  - Cụm nút bấm Đăng ký & Đăng nhập nằm cố định ở góc phải với độ tương phản cao và kích thước touch target 44px.
+- **Tích Hợp Menu Quản Lý Người Dùng / Tài Khoản Ở Góc Phải (Sau Khi Đăng Nhập):**
+  - Khởi tạo component `UserAccountMenu.tsx`: Hiển thị Avatar tròn với ký tự viết tắt, tên người dùng, vai trò và icon mũi tên.
+  - Dropdown Menu tài khoản đa tầng:
+    - **Quản lý tài khoản cá nhân:** Modal thông tin tài khoản chi tiết (ID, Email, SĐT, Roles, JWT status) và Tab Đổi mật khẩu an toàn.
+    - **Quản lý người dùng hệ thống (Admin & Staff):** Modal tra cứu danh sách người dùng, tìm kiếm theo tên/username/email, lọc theo vai trò và xem chi tiết.
+    - **Lối tắt nhanh:** Xem hồ sơ của tôi, Kết quả thi sát hạch, Lịch sử nộp học phí.
+    - **Đăng xuất an toàn:** Đăng xuất khỏi phiên làm việc.
+
+### Nâng Cấp Hệ Thống Giao Diện UI/UX Pro Max (Enterprise Government Portal & LMS)
+- **Tích Hợp Design System Master từ `ui-ux-pro-max`:**
+  - Khởi tạo Source of Truth thiết kế tại `design-system/gplx-enterprise-portal/MASTER.md` theo phong cách `Accessible & Ethical` kết hợp `Enterprise Gateway`.
+  - Chuẩn hóa bảng màu thương hiệu: Primary Trust Blue (`#1E40AF`), Action Blue (`#3B82F6`), Service Green CTA (`#16A34A`), Dark Text (`#0F172A`), Border chuẩn WCAG 2.1 AA (`#CBD5E1`).
+  - Typography đa tầng: Tích hợp font Google `Be Vietnam Pro` (400, 500, 600, 700, 800) và `Atkinson Hyperlegible` đảm bảo hiển thị tiếng Việt dấu thanh chuẩn mực, rõ ràng, chống mỏi mắt.
+- **Chuẩn Hóa Tiêu Chuẩn Tiếp Cận & Khả Năng Sử Dụng (WCAG 2.1 AA Compliance):**
+  - Bổ sung đường dẫn bỏ qua tiện ích: `<a href="#main-content" className="skip-to-content">` hỗ trợ bàn phím và thiết bị đọc màn hình (Screen Readers).
+  - Tích hợp vòng nét rõ ràng `:focus-visible` (3px outline với offset 2px) cho toàn bộ các phần tử tương tác.
+  - Hỗ trợ cơ chế `@media (prefers-reduced-motion: reduce)` giảm chuyển động cho người dùng nhạy cảm.
+  - Tối thiểu 44×44px touch targets trên mobile và tablet cho các nút bấm, ô input, dropdown select và liên kết điều hướng.
+- **Thay Thế Toàn Bộ Biểu Tượng Emoji Thành Bộ Icon SVG Vector Độc Lập (`Icons.tsx`):**
+  - Khởi tạo thư viện icon vector chuẩn SVG nhẹ, sắc nét: `Car`, `BookOpen`, `GraduationCap`, `ClipboardList`, `Calendar`, `Activity`, `FileText`, `CreditCard`, `ShieldCheck`, `Award`, `User`, `LogOut`, `CheckCircle`, `Plus`, `RefreshCw`, `Menu`, `X`, `BarChart`, `Server`, `ExternalLink`.
+  - Triệt để loại bỏ emoji trên Header, MainLayout, Footer, Hero Banner, Thẻ KPI và Trang chủ theo đúng nguyên tắc của `AGENTS.md` và `MASTER.md`.
+- **Tái Cấu Trúc Toàn Diện Các Component Dùng Chung (`frontend/src/components/ui/`):**
+  - `tokens.css` & `global.css`: Nâng cấp hệ thống spacing (`--space-xs`..`--space-3xl`), shadows mềm mại (`--shadow-xs`..`--shadow-xl`), focus tokens (`--focus-ring`).
+  - `AppButton`: Bổ sung micro-interactions (`active: scale(0.98)`), hover nâng nhẹ không giật layout, chiều cao tối thiểu chuẩn 44px (`md`) và 48px (`lg`).
+  - `AppInput`, `AppSelect`, `AppTextarea`: Gắn kết chặt chẽ `id` - `htmlFor`, viền border sắc nét, focus ring phát sáng tự nhiên, chevron SVG tùy biến.
+  - `StatusBadge` & `StatCard`: Nâng cấp độ tương phản văn bản, bo góc mềm mại, hiển thị icon trung tâm rõ nét.
+  - `MainLayout`: Thiết kế lại Header phong cách Cổng thông tin Nhà nước tin cậy, menu ngăn nắp, thanh Workspace Bar phân chia 4 phân hệ rõ ràng (`Học viên`, `Tuyển sinh & Đào tạo`, `Sát hạch`, `Quản trị & Giám sát`).
+  - `HomePage`: Hero banner tràn viền uy tín, lộ trình 4 bước trực quan, 6 thẻ phân hệ Modular Monolith dẫn link chuẩn xác.
+- **Đóng Gói & Triển Khai Kiểm Thử:**
+  - Build frontend production với `tsc -b && vite build` đạt 0 lỗi.
+  - Deploy Nginx container `gplx-frontend` tại cổng 3000, kiểm tra `curl.exe -I http://localhost:3000` trả về HTTP 200 OK.
+  - Kết nối thông suốt với `gplx-backend` tại cổng 8088.
+
+## [1.8.0] — 2026-10-26
+
+### Kiểm Thử Toàn Diện, Xác Thực Phân Quyền & Nghiệm Thu Hệ Thống (Giai đoạn 6 — Phase 15)
+- **Kiểm Thử Toàn Diện Hệ Thống (100% BUILD SUCCESS):**
+  - Chạy toàn bộ test suites backend: **76/76 unit & integration tests PASS 100%** (bao gồm xác thực Spring Boot context, Authentication, Admission, Examination, Training, Support modules và Theory learning).
+  - Chuẩn hóa `FlywayConfig` với điều kiện `@ConditionalOnProperty(name = "spring.flyway.enabled", havingValue = "true", matchIfMissing = true)` tương thích mượt mà giữa môi trường Production MySQL 8.4 LTS và Test in-memory H2.
+- **Xác Thực Bảo Mật & Phân Quyền Đa Tầng (RBAC End-to-End):**
+  - Kiểm chứng thành công kịch bản bảo vệ dữ liệu nhạy cảm: Học viên (`ROLE_STUDENT`) bị chặn truy cập API quản trị bằng HTTP 403 Forbidden.
+  - Quản trị viên (`ROLE_ADMIN`, `ROLE_STAFF`) truy cập đầy đủ các endpoint cấu hình đề thi và phân trang ngân hàng câu hỏi bằng HTTP 200 OK.
+- **Xác Thực Đóng Gói Production Container:**
+  - Biên dịch Vite React 19 + TypeScript strict bundle 0 lỗi; container `gplx-frontend` phục vụ tại cổng 3000.
+  - Multi-stage build Maven Java 21 container `gplx-backend` thành công, phục vụ tại cổng 8088 (8080 internal).
+  - Cả 3 containers (`gplx-frontend`, `gplx-backend`, `gplx-mysql`) hoạt động ổn định ở trạng thái `Up (healthy)`.
+- **Hoàn Thiện Tài Liệu Hướng Dẫn & Nghiệm Thu:**
+  - Khởi tạo `docs/guides/theory-learning-and-exam-system-guide.md` hướng dẫn sử dụng chi tiết 6 phân khu chức năng và đối soát toàn diện 14 tiêu chí nghiệm thu theo Master Prompt (ĐẠT 14/14 tiêu chí).
+  - Cập nhật Task Backlog `docs/backlog/tasks.md` ghi nhận hoàn thành trọn vẹn Phase 15 (Giai đoạn 6).
+
+## [1.7.0] — 2026-10-26
+
+### Quản Trị Dữ Liệu Ngân Hàng Câu Hỏi & Cấu Hình Đề Thi GPLX (Giai đoạn 5 — Phase 14)
+- **Quản lý Ngân Hàng 600 Câu Hỏi Sát Hạch (TheoryAdminConfigTab.tsx):**
+  - Giao diện tra cứu và phân trang ngân hàng câu hỏi đa tiêu chí: lọc theo 7 chương lý thuyết, theo hạng GPLX (A1, A2, B1, B, C), lọc riêng câu hỏi điểm liệt ⚠️, tìm kiếm theo số thứ tự hoặc từ khóa nội dung.
+  - Modal xem chi tiết đầy đủ câu hỏi: hiển thị hình ảnh minh họa đúng tỷ lệ, danh sách phương án A/B/C/D với đánh dấu trực quan đáp án đúng, lời giải thích chi tiết và căn cứ văn bản quy phạm pháp luật.
+  - Hỗ trợ thêm mới (createQuestion) và chỉnh sửa (updateQuestion) câu hỏi trắc nghiệm với form validation nghiêm ngặt: kiểm tra tối thiểu 2 phương án, bắt buộc có duy nhất 1 đáp án đúng theo quy chuẩn sát hạch GPLX Việt Nam.
+  - Hỗ trợ xóa an toàn câu hỏi (deleteQuestion) khỏi ngân hàng dữ liệu với hộp thoại xác nhận modal.
+- **Cấu hình Đề thi Sát hạch theo Hạng GPLX:**
+  - Bảng điều khiển cấu hình thời lượng thi, số lượng câu hỏi, điểm sàn tối thiểu đạt yêu cầu, phiên bản quy chế áp dụng cho từng hạng A1, A2, B1, B, C.
+  - Modal điều chỉnh thông số đề thi linh hoạt, lưu trữ căn cứ pháp lý (Thông tư 12/2017/TT-BGTVT và Thông tư 04/2022/TT-BGTVT).
+- **Nhập / Xuất Hàng Loạt & Quản Lý Phiên Bản (Bulk Import / Export & Legal Verification):**
+  - Chức năng Nhập hàng loạt câu hỏi từ định dạng JSON (Bulk Import): Kiểm tra cú pháp trước khi nhập, tự động ánh xạ chương tương ứng, báo cáo chi tiết số lượng thành công / thất bại và danh sách lỗi validation cụ thể.
+  - Chức năng Xuất dữ liệu câu hỏi (Export JSON) tải về máy tính để sao lưu hoặc kiểm toán dữ liệu.
+  - Quản lý phiên bản dữ liệu và trạng thái kiểm soát pháp lý: Bộ 600 câu hỏi Cục Đường bộ Việt Nam, 60 câu điểm liệt ở trạng thái VERIFIED.
+- **Kiểm thử Tự động Backend & Frontend:**
+  - Bổ sung unit tests cho QuestionAdminServiceTest (5/5 PASS), tổng cộng 7/7 tests module lý thuyết đạt 100%.
+  - Đóng gói Docker frontend production bundle Nginx Alpine hoàn tất không lỗi.
+
+## [1.6.0] — 2026-10-26
+
+### Giao Diện Thi Thử Lý Thuyết Sát Hạch Chuyên Sâu (Giai đoạn 4 — Phase 13)
+- **Phòng Thi Trực Tuyến Tập Trung & Giám Sát Thời Gian Thực (TheoryMockExamTab.tsx):**
+  - Cơ chế đếm ngược thời gian chính xác (Countdown Timer) với cảnh báo đổi màu khi thời gian dưới 2 phút, tự động nộp bài khi hết giờ (handleAutoSubmit).
+  - Lưới điều hướng câu hỏi thời gian thực (Question Grid Navigator): Phân định rõ câu đã làm (xanh lá), chưa làm (xám nhạt), đang xem (viền xanh đậm) và câu điểm liệt (chấm đỏ cảnh báo).
+  - Tích hợp tính năng **Cắm cờ xem lại (Flag for review)**: Cho phép học viên đánh dấu các câu phân vân bằng icon 🚩 và lọc rà soát trước khi nộp bài.
+  - Cơ chế tự động lưu tiến độ ngầm trên đám mây (learningService.saveExamProgress) mỗi khi học viên chọn phương án, phòng ngừa sự cố mất điện hoặc tải lại trang.
+  - Hệ thống phím tắt phòng thi: Phím số 1..4 để chọn đáp án A..D, Mũi tên Trái/Phải để chuyển câu, phím F để cắm cờ xem lại.
+  - Hộp thoại xác nhận nộp bài an toàn (Modal Confirm Submit), thống kê số câu đã làm, số câu chưa làm, cảnh báo câu cắm cờ và chống bấm nhầm hoặc spam nộp bài.
+- **Màn Hình Kết Quả & Tra Cứu Lịch Sử Thi Đầy Đủ:**
+  - Kết luận ĐẠT / KHÔNG ĐẠT, thời gian làm bài, điểm số chi tiết và cảnh báo nổi bật nếu trượt do sai câu điểm liệt.
+  - Bộ lọc xem lại kết quả: Xem tất cả câu, chỉ xem câu làm sai, hoặc xem các câu điểm liệt.
+  - Sub-tab **Lịch sử các lượt thi thử** (getMockExamHistory): Bảng thống kê toàn bộ các bài thi đã làm trong quá khứ kèm nút xem lại chi tiết bài thi cũ.
+
+## [1.5.0] — 2026-10-26
+
+### Giao Diện Học Tập, Rèn Luyện & Ôn Tập Chuyên Sâu (Giai đoạn 3 — Phase 12)
+- **Học tập 7 Chương Tương tác Đa Chế độ (`TheoryTopicStudyTab.tsx`):**
+  - Chuyển đổi linh hoạt giữa hai chế độ: 🎴 **Học tương tác từng câu (Flashcard/Quiz)** và 📜 **Xem danh sách đầy đủ**.
+  - Tích hợp **Lưới chuyển nhanh câu hỏi (Question Grid Navigator 1..N)** hiển thị màu sắc trạng thái câu điểm liệt ⚠️ và câu đang học.
+  - Hỗ trợ phím tắt bàn phím: Mũi tên trái/phải để chuyển câu, phím 1–4 để chọn nhanh đáp án, phím B để đánh dấu bookmark.
+  - Thanh tìm kiếm câu hỏi tức thì theo từ khóa nội dung hoặc số câu hỏi chuẩn 1–600.
+- **Rèn luyện 8 Chế độ Tương tác Cao (`TheoryPracticeTab.tsx`):**
+  - Tích hợp bảng lưới câu hỏi theo dõi trạng thái làm bài thời gian thực: xanh lá (trả lời đúng ✓), đỏ (trả lời sai ✗), xanh dương (câu hiện tại).
+  - Phím tắt bàn phím: Chọn đáp án bằng phím số, Enter để kiểm tra hoặc qua câu tiếp theo.
+  - Báo cáo tổng kết buổi rèn luyện chi tiết, hiển thị danh sách các câu làm sai để người học xem lại ngay lập tức.
+- **Ôn tập Câu sai, Đánh dấu & Lịch sử Học tập (`TheoryReviewTab.tsx`):**
+  - Bổ sung phân khu tra cứu lịch sử các phiên rèn luyện (`GET /api/v1/theory/practice/history`).
+  - Nút phím tắt "Rèn luyện ngay danh sách này" chuyển thẳng từ danh sách câu sai hoặc câu đã bookmark sang phiên luyện tập mới.
+- **Tối ưu hóa và Đóng gói Production:**
+  - Nâng cấp `learningService.ts` đồng bộ đầy đủ các API phân trang, tìm kiếm, lưu tiến độ và lịch sử.
+  - Biên dịch Vite bundle TypeScript strict 0 lỗi, container Nginx Alpine phục vụ mượt mà tại cổng 3000.
+
+## [1.4.0] — 2026-10-26
+
+### Chuyên Sâu Database & Backend Phân Hệ Lý Thuyết GPLX (Giai đoạn 2 — Phase 11)
+- **Cấu trúc Đề thi & Database Migration (V11):**
+  - Khởi tạo migration `V11__seed_exam_structure_and_import_helpers.sql` cấu hình phân bổ số lượng câu theo từng chương (`structure_json`) cho các hạng bằng A1, A2, B1, B, C theo quy chuẩn của Thông tư 12 & Thông tư 04.
+  - Bổ sung chỉ mục tối ưu hóa cho tra cứu câu hỏi theo số thứ tự và phân loại điểm liệt.
+- **Bảo mật & Trải nghiệm Thi Thử Nâng Cao:**
+  - Bổ sung API `POST /api/v1/theory/mock-exam/{sessionCode}/progress` lưu tiến độ làm bài thời gian thực của học viên, ngăn ngừa rủi ro mất điện hoặc tải lại trang.
+  - Tự động đánh dấu `EXPIRED` khi thời gian làm bài vượt quá thời lượng cho phép cộng với thời gian ân hạn mạng (Grace Period 30 giây).
+  - Đảm bảo tính Idempotency: Nộp bài nhiều lần trả về cùng một kết quả đã chấm thay vì ghi đè điểm số.
+  - Phân bổ đề thi bắt buộc có câu điểm liệt và bám sát tỷ lệ các chương lý thuyết.
+- **Quản trị Ngân Hàng Câu Hỏi Nâng Cao (Admin):**
+  - Cung cấp API `POST /api/v1/admin/theory/questions/import` cho phép nạp hàng loạt câu hỏi kèm validation nghiêm ngặt: kiểm tra số lượng đáp án tối thiểu (>= 2), ràng buộc duy nhất 1 đáp án đúng chuẩn trắc nghiệm GPLX Việt Nam, tự động map theo 7 chương.
+  - Cung cấp API `GET /api/v1/admin/theory/questions/export` hỗ trợ trích xuất câu hỏi theo chủ đề hoặc hạng bằng.
+- **Tìm kiếm & Phân trang Nâng Cao:**
+  - Bổ sung tìm kiếm câu hỏi có phân trang `Pageable` theo từ khóa và lọc câu điểm liệt.
+  - Phân trang lịch sử rèn luyện (`GET /api/v1/theory/practice/history`) và lịch sử thi thử (`GET /api/v1/theory/mock-exam/history`).
+- **Kiểm thử Tự động & Đóng gói:**
+  - Mở rộng `TheoryExamSecureWorkflowTest` và thêm `QuestionAdminServiceTest` (10/10 tests PASS 100%).
+  - Đóng gói container Docker backend và kiểm chứng toàn bộ kịch bản thực tế thành công.
+
+## [1.3.0] — 2026-10-26
+
+### Phân Hệ Học Tập, Rèn Luyện & Thi Thử Lý Thuyết GPLX Việt Nam (Phase 10 — Theory Learning & Exam System)
+- **Tài liệu Nguồn & Quy chuẩn Pháp lý (docs/legal/):**
+  - Khởi tạo question-bank-source.md: Chuẩn hóa 600 câu hỏi Cục Đường bộ Việt Nam thành 7 chương nghiệp vụ và 60 câu điểm liệt (VERIFIED).
+  - Khởi tạo exam-format-by-license-class.md: Cấu trúc đề thi sát hạch lý thuyết chính thức theo hạng A1 (25 câu / 19p / Đạt 21), A2 (25 câu / 19p / Đạt 23), B1 (30 câu / 20p / Đạt 27), B (35 câu / 22p / Đạt 32), C (40 câu / 24p / Đạt 36) theo Thông tư 12/2017/TT-BGTVT và Thông tư 04/2022/TT-BGTVT.
+  - Khởi tạo legal-verification-log.md: Nhật ký đối soát văn bản quy phạm pháp luật.
+- **Database & Flyway Migrations (V9, V10):**
+  - Tạo bảng 	heory_topics lưu trữ danh mục 7 chương lý thuyết chuẩn Cục ĐBVN.
+  - Bổ sung 	opic_id, ersion, erification_status, legal_reference vào bảng 	heory_questions.
+  - Tạo bảng exam_configurations: Quản lý cấu hình thông số đề thi theo hạng GPLX và phiên bản quy chế.
+  - Tạo bảng ookmarked_questions: Lưu trữ các câu hỏi đánh dấu yêu thích theo người dùng.
+  - Tạo bảng practice_sessions & practice_answers: Lưu trữ phiên rèn luyện và câu trả lời tương tác tức thời.
+  - Tạo bảng mock_exam_sessions & mock_exam_session_answers: Lưu trữ phiên thi thử trực tuyến bảo mật.
+  - Bổ sung audit fields (created_at, updated_at) trên tất cả các bảng lý thuyết tuân thủ BaseEntity (V10).
+  - Seed 7 chương lý thuyết chuẩn, cấu hình đề thi các hạng và 25+ câu hỏi mẫu bao quát đủ các chương, biển báo và sa hình.
+- **Backend Application & Domain Services (Java 21, Spring Boot 4.1.1):**
+  - Khởi tạo các Domain Entities: TheoryTopic, ExamConfiguration, BookmarkedQuestion, PracticeSession, PracticeAnswer, MockExamSession, MockExamSessionAnswer.
+  - Triển khai TheoryTopicService: Cung cấp danh mục 7 chương, đếm tiến độ học viên, lấy câu hỏi theo chương kèm lời giải và luật.
+  - Triển khai TheoryBookmarkService: Đánh dấu/bỏ đánh dấu câu hỏi yêu thích (toggle), tra cứu danh sách đã lưu.
+  - Triển khai TheoryPracticeService: Hỗ trợ 8 chế độ rèn luyện chuyên sâu (TOPIC, CATEGORY, UNANSWERED, INCORRECT, PARALYSIS, BOOKMARKED, RANDOM, ALL) kèm phản hồi đáp án ngay (Instant Feedback).
+  - Triển khai TheoryExamService chuẩn hóa: Sinh đề thi bảo mật không trả về isCorrect cho client; chấm điểm server-side; trượt ngay khi sai câu điểm liệt (hasFailedParalysis); cơ chế chống nộp đúp (idempotent).
+  - Triển khai TheoryStatisticsService: Tính toán chính xác các chỉ số từ DB (số câu đã học, tỷ lệ đúng/sai, số đề đạt/trượt, tiến độ 7 chương, danh sách câu sai).
+  - Triển khai ExamConfigService & QuestionAdminService: Quản trị cấu hình đề thi theo từng hạng và CRUD ngân hàng câu hỏi.
+  - Cung cấp đầy đủ REST API Controllers: TheoryExamController, TheoryLearningController, TheoryAdminController.
+- **Kiểm thử Tự động Backend (Unit Tests):**
+  - TheoryExamSecureWorkflowTest: Kiểm chứng bảo mật đề thi không lộ đáp án đúng; kiểm chứng quy chế trượt tức thì khi sai câu hỏi điểm liệt.
+  - Toàn bộ unit tests đạt kết quả BUILD SUCCESS (0 failures, 0 errors).
+- **Frontend React 19 + TypeScript + Vite:**
+  - Nâng cấp learning.ts và learningService.ts kết nối toàn bộ hệ thống API lý thuyết.
+  - TheoryOverviewTab: Dashboard trực quan với 4 thẻ KPI, thanh tiến độ 7 chương, 3 phím tắt rèn luyện thông minh.
+  - TheoryTopicStudyTab: Học chuyên sâu 7 chương, lọc câu điểm liệt, hiển thị đáp án đúng, giải thích và căn cứ pháp lý, bookmark câu hỏi.
+  - TheoryPracticeTab: Giao diện tương tác 8 chế độ rèn luyện, kiểm tra kết quả ngay từng câu, giải thích tại chỗ.
+  - TheoryMockExamTab: Màn hình thi thử chuẩn Bộ GTVT theo từng hạng bằng, đồng hồ đếm ngược, lưới chuyển nhanh 25-40 câu, cảnh báo câu điểm liệt, hộp thoại xác nhận nộp bài, kết luận Đạt/Trượt chi tiết.
+  - TheoryReviewTab: Quản lý danh sách câu từng làm sai và câu đã đánh dấu.
+  - TheoryAdminConfigTab: Màn hình điều chỉnh thông số đề thi theo từng hạng cho Quản trị viên / Cán bộ đào tạo.
+- **Vận hành Docker Stack:**
+  - Build thành công Docker image cho gplx-frontend và gplx-backend.
+  - Cả 3 containers (gplx-frontend:3000, gplx-backend:8088, gplx-mysql:3306) đang hoạt động ổn định và healthy.
+
 ## [1.2.0] — 2026-10-26
 
 ### Nâng Cấp Toàn Diện UI/UX & Xây Dựng Hệ Thống Design System Chuyên Nghiệp (Phase 9)

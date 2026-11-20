@@ -272,3 +272,18 @@ Tài liệu này lập danh mục và phân loại chi tiết toàn bộ **30 b�
 - **Khóa ngoại:** 
   - `fk_notifications_user → users(id) ON DELETE CASCADE`
   - `fk_crm_leads_assigned → users(id) ON DELETE SET NULL`
+
+#### 3.x. Bảng `traffic_signs` (V13) — Danh mục biển báo chuẩn
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+| :--- | :--- | :--- | :--- |
+| `code` | VARCHAR(20) | NOT NULL, UNIQUE cùng `standard_version` | Mã biển (vd `P.102`, `R.301a`) |
+| `name` | VARCHAR(255) | NOT NULL | Tên biển |
+| `sign_group` | VARCHAR(20) | NOT NULL | `CAM`, `NGUY_HIEM`, `HIEU_LENH`, `CHI_DAN`, `PHU`, `VACH_KE` |
+| `meaning` | TEXT | NULL | Ý nghĩa, cách sử dụng |
+| `standard_version` | VARCHAR(30) | NOT NULL | Phiên bản quy chuẩn (vd `QCVN41:2019`) |
+| `legal_status` | VARCHAR(30) | NOT NULL, CHECK | `VERIFIED` / `NEEDS_VERIFICATION` / `INTERNAL_RULE` |
+| `legacy_code`, `replaced_by_code` | VARCHAR(20) | NULL | Ánh xạ mã cũ ↔ mã mới |
+| `svg_asset`, `raster_asset` | VARCHAR(255) | NULL | Đường dẫn hình |
+| `search_text` | VARCHAR(400) | NOT NULL | Mã + tên chuẩn hóa không dấu, chữ thường (phục vụ tìm kiếm) |
+
+Bổ sung `theory_questions.traffic_sign_code` VARCHAR(20) NULL (V15).

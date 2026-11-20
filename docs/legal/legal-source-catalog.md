@@ -16,6 +16,8 @@ Tài liệu này lưu trữ danh mục toàn bộ các Văn bản Quy phạm Ph�
 | **`SRC-TT-03`** | **Thông tư 05/2024/TT-BGTVT**| Sửa đổi, bổ sung Thông tư 12/2017/TT-BGTVT về đào tạo, sát hạch trực tuyến | Bộ Giao thông Vận tải | 31/03/2024 | 01/06/2024 | Đang có hiệu lực | `VERIFIED` |
 | **`SRC-TTLT-01`**| **Thông tư liên tịch 24/2015/TTLT-BYT-BGTVT**| Quy định về tiêu chuẩn sức khỏe của người lái xe, khám sức khỏe định kỳ | Bộ Y tế & Bộ GTVT | 21/08/2015 | 10/10/2015 | Đang có hiệu lực | `VERIFIED` |
 | **`SRC-ND-01`** | **Nghị định 13/2023/NĐ-CP** | Nghị định về Bảo vệ dữ liệu cá nhân | Chính phủ | 17/04/2023 | 01/07/2023 | Đang có hiệu lực | `VERIFIED` |
+| **`SRC-QCVN-15`** | **QCVN 15:2026/BCA** | Quy chuẩn kỹ thuật quốc gia về trung tâm sát hạch lái xe cơ giới đường bộ (kèm Phụ lục trao đổi dữ liệu giám sát) | Bộ Công an (ban hành kèm Thông tư 107/2026/TT-BCA) | 29/06/2026 | Theo Thông tư 107/2026/TT-BCA | Đang có hiệu lực | `VERIFIED` |
+| **`SRC-QCVN-41-2019`** | **QCVN 41 (bản 2016/2019, tài liệu tổng hợp)** | Tổng hợp biển báo hiệu đường bộ — Phụ lục B–F (ý nghĩa, sử dụng các biển) | Bộ Giao thông Vận tải | — | — | Đã được thay thế bởi QCVN 41:2024/BGTVT (hiệu lực 01/01/2025) — chưa có văn bản 2024 để đối chiếu | `NEEDS_VERIFICATION` |
 
 ---
 
@@ -72,3 +74,9 @@ Tài liệu này lưu trữ danh mục toàn bộ các Văn bản Quy phạm Ph�
   - **Điều 9:** Quyền của chủ thể dữ liệu (được biết, đồng ý, truy cập, chỉnh sửa, xóa dữ liệu).
   - **Điều 13 & 17:** Biện pháp bảo vệ dữ liệu cá nhân, ghi nhật ký hệ thống (Audit Trail) để truy vết mọi hành vi truy cập, trích xuất dữ liệu cá nhân học viên.
 - **Trạng thái:** `VERIFIED`.
+
+### Bổ sung 2026-11-20 — Nguồn cho mô phỏng sa hình & danh mục biển báo
+
+- **`SRC-QCVN-15` — QCVN 15:2026/BCA:** file gốc `docs/legal/sources/QCVN-15-2026-BCA.pdf`, phụ lục `docs/legal/sources/QCVN-15-2026-BCA-phu-luc.pdf`; ảnh các trang bản vẽ Hình 1–20 tại `docs/legal/sources/qcvn15-2026-figures/` (sinh bằng `tools/legal/render_qcvn_figures.py`). Điều khoản dùng: mục 2.1 (sân sát hạch, kích thước các bài A1, A, B), mục 2.2 (thông số xe sát hạch). Văn bản do người dùng cung cấp.
+- **`SRC-QCVN-41-2019` — Tổng hợp biển báo (bản 2016/2019):** file `docs/legal/sources/tong-hop-bien-bao-QCVN41-2019.doc`. Dùng làm dữ liệu đầu vào cho bảng `traffic_signs`; toàn bộ bản ghi gắn `standard_version = QCVN41:2019`, `legal_status = NEEDS_VERIFICATION` cho đến khi đối chiếu với QCVN 41:2024/BGTVT.
+

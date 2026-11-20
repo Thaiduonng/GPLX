@@ -124,3 +124,129 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P9-05`** | Nâng cấp toàn diện Phân hệ Nghiệp vụ Cán bộ & Quản trị | TSK-P9-03 | `DONE` | `ApplicationManagementPage` thẩm định hồ sơ chuẩn ADM-002; `ExamGradingPage` chấm điểm 4 môn sát hạch EXM-002; `FleetManagementPage` cảnh báo hạn kiểm định FLT-001 & modal bảo dưỡng; `DashboardPage` KPI charts; `AuditLogPage` tra cứu nhật ký kiểm toán. |
 | **`TSK-P9-06`** | Loại bỏ 100% kiểu `any`, Format Chuẩn Tiếng Việt & Đóng gói Docker | TSK-P9-04..05 | `DONE` | Loại bỏ toàn bộ `any`, định dạng tiền tệ VND / ngày giờ tiếng Việt (`formatters.ts`), bổ sung `.dockerignore`, biên dịch Vite `npm run build` 0 lỗi và Nginx container hoạt động mượt mà tại `http://localhost:3000`. |
 
+
+---
+
+## Danh mục Tasks — Phase 10: Phân Hệ Học Tập, Rèn Luyện & Thi Thử Lý Thuyết GPLX Việt Nam
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **TSK-P10-01** | Chuẩn hóa Căn cứ Pháp lý & Cấu trúc 600 Câu hỏi GPLX | TSK-P9-06 | DONE | Khởi tạo question-bank-source.md (7 chương, 60 câu điểm liệt), exam-format-by-license-class.md (cấu trúc đề A1, A2, B1, B, C theo Thông tư 12 & 04), legal-verification-log.md trạng thái VERIFIED. |
+| **TSK-P10-02** | Database Migrations V9 & V10 cho Phân hệ Lý thuyết | TSK-P10-01 | DONE | Tạo bảng 	heory_topics, exam_configurations, ookmarked_questions, practice_sessions, practice_answers, mock_exam_sessions, mock_exam_session_answers; audit fields created_at, updated_at; seed 7 chương, cấu hình đề và câu hỏi mẫu. |
+| **TSK-P10-03** | Triển khai Domain & Application Services Backend | TSK-P10-02 | DONE | Java 21 Spring Boot 4.1.1: TheoryTopicService, TheoryBookmarkService, TheoryPracticeService (8 chế độ rèn luyện), TheoryExamService (bảo mật đề, chấm điểm server, rẽ nhánh điểm liệt, idempotent), TheoryStatisticsService, ExamConfigService, QuestionAdminService. |
+| **TSK-P10-04** | Xây dựng REST API Controllers & Unit Test Bảo Mật | TSK-P10-03 | DONE | TheoryExamController, TheoryLearningController, TheoryAdminController; bộ test TheoryExamSecureWorkflowTest và TheoryExamServiceTest đạt BUILD SUCCESS 100%. |
+| **TSK-P10-05** | Xây dựng Giao diện React Frontend Chuyên Sâu 5 Phân Khu | TSK-P10-04 | DONE | Nâng cấp TheoryExamPage với 6 Tabs: Tổng quan & KPI, Học theo 7 chương, Rèn luyện 8 chế độ tương tác, Thi thử chuẩn theo từng hạng GPLX, Ôn tập câu sai & Bookmark, Quản trị cấu hình đề thi. |
+| **TSK-P10-06** | Kiểm thử Tích hợp End-to-End & Đóng gói Docker Stack | TSK-P10-05 | DONE | Build Docker Compose thành công, các container gplx-frontend, gplx-backend, gplx-mysql hoạt động healthy, API 	opics và questions phản hồi chuẩn xác. |
+
+
+---
+
+## Danh mục Tasks — Phase 11: Chuyên Sâu Database & Backend Phân Hệ Lý Thuyết GPLX (Giai đoạn 2)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P11-01`** | CSDL & Flyway Migration V11 Cấu Trúc Đề Thi 7 Chương | TSK-P10-02 | `DONE` | Khởi tạo `V11__seed_exam_structure_and_import_helpers.sql` chuẩn hóa cấu trúc đề thi `structure_json` cho các hạng A1, A2, B1, B, C theo Thông tư 12 & 04; áp dụng thành công trên MySQL 8.4 LTS. |
+| **`TSK-P11-02`** | Cơ Chế Bảo Mật & Lưu Tiến Độ Thi Thời Gian Thực | TSK-P10-03 | `DONE` | Nâng cấp `TheoryExamService` với API `POST /api/v1/theory/mock-exam/{sessionCode}/progress` lưu trạng thái từng câu thời gian thực; cơ chế tự động đánh dấu hết giờ `EXPIRED`; chống nộp lặp (idempotent); sinh đề phân bổ 7 chương bắt buộc có câu điểm liệt. |
+| **`TSK-P11-03`** | Quản Trị Ngân Hàng Câu Hỏi: Bulk Import & Export JSON | TSK-P10-03 | `DONE` | Triển khai API `POST /api/v1/admin/theory/questions/import` và `GET /api/v1/admin/theory/questions/export` trên `TheoryAdminController` & `QuestionAdminService`; kiểm tra ràng buộc bắt buộc tối thiểu 2 phương án và duy nhất 1 đáp án đúng theo quy định GPLX Việt Nam. |
+| **`TSK-P11-04`** | Tìm Kiếm & Phân Trang Nâng Cao Cho Câu Hỏi & Lịch Sử | TSK-P10-03 | `DONE` | Bổ sung query `searchQuestionsAdvanced` trong `TheoryQuestionRepository`; nâng cấp phân trang `Pageable` cho câu hỏi theo chủ đề, lọc câu điểm liệt, phân trang lịch sử rèn luyện và lịch sử thi thử. |
+| **`TSK-P11-05`** | Bộ Kiểm Thử Tự Động Backend Chuyên Sâu | TSK-P11-02..04 | `DONE` | Mở rộng `TheoryExamSecureWorkflowTest` và khởi tạo `QuestionAdminServiceTest` kiểm thử toàn diện: lưu tiến độ, xử lý quá giờ, chống nộp đúp, validation import (10/10 tests PASS 100%). |
+| **`TSK-P11-06`** | Đóng Gói Docker Container & Kiểm Thử Runtime Thực Tế | TSK-P11-05 | `DONE` | Multi-stage build lại `gplx-backend` container; kiểm thử trực tiếp trên container với chuỗi kịch bản: Topics -> Questions Pagination -> Start Exam -> Realtime Progress Save -> Submit Exam -> Paginated History. Tất cả phản hồi HTTP 200 OK. |
+
+
+---
+
+## Danh mục Tasks — Phase 12: Giao Diện Học Tập, Rèn Luyện & Ôn Tập Chuyên Sâu (Giai đoạn 3)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P12-01`** | Giao diện Học tập 7 Chương Tương tác Đa Chế độ | TSK-P11-06 | `DONE` | Nâng cấp `TheoryTopicStudyTab.tsx` với 2 chế độ hiển thị: 🎴 Học tương tác từng câu (Flashcard/Quiz) và 📜 Xem danh sách đầy đủ; hỗ trợ phím tắt bàn phím (ArrowLeft, ArrowRight, phím 1-4, phím B). |
+| **`TSK-P12-02`** | Lưới Chuyển Nhanh Câu Hỏi & Tìm Kiếm Thông Minh | TSK-P12-01 | `DONE` | Xây dựng Question Grid Navigator 1..N hiển thị trực quan trạng thái câu điểm liệt và câu đang học; thanh tìm kiếm từ khóa nội dung hoặc số câu hỏi chuẩn 1-600. |
+| **`TSK-P12-03`** | Nâng Cấp Giao Diện Rèn Luyện 8 Chế Độ Chuyên Sâu | TSK-P12-01 | `DONE` | Nâng cấp `TheoryPracticeTab.tsx` với bảng lưới câu hỏi trực quan hiển thị màu sắc đúng (xanh)/sai (đỏ), hỗ trợ phím tắt chọn đáp án và Enter chuyển câu; tổng kết buổi rèn luyện chi tiết. |
+| **`TSK-P12-04`** | Phân Hệ Ôn Tập Câu Sai, Đánh Dấu & Lịch Sử Phiên Học | TSK-P12-02 | `DONE` | Nâng cấp `TheoryReviewTab.tsx` với 3 phân khu: Danh sách câu từng làm sai, Danh sách câu đã bookmark, Lịch sử các phiên rèn luyện phân trang; nút phím tắt "Rèn luyện ngay tập hợp này". |
+| **`TSK-P12-05`** | Đóng Gói Docker Frontend & Kiểm Thử Runtime UI/UX | TSK-P12-03..04| `DONE` | Rebuild Vite bundle 0 lỗi TypeScript strict (`npm run build`); Nginx container hoạt động mượt mà tại `http://localhost:3000`. |
+
+
+---
+
+## Danh mục Tasks — Phase 13: Giao Diện Thi Thử Lý Thuyết Sát Hạch Chuyên Sâu (Giai đoạn 4)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **TSK-P13-01** | Phòng Thi Trực Tuyến & Đồng Hồ Đếm Ngược Countdown | TSK-P12-05 | DONE | Xây dựng phòng thi độc lập trên TheoryMockExamTab.tsx, đồng hồ đếm ngược chính xác, cảnh báo đổi màu dưới 2 phút, tự động nộp bài khi hết giờ (handleAutoSubmit). |
+| **TSK-P13-02** | Lưới Điều Hướng Câu Hỏi & Tính Năng Cắm Cờ Xem Lại (Flag) | TSK-P13-01 | DONE | Bảng ma trận câu hỏi Question Grid hiển thị màu sắc: Đã làm (xanh), Chưa làm (xám), Đang xem (viền đậm), Điểm liệt (chấm đỏ), Cắm cờ xem lại (icon 🚩). Phím tắt F để cắm/gỡ cờ. |
+| **TSK-P13-03** | Tự Động Lưu Tiến Độ Ngầm Thời Gian Thực (Auto-save) | TSK-P13-01 | DONE | Gọi ngầm saveExamProgress mỗi khi người học chọn hoặc thay đổi đáp án; hiển thị trạng thái lưu đám mây thời gian thực, phòng chống mất điện hoặc tải lại trang. |
+| **TSK-P13-04** | Hệ Thống Phím Tắt Phòng Thi & Modal Xác Nhận Nộp Bài | TSK-P13-02 | DONE | Phím 1..4 chọn đáp án A..D, Mũi tên Trái/Phải chuyển câu; Modal nộp bài kiểm soát thống kê câu làm / câu chưa làm / câu cắm cờ, chống bấm nhầm và chống nộp lặp. |
+| **TSK-P13-05** | Bảng Điểm Sát Hạch Chi Tiết & Tra Cứu Lịch Sử Thi Đã Lưu | TSK-P13-04 | DONE | Màn hình kết quả thông báo ĐẠT / KHÔNG ĐẠT, cảnh báo trượt điểm liệt; bộ lọc xem lại câu sai / điểm liệt; sub-tab tra cứu lịch sử các lượt thi cũ (getMockExamHistory). |
+| **TSK-P13-06** | Đóng Gói Docker Frontend & Kiểm Thử Runtime | TSK-P13-05 | DONE | Biên dịch TypeScript strict 0 lỗi, đóng gói Docker Compose frontend v1.6.0 hoạt động mượt mà. |
+
+---
+
+## Danh mục Tasks — Phase 14: Quản Trị Dữ Liệu Ngân Hàng Câu Hỏi & Cấu Hình Đề Thi (Giai đoạn 5)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **TSK-P14-01** | Bảng Điều Khiển Cấu Hình Đề Thi Theo Hạng GPLX | TSK-P13-06 | DONE | Quản lý thông số đề thi cho các hạng A1, A2, B1, B, C (số câu hỏi, thời gian, điểm sàn đạt, phiên bản quy chế, căn cứ pháp lý); modal chỉnh sửa lưu trữ trên backend. |
+| **TSK-P14-02** | Quản Lý Ngân Hàng Câu Hỏi: Tìm Kiếm, Lọc Đa Tiêu Chí & CRUD | TSK-P14-01 | DONE | Bảng quản trị câu hỏi phân trang; lọc theo 7 chương lý thuyết, theo hạng GPLX, lọc riêng câu hỏi điểm liệt ⚠️; modal xem chi tiết đáp án đúng và căn cứ pháp lý; chức năng thêm mới, sửa và xóa câu hỏi an toàn. |
+| **TSK-P14-03** | Nhập Hàng Loạt Câu Hỏi Từ JSON (Bulk Import) | TSK-P14-01 | DONE | Chức năng nhập hàng loạt với tiền kiểm tra cú pháp JSON, kiểm tra tính toàn vẹn (tối thiểu 2 đáp án, duy nhất 1 đáp án đúng theo quy định GPLX); hiển thị báo cáo thành công/thất bại chi tiết. |
+| **TSK-P14-04** | Xuất Dữ Liệu Ngân Hàng Câu Hỏi (Export JSON) & Xác Minh Pháp Lý | TSK-P14-02 | DONE | Xuất dữ liệu câu hỏi ra file JSON tiêu chuẩn theo chương hoặc hạng; quản lý thông tin phiên bản Bộ 600 câu hỏi Cục ĐBVN và 60 câu điểm liệt ở trạng thái VERIFIED (Thông tư 12 & Thông tư 04). |
+| **TSK-P14-05** | Kiểm Thử Tự Động Backend & Đóng Gói Docker Toàn Diện | TSK-P14-02..04 | DONE | Mở rộng bộ unit tests QuestionAdminServiceTest đạt 5/5 PASS (tổng 7/7 tests module lý thuyết); đóng gói Docker frontend v1.7.0 phục vụ tại cổng 3000. |
+
+
+---
+
+## Danh mục Tasks — Phase 15: Kiểm Thử Toàn Diện & Nghiệm Thu Hệ Thống (Giai đoạn 6)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P15-01`** | Kiểm Thử Tự Động Backend Toàn Bộ (Test Suites) | TSK-P14-05 | `DONE` | Toàn bộ 76/76 unit & integration tests chạy thành công 100% BUILD SUCCESS; chuẩn hóa FlywayConfig tương thích giữa MySQL 8.4 và H2 in-memory test. |
+| **`TSK-P15-02`** | Xác Thực Bảo Mật Phân Quyền RBAC Phía Server | TSK-P15-01 | `DONE` | Kiểm chứng kịch bản thực tế: Học viên `ROLE_STUDENT` bị chặn truy cập API Admin bằng HTTP 403; Quản trị viên `ROLE_ADMIN` truy cập đầy đủ API cấu hình và ngân hàng câu hỏi bằng HTTP 200. |
+| **`TSK-P15-03`** | Đóng Gói Docker Compose & Xác Thực Container Healthy | TSK-P15-02 | `DONE` | Đóng gói production bundle cho `gplx-frontend` (Nginx Alpine) và `gplx-backend` (Eclipse Temurin 21 JRE); cả 3 containers (Frontend, Backend, MySQL) đạt trạng thái Up (healthy). |
+| **`TSK-P15-04`** | Tài Liệu Hướng Dẫn Sử Dụng & Báo Cáo Nghiệm Thu | TSK-P15-03 | `DONE` | Khởi tạo `docs/guides/theory-learning-and-exam-system-guide.md` hướng dẫn 6 phân khu chức năng và đối soát toàn diện 14 tiêu chí nghiệm thu theo Master Prompt (ĐẠT 14/14). |
+
+
+---
+
+## Danh mục Tasks — Phase 16: Nâng Cấp Hệ Thống Giao Diện UI/UX Pro Max (Enterprise Government Portal & LMS)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P16-01`** | Tích Hợp Skill & Khởi Tạo Master Design System | TSK-P15-04 | `DONE` | Khởi tạo Source of Truth thiết kế tại `design-system/gplx-enterprise-portal/MASTER.md` theo preset `Accessible & Ethical` kết hợp `Enterprise Gateway`, chuẩn hóa bảng màu, typography và spacing. |
+| **`TSK-P16-02`** | Nâng Cấp Bộ Tokens CSS & Base Accessibility Global | TSK-P16-01 | `DONE` | Cập nhật `tokens.css` và `global.css`: Nhúng font `Be Vietnam Pro` & `Atkinson Hyperlegible`, vòng nét `:focus-visible` 3px, `@media (prefers-reduced-motion)` và link `.skip-to-content`. |
+| **`TSK-P16-03`** | Thay Thế Toàn Bộ Emojis Bằng Bộ SVG Icons Độc Lập | TSK-P16-02 | `DONE` | Khởi tạo thư viện `frontend/src/components/ui/Icons.tsx` với 20+ SVG icons nhẹ và sắc nét; loại bỏ toàn bộ emoji trên navigation và trang chủ theo quy tắc `AGENTS.md`. |
+| **`TSK-P16-04`** | Nâng Cấp Shared UI Components Chuẩn WCAG 2.1 AA | TSK-P16-02 | `DONE` | Hoàn thiện `AppButton` (micro-interactions, touch target 44px), `AppInput`, `AppSelect`, `AppTextarea` (liên kết label `htmlFor`, focus ring phát sáng), `StatusBadge`, `StatCard`, `Modal`, `DataTable`. |
+| **`TSK-P16-05`** | Tái Cấu Trúc MainLayout & Giao Diện Trang Chủ HomePage | TSK-P16-03..04 | `DONE` | Tái thiết kế Header phong cách Cổng thông tin Quốc gia, thanh Workspace Bar phân chia 4 phân hệ, Hero Banner uy tín, lộ trình 4 bước và lưới các phân hệ Modular Monolith. |
+| **`TSK-P16-06`** | Đóng Gói Docker Frontend & Kiểm Thử Runtime | TSK-P16-05 | `DONE` | Biên dịch `tsc -b && vite build` 0 lỗi; đóng gói container Nginx `gplx-frontend` v1.9.0; phản hồi HTTP 200 OK tại cổng 3000 kết nối backend 8088. |
+| **`TSK-P16-07`** | Tái Cấu Trúc Menu Góc Trái & Khu Vực Quản Lý Tài Khoản / Người Dùng Góc Phải | TSK-P16-05 | `DONE` | Bố trí thanh menu và drawer bên góc trái; đưa nút Đăng nhập/Đăng ký sang góc phải; sau đăng nhập hiển thị UserAccountMenu góc phải kèm quản lý tài khoản (hồ sơ, đổi mật khẩu) và quản lý người dùng hệ thống. |
+| **`TSK-P16-08`** | Tái Cấu Trúc Trang Đầu Tiên Thành Landing Page Quảng Cáo Vào Đăng Ký / Đăng Nhập & Khóa Quyền Module | TSK-P16-07 | `DONE` | Thiết kế lại toàn diện HomePage.tsx thành Landing Page quảng cáo: Hero Banner nổi bật với 2 nút CTA Đăng ký / Đăng nhập, 4 chỉ số chất lượng, 4 trụ cột lợi thế đào tạo, Showcase 4 hạng GPLX (A1, B1, B2 - Popular, C), Lộ trình 4 bước, Đánh giá học viên & Cam kết 3 Không, Banner chuyển đổi cuối trang; ẩn hoàn toàn nút menu danh mục và các liên kết module ở Header khi chưa đăng nhập; bọc toàn bộ 16 routes module bằng `ProtectedRoute` chặn truy cập trực tiếp khi chưa đăng nhập. |
+
+
+---
+
+## Danh mục Tasks — Phase 17: Phân Hệ Ôn Tập GPLX — Spaced Repetition & Củng Cố Kiến Thức (Full-Stack)
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P17-01`** | Database Migration V12 & Domain Entities Spaced Repetition | TSK-P16-07 | `DONE` | Flyway V12 tạo 3 bảng (`question_retention_states`, `review_sessions`, `review_session_answers`); Entity `QuestionRetentionState` thực thi thuật toán Leitner 5 hộp, chu kỳ 1->3->7->14->30 ngày và công thức tính điểm ưu tiên (`priorityScore`). |
+| **`TSK-P17-02`** | Infrastructure Repositories & Dữ Liệu Lịch Sử | TSK-P17-01 | `DONE` | Khởi tạo 3 repositories Spring Data JPA; bổ sung query truy vấn danh sách câu hỏi đã đánh dấu; đồng bộ tự động câu sai từ lịch sử làm bài `PracticeAnswer`. |
+| **`TSK-P17-03`** | Application Service & DTOs Nghiệp Vụ Ôn Tập | TSK-P17-02 | `DONE` | `TheoryReviewService` và `TheoryReviewServiceImpl`: Tổng quan chỉ số Dashboard, sinh hàng đợi ôn tập thông minh (Smart Review Queue), chấm điểm và cập nhật chu kỳ ngắt quãng, tổng kết và đưa ra gợi ý củng cố. |
+| **`TSK-P17-04`** | REST API Controller Chuẩn OpenAPI 3.1.1 | TSK-P17-03 | `DONE` | `TheoryReviewController` cung cấp 10 endpoints tại `/api/v1/review/**`: Overview, Danh sách câu sai, 60 câu điểm liệt, Danh sách bookmark, Thống kê 7 chủ đề, Bắt đầu phiên, Nộp đáp án tức thì, Hoàn tất phiên, Lịch sử phiên ôn. |
+| **`TSK-P17-05`** | Backend Unit Tests Suite | TSK-P17-03 | `DONE` | Khởi tạo `TheoryReviewServiceTest`: 5 kịch bản kiểm thử (Leitner thăng/hạ hộp khi trả lời đúng/sai, reset chu kỳ, Dashboard cho học viên mới, tạo phiên ôn thông minh, hoàn thành phiên và gợi ý bước tiếp theo). |
+| **`TSK-P17-06`** | Frontend Giao Diện Ôn Tập React 19 + TypeScript | TSK-P17-04 | `DONE` | `TheoryReviewPage.tsx` và `reviewService.ts`: Dashboard 6 thẻ KPI, 6 tab nghiệp vụ (Tổng quan, Ôn câu sai, Ôn điểm liệt, Ôn câu đã lưu, Ôn theo 7 chủ đề, Lịch sử phiên ôn) + Màn hình phiên ôn trực tiếp với phản hồi tức thì, Leitner box level và giải thích pháp lý. |
+| **`TSK-P17-07`** | Điều Hướng Routing, Layout & Kiểm Thử Tích Hợp E2E | TSK-P17-05..06 | `DONE` | Tích hợp route `/student/review` và `/theory-review` vào `App.tsx`; bổ sung liên kết vào Header, Drawer góc trái, Workspace bar học viên và `HomePage.tsx`; đóng gói Docker container và chạy kiểm thử E2E 8/8 bước thành công 100%. |
+
+---
+
+## Danh mục Tasks — Phase 18: Mô Phỏng Sa Hình 2D/3D & Chuẩn Hóa Biển Báo — Giai đoạn 1: Danh Mục Biển Báo
+
+Thiết kế: `docs/superpowers/specs/2026-11-20-sa-hinh-simulator-and-sign-catalog-design.md` · Kế hoạch: `docs/superpowers/plans/2026-11-20-phase1-traffic-sign-catalog.md`
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P18-01`** | Đưa QCVN 15:2026 & tài liệu biển báo vào nguồn pháp lý | — | `DONE` | File gốc trong `docs/legal/sources/`; 13 ảnh trang bản vẽ; `SRC-QCVN-15`, `SRC-QCVN-41-2019` trong legal-source-catalog. |
+| **`TSK-P18-02`** | Script trích danh mục biển + ảnh + seed SQL | TSK-P18-01 | `DONE` | 288 mã, 187 hình ghép đúng (kiểm tra mắt 22 biển); `V14` sinh tự động; 16 unit test Python. |
+| **`TSK-P18-03`** | Backend bảng `traffic_signs` & API tra cứu/cập nhật | TSK-P18-02 | `DONE` | `V13`; tìm không dấu, lọc nhóm, phân trang; 401/403/404/400 đúng; 11 test service + controller. |
+| **`TSK-P18-04`** | Liên kết câu hỏi lý thuyết với biển báo | TSK-P18-03 | `DONE` | `V15`; mã không tồn tại bị từ chối; chi tiết câu hỏi trả `trafficSignCode`. |
+| **`TSK-P18-05`** | Vitest + SVG 13 biển trên sân sa hình | — | `DONE` | Hình dạng/màu theo QCVN 41 (bát giác đỏ, tam giác vàng viền đỏ, tròn xanh, chữ X đường sắt). |
+| **`TSK-P18-06`** | Trang tra cứu `/traffic-signs` | TSK-P18-03, 05 | `DONE` | Đủ 4 trạng thái loading/empty/error-thử lại/success; debounce 300 ms; liên kết trên header và drawer. |
+| **`TSK-P18-07`** | Form chỉnh sửa biển cho quản trị | TSK-P18-06 | `DONE` | Chỉ ADMIN/MANAGER thấy nút; chống double submit; báo lỗi tiếng Việt. |
+| **`TSK-P18-08`** | Giai đoạn 2: Lõi mô phỏng + 2D hạng A1/A | TSK-P18-05 | `TODO` | Viết kế hoạch riêng trước khi làm. |

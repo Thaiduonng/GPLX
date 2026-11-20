@@ -48,6 +48,12 @@ Tài liệu này định nghĩa chi tiết ngữ nghĩa nghiệp vụ, kiểu d�
 
 ---
 
+### Danh mục biển báo (`traffic_signs`)
+- **Mã biển (`code`):** theo hệ thống ký hiệu QCVN 41 — tiền tố `P` (cấm), `DP` (hết cấm), `W` (nguy hiểm), `R` (hiệu lệnh), `I` (chỉ dẫn), `S` (phụ); chữ cái cuối là biến thể (vd `P.103a`).
+- **Phiên bản (`standard_version`):** văn bản quy chuẩn làm căn cứ của bản ghi; cùng một mã có thể tồn tại ở nhiều phiên bản.
+- **Trạng thái pháp lý (`legal_status`):** theo Rule 08; dữ liệu nhập từ tài liệu 2016/2019 luôn là `NEEDS_VERIFICATION`.
+- **`search_text`:** chuỗi tìm kiếm chuẩn hóa (bỏ dấu, `đ→d`, chữ thường) — quy tắc giống nhau ở `TrafficSignService.normalize` và `tools/signs/extract_signs.py`.
+
 ## 4. Dữ Liệu Sát Hạch & Đánh Giá Điều Kiện (Examination)
 
 | Bảng | Tên Cột | Kiểu Dữ Liệu | Bắt Buộc | Đơn Vị | Giá Trị Hợp Lệ / Enum | Dữ Liệu Nhạy Cảm | Ý Nghĩa Nghiệp Vụ & Quy Tắc Validation |

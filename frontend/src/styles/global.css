@@ -1,6 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
 @import './tokens.css';
 
-/* Reset and Base Styles */
+/* ==========================================================================
+   Reset and Accessible Base Styles
+   Preset: Accessible & Ethical | Category: Government Portal
+   ========================================================================== */
 *,
 *::before,
 *::after {
@@ -13,25 +17,58 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-family-base);
-  line-height: 1.5;
+  font-size: var(--font-size-md);
+  line-height: 1.6;
   color: var(--color-text-main);
   background-color: var(--color-bg-app);
   min-height: 100vh;
+  text-rendering: optimizeLegibility;
 }
 
+/* Accessibility: Skip to Main Content */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  transition: top var(--transition-fast);
+}
+
+.skip-to-content:focus {
+  top: 1rem;
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Focus Visible Specification (WCAG 2.1 AA Compliant) */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Accessible Interactive Elements */
 a {
-  color: var(--color-accent);
+  color: var(--color-primary);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), text-decoration var(--transition-fast);
+  cursor: pointer;
 }
 
 a:hover {
   color: var(--color-primary-hover);
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 button {
@@ -44,12 +81,26 @@ button {
 input, select, textarea {
   font-family: inherit;
   font-size: inherit;
+  color: inherit;
 }
 
-/* Custom scrollbars */
+/* Responsive Images & Media */
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* Text Selection */
+::selection {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+/* Custom Accessibility Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -59,8 +110,21 @@ input, select, textarea {
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: var(--radius-full);
+  border: 2px solid #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Reduced Motion Preference (WCAG Criterion) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
