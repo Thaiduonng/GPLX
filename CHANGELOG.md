@@ -2,6 +2,15 @@
 
 Toàn bộ các cập nhật quan trọng của dự án sẽ được ghi nhận tại đây theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Danh Mục Biển Báo Chuẩn (Giai đoạn 1 — Mô phỏng sa hình & chuẩn hóa biển báo)
+- **Nguồn pháp lý:** bổ sung QCVN 15:2026/BCA (trung tâm sát hạch, kèm Phụ lục) và tài liệu tổng hợp biển báo QCVN 41 bản 2016/2019 vào `docs/legal/sources/`; ảnh bản vẽ Hình 1–20 của QCVN 15 tại `docs/legal/sources/qcvn15-2026-figures/`.
+- **Công cụ trích dữ liệu** `tools/signs/extract_signs.py`: đọc file .doc → 288 mã biển (CAM 62, NGUY_HIEM 83, HIEU_LENH 59, CHI_DAN 65, PHU 19), 185 hình biển ghép đúng theo vị trí ảnh trong văn bản (`sprmCPicLocation`), sinh migration seed `V14`.
+- **Backend (`learning`):** bảng `traffic_signs` (`V13`), seed (`V14`), cột `theory_questions.traffic_sign_code` (`V15`); API `GET/PUT /api/v1/learning/traffic-signs` — tìm theo mã/tên không phân biệt dấu, lọc nhóm, phân trang; chỉ `ADMIN`/`MANAGER` được sửa. Câu hỏi lý thuyết có thể liên kết mã biển (kiểm tra mã tồn tại).
+- **Frontend:** trang **`/traffic-signs`** tra cứu biển báo (tìm có/không dấu, lọc nhóm, chi tiết, nhãn "Chờ xác minh"), form chỉnh sửa cho quản trị; 13 biển dùng trên sân sa hình vẽ SVG đúng hình dạng/màu QCVN 41; bổ sung Vitest + Testing Library (15 test).
+- **Trạng thái pháp lý:** toàn bộ biển nhập từ tài liệu gắn `QCVN41:2019` / `NEEDS_VERIFICATION`, chờ đối chiếu QCVN 41:2024/BGTVT (`LRN-SIGN-001`).
+
 ## [2.1.0] — 2026-10-27
 
 ### Tái Thiết Kế Trang Đầu Tiên Thành Landing Page Quảng Cáo Vào Đăng Ký / Đăng Nhập

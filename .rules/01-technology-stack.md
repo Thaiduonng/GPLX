@@ -15,6 +15,7 @@
 | **Frontend Framework** | **React 19 + TypeScript** | Strict Mode, Function Components, Hooks |
 | **Frontend Build Tool** | **Vite** | Tốc độ dev server cực nhanh, cấu hình proxy `/api` |
 | **Frontend Routing** | **React Router DOM v7** | Định tuyến SPA mượt mà |
+| **Frontend Testing** | **Vitest 3 + Testing Library (React, jest-dom) + jsdom** | `npm test`; file `*.test.tsx` đặt cạnh mã nguồn; setup tại `src/test/setup.ts` |
 | **HTTP Client** | **Axios** | Wrapper có interceptor xử lý token và lỗi tập trung |
 | **Containerization** | **Docker & Docker Compose v2** | Multi-stage build, container hóa toàn bộ stack |
 

@@ -233,3 +233,20 @@ Tài liệu này quản lý toàn bộ các hạng mục công việc (tasks) th
 | **`TSK-P17-05`** | Backend Unit Tests Suite | TSK-P17-03 | `DONE` | Khởi tạo `TheoryReviewServiceTest`: 5 kịch bản kiểm thử (Leitner thăng/hạ hộp khi trả lời đúng/sai, reset chu kỳ, Dashboard cho học viên mới, tạo phiên ôn thông minh, hoàn thành phiên và gợi ý bước tiếp theo). |
 | **`TSK-P17-06`** | Frontend Giao Diện Ôn Tập React 19 + TypeScript | TSK-P17-04 | `DONE` | `TheoryReviewPage.tsx` và `reviewService.ts`: Dashboard 6 thẻ KPI, 6 tab nghiệp vụ (Tổng quan, Ôn câu sai, Ôn điểm liệt, Ôn câu đã lưu, Ôn theo 7 chủ đề, Lịch sử phiên ôn) + Màn hình phiên ôn trực tiếp với phản hồi tức thì, Leitner box level và giải thích pháp lý. |
 | **`TSK-P17-07`** | Điều Hướng Routing, Layout & Kiểm Thử Tích Hợp E2E | TSK-P17-05..06 | `DONE` | Tích hợp route `/student/review` và `/theory-review` vào `App.tsx`; bổ sung liên kết vào Header, Drawer góc trái, Workspace bar học viên và `HomePage.tsx`; đóng gói Docker container và chạy kiểm thử E2E 8/8 bước thành công 100%. |
+
+---
+
+## Danh mục Tasks — Phase 18: Mô Phỏng Sa Hình 2D/3D & Chuẩn Hóa Biển Báo — Giai đoạn 1: Danh Mục Biển Báo
+
+Thiết kế: `docs/superpowers/specs/2026-11-20-sa-hinh-simulator-and-sign-catalog-design.md` · Kế hoạch: `docs/superpowers/plans/2026-11-20-phase1-traffic-sign-catalog.md`
+
+| Task ID | Tên công việc | Phụ thuộc | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TSK-P18-01`** | Đưa QCVN 15:2026 & tài liệu biển báo vào nguồn pháp lý | — | `DONE` | File gốc trong `docs/legal/sources/`; 13 ảnh trang bản vẽ; `SRC-QCVN-15`, `SRC-QCVN-41-2019` trong legal-source-catalog. |
+| **`TSK-P18-02`** | Script trích danh mục biển + ảnh + seed SQL | TSK-P18-01 | `DONE` | 288 mã, 185 hình ghép đúng (kiểm tra mắt 12 biển); `V14` sinh tự động; 12 unit test Python. |
+| **`TSK-P18-03`** | Backend bảng `traffic_signs` & API tra cứu/cập nhật | TSK-P18-02 | `DONE` | `V13`; tìm không dấu, lọc nhóm, phân trang; 401/403/404/400 đúng; 11 test service + controller. |
+| **`TSK-P18-04`** | Liên kết câu hỏi lý thuyết với biển báo | TSK-P18-03 | `DONE` | `V15`; mã không tồn tại bị từ chối; chi tiết câu hỏi trả `trafficSignCode`. |
+| **`TSK-P18-05`** | Vitest + SVG 13 biển trên sân sa hình | — | `DONE` | Hình dạng/màu theo QCVN 41 (bát giác đỏ, tam giác vàng viền đỏ, tròn xanh, chữ X đường sắt). |
+| **`TSK-P18-06`** | Trang tra cứu `/traffic-signs` | TSK-P18-03, 05 | `DONE` | Đủ 4 trạng thái loading/empty/error-thử lại/success; debounce 300 ms; liên kết trên header và drawer. |
+| **`TSK-P18-07`** | Form chỉnh sửa biển cho quản trị | TSK-P18-06 | `DONE` | Chỉ ADMIN/MANAGER thấy nút; chống double submit; báo lỗi tiếng Việt. |
+| **`TSK-P18-08`** | Giai đoạn 2: Lõi mô phỏng + 2D hạng A1/A | TSK-P18-05 | `TODO` | Viết kế hoạch riêng trước khi làm. |

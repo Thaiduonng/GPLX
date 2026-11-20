@@ -34,6 +34,7 @@ Tài liệu này thiết lập mối liên kết toàn vẹn hai chiều (Bidire
 | **`FIN-001`** | Idempotency Key thanh toán học phí | `finance` | `payment_receipts.idempotency_key` | Chống thu kép hoặc phát hành 2 biên lai do người dùng nhấn thanh toán nhiều lần |
 | **`FIN-002`** | Chứng từ tài chính bất biến vĩnh viễn| `finance` | `payment_receipts` | Không hỗ trợ xóa biên lai; xử lý sai lệch bằng nghiệp vụ điều chỉnh |
 | **`FLT-001`** | Khóa xe quá hạn đăng kiểm hoặc bảo dưỡng| `fleet` | `vehicles.inspection_expiry_date`, `status` | Đảm bảo an toàn kỹ thuật phương tiện tập lái khi đưa vào giảng dạy |
+| **`LRN-SIGN-001`** | Danh mục biển báo chuẩn, ghi phiên bản & trạng thái xác minh | `learning` | `traffic_signs.standard_version`, `legal_status`; `theory_questions.traffic_sign_code` | Nguồn `SRC-QCVN-41-2019` (`NEEDS_VERIFICATION`), chờ đối chiếu QCVN 41:2024 |
 | **`EXM-002`** | Khóa sổ kết quả kỳ thi vĩnh viễn | `examination` | `exam_results.final_result` | Kết quả thi sau khi ký biên bản không được sửa đổi trực tiếp |
 
 ---

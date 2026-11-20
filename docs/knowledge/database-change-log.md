@@ -29,3 +29,8 @@ Tài liệu này lưu vết toàn bộ lịch sử các phiên bản migration F
 ### Phiên bản V8 (Chuẩn Hóa Audit Fields Với BaseEntity)
 - **Vấn đề phát hiện:** Lớp JPA Entity `Permission.java` và `VehicleMaintenance.java` kế thừa từ `BaseEntity.java` (trong đó khai báo thuộc tính bắt buộc `updatedAt` ánh xạ cột `updated_at`). Tuy nhiên, bảng `permissions` (từ `V1`) và bảng `vehicle_maintenances` (từ `V6`) chỉ khai báo cột `created_at` mà thiếu cột `updated_at`, dẫn đến Hibernate ném ngoại lệ `SchemaManagementException: Schema validation: missing column [updated_at]`.
 - **Giải pháp áp dụng:** Tạo migration `V8__add_updated_at_to_permissions.sql` bổ sung cột `updated_at` cho cả 2 bảng, đảm bảo quy chuẩn audit fields đồng bộ 100% trên toàn bộ các thực thể kế thừa `BaseEntity`.
+
+### Phiên bản V13–V15 (Danh mục biển báo chuẩn — 2026-11-20)
+- **V13 `create_traffic_signs_table`:** bảng `traffic_signs` (mã, tên, nhóm, ý nghĩa, phiên bản quy chuẩn, trạng thái pháp lý, mã cũ/mã thay thế, ảnh SVG/raster, `search_text` chuẩn hóa không dấu); `UNIQUE(code, standard_version)`; `CHECK legal_status`.
+- **V14 `seed_traffic_signs_qcvn41_2019`:** 288 biển sinh tự động bởi `tools/signs/extract_signs.py` từ tài liệu QCVN 41 bản 2016/2019 — không sửa tay; toàn bộ `NEEDS_VERIFICATION`.
+- **V15 `link_theory_questions_to_traffic_signs`:** cột `theory_questions.traffic_sign_code` (nullable, có index, không FK vì khóa của `traffic_signs` là cặp mã + phiên bản; kiểm tra tồn tại ở tầng ứng dụng).
