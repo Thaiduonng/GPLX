@@ -10,6 +10,11 @@ vi.mock('../services/trafficSignService', () => ({
   trafficSignService: { search: vi.fn(), getByCode: vi.fn(), update: vi.fn() },
 }));
 
+const authState = vi.hoisted(() => ({ roles: ['ROLE_STUDENT'] as string[] }));
+vi.mock('../features/auth/AuthContext', () => ({
+  useAuth: () => ({ user: { roles: authState.roles }, isAuthenticated: true }),
+}));
+
 const search = vi.mocked(trafficSignService.search);
 
 const stop: TrafficSign = {
@@ -41,6 +46,7 @@ function renderPage() {
 describe('TrafficSignCatalogPage', () => {
   beforeEach(() => {
     search.mockReset();
+    authState.roles = ['ROLE_STUDENT'];
   });
 
   afterEach(() => {
@@ -95,5 +101,18 @@ describe('TrafficSignCatalogPage', () => {
     await screen.findByText('R.122');
     expect(screen.getByText('Chờ xác minh')).toBeInTheDocument();
     expect(screen.getByText('QCVN 41:2019')).toBeInTheDocument();
+  });
+
+  it('shows edit button only for admin or manager', async () => {
+    search.mockResolvedValue(page([stop]));
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: 'Xem biển R.122 Dừng lại' }));
+    expect(screen.queryByRole('button', { name: 'Chỉnh sửa' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /đóng/i }));
+
+    authState.roles = ['ROLE_MANAGER'];
+    fireEvent.click(screen.getByRole('button', { name: 'Xem biển R.122 Dừng lại' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Chỉnh sửa' }));
+    expect(screen.getByLabelText('Tên biển báo')).toHaveValue('Dừng lại');
   });
 });

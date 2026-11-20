@@ -12,6 +12,8 @@ import {
 import { trafficSignService } from '../services/trafficSignService';
 import { TrafficSignCard, legalStatusVariant } from '../features/traffic-signs/TrafficSignCard';
 import { SignImage } from '../features/traffic-signs/SignImage';
+import { TrafficSignEditForm } from '../features/traffic-signs/TrafficSignEditForm';
+import { useAuth } from '../features/auth/AuthContext';
 import {
   LEGAL_STATUS_LABELS,
   TRAFFIC_SIGN_GROUP_LABELS,
@@ -25,6 +27,7 @@ import styles from './TrafficSignCatalogPage.module.css';
 const PAGE_SIZE = 24;
 const DEBOUNCE_MS = 300;
 const GROUPS = Object.keys(TRAFFIC_SIGN_GROUP_LABELS) as TrafficSignGroup[];
+const EDITOR_ROLES = ['ROLE_ADMIN', 'ROLE_MANAGER'];
 
 type LoadState =
   | { status: 'loading' }
@@ -46,6 +49,9 @@ export default function TrafficSignCatalogPage() {
   const [page, setPage] = useState(0);
   const [state, setState] = useState<LoadState>({ status: 'loading' });
   const [selected, setSelected] = useState<TrafficSign | null>(null);
+  const [editing, setEditing] = useState(false);
+  const { user } = useAuth();
+  const canEdit = (user?.roles ?? []).some((role) => EDITOR_ROLES.includes(role));
   const debouncedQuery = useDebouncedValue(query.trim(), DEBOUNCE_MS);
   const requestId = useRef(0);
 
@@ -68,6 +74,28 @@ export default function TrafficSignCatalogPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const closeDetail = () => {
+    setSelected(null);
+    setEditing(false);
+  };
+
+  const handleSaved = (saved: TrafficSign) => {
+    setSelected(saved);
+    setState((prev) =>
+      prev.status === 'success'
+        ? {
+            status: 'success',
+            data: {
+              ...prev.data,
+              content: prev.data.content.map((s) =>
+                s.code === saved.code && s.standardVersion === saved.standardVersion ? saved : s,
+              ),
+            },
+          }
+        : prev,
+    );
+  };
 
   return (
     <div className={styles.page}>
@@ -168,8 +196,23 @@ export default function TrafficSignCatalogPage() {
         </>
       )}
 
-      <Modal isOpen={selected !== null} onClose={() => setSelected(null)} title={selected ? `${selected.code} — ${selected.name}` : ''} size="lg">
-        {selected && (
+      <Modal
+        isOpen={selected !== null}
+        onClose={closeDetail}
+        title={selected ? `${selected.code} — ${selected.name}` : ''}
+        size="lg"
+        footer={
+          canEdit && selected && !editing ? (
+            <AppButton variant="outline" onClick={() => setEditing(true)}>
+              Chỉnh sửa
+            </AppButton>
+          ) : undefined
+        }
+      >
+        {selected && editing && (
+          <TrafficSignEditForm sign={selected} onSaved={handleSaved} onCancel={() => setEditing(false)} />
+        )}
+        {selected && !editing && (
           <div className={styles.detail}>
             <div className={styles.detailImage}>
               <SignImage sign={selected} size={160} />
