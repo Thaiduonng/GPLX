@@ -129,7 +129,8 @@ public class TheoryStatisticsServiceImpl implements TheoryStatisticsService {
                     q.isParalysis(),
                     q.getLegalReference(),
                     bookmarkedIds.contains(q.getId()),
-                    answers
+                    answers,
+                q.getTrafficSignCode()
             );
         }).toList();
     }

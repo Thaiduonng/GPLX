@@ -78,7 +78,8 @@ public class TheoryBookmarkServiceImpl implements TheoryBookmarkService {
                     q.isParalysis(),
                     q.getLegalReference(),
                     true,
-                    answers
+                    answers,
+                q.getTrafficSignCode()
             );
         }).toList();
     }

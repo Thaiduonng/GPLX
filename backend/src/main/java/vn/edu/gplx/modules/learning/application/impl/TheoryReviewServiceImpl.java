@@ -655,7 +655,8 @@ public class TheoryReviewServiceImpl implements TheoryReviewService {
                 q.isParalysis(),
                 q.getLegalReference(),
                 isBookmarked,
-                answerDtos
+                answerDtos,
+                q.getTrafficSignCode()
         );
     }
 }

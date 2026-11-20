@@ -125,7 +125,8 @@ public class TheoryTopicServiceImpl implements TheoryTopicService {
                 q.isParalysis(),
                 q.getLegalReference(),
                 isBookmarked,
-                answers
+                answers,
+                q.getTrafficSignCode()
         );
     }
 }

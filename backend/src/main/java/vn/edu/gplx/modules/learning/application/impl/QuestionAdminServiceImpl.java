@@ -11,6 +11,7 @@ import vn.edu.gplx.modules.learning.api.dto.QuestionImportResultResponse;
 import vn.edu.gplx.modules.learning.api.dto.QuestionUpsertRequest;
 import vn.edu.gplx.modules.learning.api.dto.StudyAnswerOptionResponse;
 import vn.edu.gplx.modules.learning.application.QuestionAdminService;
+import vn.edu.gplx.modules.learning.application.TrafficSignService;
 import vn.edu.gplx.modules.learning.domain.TheoryAnswer;
 import vn.edu.gplx.modules.learning.domain.TheoryQuestion;
 import vn.edu.gplx.modules.learning.domain.TheoryTopic;
@@ -31,10 +32,13 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
 
     private final TheoryQuestionRepository questionRepository;
     private final TheoryTopicRepository topicRepository;
+    private final TrafficSignService trafficSignService;
 
-    public QuestionAdminServiceImpl(TheoryQuestionRepository questionRepository, TheoryTopicRepository topicRepository) {
+    public QuestionAdminServiceImpl(TheoryQuestionRepository questionRepository, TheoryTopicRepository topicRepository,
+                                    TrafficSignService trafficSignService) {
         this.questionRepository = questionRepository;
         this.topicRepository = topicRepository;
+        this.trafficSignService = trafficSignService;
     }
 
     @Override
@@ -69,6 +73,7 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
         );
         question.setTopic(topic);
         question.setLegalReference(request.legalReference());
+        applyTrafficSignCode(question, request);
 
         if (request.answers() != null) {
             for (QuestionUpsertRequest.AnswerUpsertItem item : request.answers()) {
@@ -98,6 +103,7 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
         question.setExplanation(request.explanation());
         question.setParalysis(request.isParalysis());
         question.setLegalReference(request.legalReference());
+        applyTrafficSignCode(question, request);
 
         // Update answers
         question.getAnswers().clear();
@@ -148,6 +154,7 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
                     question.setExplanation(req.explanation());
                     question.setParalysis(req.isParalysis());
                     question.setLegalReference(req.legalReference());
+                    applyTrafficSignCode(question, req);
                     question.setTopic(topic);
                     question.getAnswers().clear();
                 } else {
@@ -161,6 +168,7 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
                     );
                     question.setTopic(topic);
                     question.setLegalReference(req.legalReference());
+                    applyTrafficSignCode(question, req);
                 }
 
                 if (req.answers() != null) {
@@ -209,6 +217,18 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
         if (correctCount != 1) {
             throw new BadRequestException("Mỗi câu hỏi sát hạch lý thuyết bắt buộc phải có duy nhất 1 đáp án đúng (hiện tại có " + correctCount + ").");
         }
+        String signCode = request.trafficSignCode();
+        if (signCode != null && !signCode.isBlank() && !trafficSignService.existsByCode(signCode.trim())) {
+            throw new BadRequestException("Mã biển báo không tồn tại trong danh mục: " + signCode.trim());
+        }
+    }
+
+    /** null = giữ nguyên liên kết hiện có; chuỗi rỗng = gỡ liên kết. */
+    private void applyTrafficSignCode(TheoryQuestion question, QuestionUpsertRequest request) {
+        String signCode = request.trafficSignCode();
+        if (signCode != null) {
+            question.setTrafficSignCode(signCode.isBlank() ? null : signCode.trim());
+        }
     }
 
     private TheoryTopic resolveTopic(Long topicId, int questionNumber) {
@@ -253,7 +273,8 @@ public class QuestionAdminServiceImpl implements QuestionAdminService {
                 q.isParalysis(),
                 q.getLegalReference(),
                 isBookmarked,
-                answers
+                answers,
+                q.getTrafficSignCode()
         );
     }
 }

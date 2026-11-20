@@ -186,7 +186,8 @@ public class TheoryPracticeServiceImpl implements TheoryPracticeService {
                     q.isParalysis(),
                     q.getLegalReference(),
                     bookmarkedIds.contains(q.getId()),
-                    answers
+                    answers,
+                q.getTrafficSignCode()
             );
         }).toList();
     }

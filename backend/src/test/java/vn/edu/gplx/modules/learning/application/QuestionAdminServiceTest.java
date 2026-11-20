@@ -32,6 +32,9 @@ class QuestionAdminServiceTest {
     @Mock
     private TheoryTopicRepository topicRepository;
 
+    @Mock
+    private TrafficSignService trafficSignService;
+
     @InjectMocks
     private QuestionAdminServiceImpl questionAdminService;
 
@@ -122,5 +125,39 @@ class QuestionAdminServiceTest {
         when(questionRepository.existsById(50L)).thenReturn(true);
         questionAdminService.deleteQuestion(50L);
         org.mockito.Mockito.verify(questionRepository).deleteById(50L);
+    }
+
+    private QuestionUpsertRequest requestWithSign(String signCode) {
+        return new QuestionUpsertRequest(
+                "B", 1L, 320, "Biển nào cấm đi ngược chiều?", null, "GT", false, null,
+                List.of(
+                        new QuestionUpsertRequest.AnswerUpsertItem(null, "Biển 1", true, 1),
+                        new QuestionUpsertRequest.AnswerUpsertItem(null, "Biển 2", false, 2)
+                ),
+                signCode
+        );
+    }
+
+    @Test
+    @DisplayName("Liên kết biển báo: mã không có trong danh mục bị từ chối")
+    void upsertQuestionWithUnknownSignCodeIsRejected() {
+        when(trafficSignService.existsByCode("X.999")).thenReturn(false);
+
+        assertThatThrownBy(() -> questionAdminService.createQuestion(requestWithSign("X.999")))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Mã biển báo không tồn tại trong danh mục");
+    }
+
+    @Test
+    @DisplayName("Liên kết biển báo: mã hợp lệ được lưu và trả về trong chi tiết")
+    void upsertQuestionWithSignCodeIsReturnedInDetail() {
+        TheoryTopic topic = new TheoryTopic("CH6_SIGNS", "Biển báo", "Mô tả", 6, 178, 0);
+        when(topicRepository.findById(1L)).thenReturn(Optional.of(topic));
+        when(trafficSignService.existsByCode("P.102")).thenReturn(true);
+        when(questionRepository.save(any(TheoryQuestion.class))).thenAnswer(i -> i.getArgument(0));
+
+        var response = questionAdminService.createQuestion(requestWithSign("P.102"));
+
+        assertThat(response.trafficSignCode()).isEqualTo("P.102");
     }
 }

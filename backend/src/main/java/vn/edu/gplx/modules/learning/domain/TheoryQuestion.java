@@ -49,6 +49,11 @@ public class TheoryQuestion extends BaseEntity {
     @Column(name = "legal_reference", length = 255)
     private String legalReference;
 
+
+    @Column(name = "traffic_sign_code", length = 20)
+
+    private String trafficSignCode;
+
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     private List<TheoryAnswer> answers = new ArrayList<>();
@@ -156,5 +161,13 @@ public class TheoryQuestion extends BaseEntity {
     public void addAnswer(TheoryAnswer answer) {
         answers.add(answer);
         answer.setQuestion(this);
+    }
+
+    public String getTrafficSignCode() {
+        return trafficSignCode;
+    }
+
+    public void setTrafficSignCode(String trafficSignCode) {
+        this.trafficSignCode = trafficSignCode;
     }
 }

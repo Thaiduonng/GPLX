@@ -14,6 +14,7 @@ public record QuestionDetailResponse(
         boolean isParalysis,
         String legalReference,
         boolean isBookmarked,
-        List<StudyAnswerOptionResponse> answers
+        List<StudyAnswerOptionResponse> answers,
+        String trafficSignCode
 ) {
 }

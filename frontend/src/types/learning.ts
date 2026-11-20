@@ -64,6 +64,7 @@ export interface QuestionDetail {
   explanation: string;
   isParalysis: boolean;
   legalReference: string | null;
+  trafficSignCode?: string | null;
   isBookmarked: boolean;
   answers: Answer[];
 }
@@ -261,6 +262,7 @@ export interface QuestionUpsertRequest {
   explanation?: string | null;
   isParalysis: boolean;
   legalReference?: string | null;
+  trafficSignCode?: string | null;
   answers: AnswerUpsertItem[];
 }
 
